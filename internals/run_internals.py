@@ -29,6 +29,7 @@ plot_internals.py, which needs no GPU.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import re
@@ -56,11 +57,12 @@ def parse_prompt(text: str) -> dict:
     text = "\n".join(ln for ln in text.splitlines()
                      if not re.match(r"\s*(SHA-?256\s*:|[0-9a-f]{64}\s*$)", ln, re.I)).strip("\n")
     m = re.match(r"\s*System:\s*\n(.*?)\n\s*User:\s*\n(.*)\Z", text, re.S)
+    sha = hashlib.sha256(text.encode()).hexdigest()   # matches the SHA-256 line the repo keeps
     if m:
-        return {"system": m.group(1).strip("\n"), "user": m.group(2).strip("\n")}
+        return {"system": m.group(1).strip("\n"), "user": m.group(2).strip("\n"), "sha256": sha}
     if "?" not in text:            # a bare system prompt (e.g. substrate_pro.txt):
-        return {"system": text, "user": None}   # the caller supplies the question
-    return {"system": None, "user": text}
+        return {"system": text, "user": None, "sha256": sha}   # the caller supplies the question
+    return {"system": None, "user": text, "sha256": sha}
 
 
 def substrate_lines(system: str) -> list[str]:
@@ -519,6 +521,8 @@ def main():
         "model": args.label or args.model, "quantize": args.quantize,
         "device": args.device, "dtype": args.dtype,
         "baseline_file": args.baseline, "substrate_file": args.substrate,
+        "baseline_sha256": base_p["sha256"], "substrate_sha256": sub_p["sha256"],
+        "question": base_p["user"],
         "raw_prompts": args.raw, "n_layers": n_layers,
         "n_heads": model.config.num_attention_heads,
         "answer_token_ids": aid,

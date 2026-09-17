@@ -37070,5 +37070,8 @@
  },
  "seconds": 77.3,
  "torch": "2.12.1+cu130",
- "transformers": "5.13.0"
+ "transformers": "5.13.0",
+ "question": "Answer with exactly one word: walk or drive",
+ "baseline_sha256": "f9ac23fbd6f7b7cae272af65ba9b9066ccb735c61a96c0307f5bd76d365b2a1a",
+ "substrate_sha256": "6f89be2b3808d77364ba5e85f72bcfb966ad992f0c5c29d9292d1c0a50badde5"
 }

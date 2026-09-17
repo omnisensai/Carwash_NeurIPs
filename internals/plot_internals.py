@@ -123,11 +123,12 @@ def fig_ablations(r: dict, d: Path):
     ab = r["ablations"]
     full = r["prompts"]["substrate"]["final"]["M_sum"]
     base = r["prompts"]["baseline"]["final"]["M_sum"]
-    names = ["baseline", "headers_only"] + [f"only_line{i}" for i in range(1, 7)] \
-        + [f"loo_line{i}" for i in range(1, 7)] + ["substrate (full)"]
-    vals = [base, ab.get("headers_only", np.nan)] + [ab.get(f"only_line{i}", np.nan) for i in range(1, 7)] \
-        + [ab.get(f"loo_line{i}", np.nan) for i in range(1, 7)] + [full]
-    cols = [C_BASE, C_BASE] + ["#60a5fa"] * 6 + ["#f87171"] * 6 + [C_SUB]
+    nl = len(r.get("substrate_lines", [])) or 6
+    names = ["baseline", "headers_only"] + [f"only_line{i}" for i in range(1, nl + 1)] \
+        + [f"loo_line{i}" for i in range(1, nl + 1)] + ["substrate (full)"]
+    vals = [base, ab.get("headers_only", np.nan)] + [ab.get(f"only_line{i}", np.nan) for i in range(1, nl + 1)] \
+        + [ab.get(f"loo_line{i}", np.nan) for i in range(1, nl + 1)] + [full]
+    cols = [C_BASE, C_BASE] + ["#60a5fa"] * nl + ["#f87171"] * nl + [C_SUB]
     fig, ax = plt.subplots(figsize=(9, 4.5))
     ax.axhline(0, color="k", lw=0.6)
     ax.bar(range(len(vals)), vals, color=cols)
@@ -187,6 +188,7 @@ def summary(r: dict, d: Path) -> str:
     b, s = r["prompts"]["baseline"], r["prompts"]["substrate"]
     n = r["n_layers"]
     lines = [f"# {r['model']}", "",
+             f"substrate file: {r.get('substrate_file', 'substrate.txt')}", "",
              f"quant: {r['quantize'] or 'bf16'} · layers {n} · heads {r['n_heads']} · "
              f"drive token {r['drive_token'][1]!r} · walk token {r['walk_token'][1]!r}", "",
              "| prompt | M (nats) | p(drive) | p(walk) | greedy |", "|---|---|---|---|---|"]
@@ -243,9 +245,15 @@ def summary(r: dict, d: Path) -> str:
             lines.append(f"line{i}: {ln.strip()}")
         lines.append("")
     if "benchmarks" in r:
-        lines += ["## all prompts", "| prompt | M | argmax | greedy |", "|---|---|---|---|"]
+        def dec(v):
+            d = v.get("decision") or {}
+            return "–" if d.get("M_sum") is None else f"{d['M_sum']:+.2f} @{d['step']}"
+        lines += ["## all prompts", "| prompt | M (first token) | M at decision token | argmax | greedy |",
+                  "|---|---|---|---|---|"]
         for k, v in r["benchmarks"].items():
-            lines.append(f"| {k} | {v['M_sum']:+.2f} | {v['argmax']!r} | {v['greedy']!r} |")
+            lines.append(f"| {k} | {v['M_sum']:+.2f} | {dec(v)} | {v['argmax']!r} | {v['greedy']!r} |")
+        for k, v in r.get("anti_test", {}).items():
+            lines.append(f"| {k} (expect walk) | {v['M_sum']:+.2f} | {dec(v)} | {v['argmax']!r} | {v['greedy']!r} |")
         lines.append("")
     text = "\n".join(lines)
     (d / "summary.md").write_text(text)

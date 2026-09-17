@@ -78,6 +78,43 @@ Same figures for nf4 in `results/llama-3.1-8b-4bit/` and for 3B in
 `results/llama-3.2-3b/`; the raw numbers in each `summary.md` and
 `internals.json`.
 
+## substrate_pro.txt and the formatting question (added later the same day)
+
+`substrate_pro.txt` is a bare system prompt (9 lines, mentions books and gas
+stations), fed with the baseline question. Chat template unless noted.
+
+| model | input | baseline M | substrate M | substrate_pro M | library anti-test (expect Walk) |
+|---|---|---|---|---|---|
+| 8B bf16 | chat template | −4.00 | +1.50 | **+2.98** | Walk under both (−5.4 / −4.6) |
+| 8B bf16 | raw text | −0.73 | +0.71 | +0.84 | Walk under both (−0.3 / −0.5) |
+| 3B bf16 | chat template | −3.50 | −1.76 | −1.28 | Walk under both |
+| 3B bf16 | raw text | −0.20 † | **+1.70 †** | **+1.39 †** | **Drive under both** (+0.3 / −0.2 †) |
+
+† raw-text 3B opens every answer with ` **` (markdown), so M is read at the
+next token, where the word actually lands (`decision` field in the json).
+
+- **substrate_pro is stronger on 8B** (+3.0 vs +1.5) and the decision enters
+  the residual two layers earlier (patch flips from layer 15 instead of 17).
+  Same heads (L31H3, L25H15), same MLPs (L28 +, L29 −). Line ablations are
+  flat: no single line is necessary any more (dropping any one keeps M ≥
+  +1.0); the redundancy is what buys the margin.
+- **3B does not flip under either substrate when the prompt goes through the
+  chat template.** It only flips on raw text without the chat scaffold, and
+  there the library control flips too: the raw-text 3B says "Drive" for the
+  book as well. That is a Drive bias induced by the substrate text, not the
+  vehicle constraint being applied. Which of these a hosted API reproduces
+  depends on whether the provider wraps the prompt in the chat template;
+  worth pinning down before counting 3B as a flip.
+- **8B is robust to the formatting**: flips under both substrates in both
+  input modes, and the library control stays Walk in all four cases.
+
+Figures: `results/llama-3.1-8b-bf16-cpu-pro/` (8B, substrate_pro),
+`results/llama-3.2-3b-pro/`, `results/llama-3.2-3b-raw/`,
+`results/llama-3.1-8b-bf16-cpu-raw/`; cross-run lens overview in
+`results/overview-pro-raw.png`.
+
+![overview pro/raw](results/overview-pro-raw.png)
+
 ## Not done
 
 - Tuned lens / J-lens readouts: no fitted lenses for Llama yet (a J-lens fit

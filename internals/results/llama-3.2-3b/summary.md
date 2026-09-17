@@ -1,5 +1,7 @@
 # Llama-3.2-3B-Instruct (bf16)
 
+substrate file: substrate.txt
+
 quant: bf16 · layers 28 · heads 24 · drive token 'Drive' · walk token 'Walk'
 
 | prompt | M (nats) | p(drive) | p(walk) | greedy |
@@ -63,15 +65,18 @@ line5: - Moving the user without moving the object does not satisfy the objectiv
 line6: - If the object is a vehicle, the user must operate the object in order to perform the activity at location B.
 
 ## all prompts
-| prompt | M | argmax | greedy |
-|---|---|---|---|
-| baseline | -3.50 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_CoT | -3.13 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_encourage | -3.25 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_expert | -2.63 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_hallucination | -2.13 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_library | -7.06 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_nomistakes | -2.50 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_threat | -3.13 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_urgency | -2.63 | 'Walk' | 'Walk.<|eot_id|>' |
-| substrate | -1.76 | 'Walk' | 'Walk.<|eot_id|>' |
+| prompt | M (first token) | M at decision token | argmax | greedy |
+|---|---|---|---|---|
+| baseline | -3.50 | -3.50 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_CoT | -3.13 | -3.13 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_encourage | -3.25 | -3.25 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_expert | -2.63 | -2.63 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_hallucination | -2.13 | -2.13 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_library | -7.06 | -7.06 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_nomistakes | -2.50 | -2.50 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_threat | -3.13 | -3.13 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_urgency | -2.63 | -2.63 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| substrate | -1.76 | -1.76 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| substrate_pro | -1.28 | -1.28 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| substrate+library (expect walk) | -5.26 | -5.26 @0 | 'Walk' | 'Walk.<|eot_id|>' |
+| substrate_pro+library (expect walk) | -5.32 | -5.32 @0 | 'Walk' | 'Walk.<|eot_id|>' |

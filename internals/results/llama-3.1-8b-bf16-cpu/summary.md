@@ -1,5 +1,7 @@
 # Llama-3.1-8B-Instruct (bf16, CPU)
 
+substrate file: substrate.txt
+
 quant: bf16 · layers 32 · heads 32 · drive token 'Drive' · walk token 'Walk'
 
 | prompt | M (nats) | p(drive) | p(walk) | greedy |
@@ -63,15 +65,15 @@ line5: - Moving the user without moving the object does not satisfy the objectiv
 line6: - If the object is a vehicle, the user must operate the object in order to perform the activity at location B.
 
 ## all prompts
-| prompt | M | argmax | greedy |
-|---|---|---|---|
-| baseline | -4.00 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_CoT | -1.75 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_encourage | -5.87 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_expert | -1.25 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_hallucination | -3.62 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_library | -12.67 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_nomistakes | -4.74 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_threat | -5.74 | 'Walk' | 'Walk.<|eot_id|>' |
-| benchmark_urgency | -1.00 | 'Walk' | 'Walk.<|eot_id|>' |
-| substrate | +1.50 | 'Drive' | 'Drive.<|eot_id|>' |
+| prompt | M (first token) | M at decision token | argmax | greedy |
+|---|---|---|---|---|
+| baseline | -4.00 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_CoT | -1.75 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_encourage | -5.87 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_expert | -1.25 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_hallucination | -3.62 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_library | -12.67 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_nomistakes | -4.74 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_threat | -5.74 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| benchmark_urgency | -1.00 | – | 'Walk' | 'Walk.<|eot_id|>' |
+| substrate | +1.50 | – | 'Drive' | 'Drive.<|eot_id|>' |

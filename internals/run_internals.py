@@ -58,6 +58,8 @@ def parse_prompt(text: str) -> dict:
     m = re.match(r"\s*System:\s*\n(.*?)\n\s*User:\s*\n(.*)\Z", text, re.S)
     if m:
         return {"system": m.group(1).strip("\n"), "user": m.group(2).strip("\n")}
+    if "?" not in text:            # a bare system prompt (e.g. substrate_pro.txt):
+        return {"system": text, "user": None}   # the caller supplies the question
     return {"system": None, "user": text}
 
 
@@ -326,7 +328,8 @@ def forward(model, tok, text: str, cap: Capture | None, want_attn: bool):
     dev = embed(model).weight.device
     if cap:
         cap.reset()
-    out = model(input_ids=ids.to(dev), output_attentions=want_attn, use_cache=False)
+    out = model(input_ids=ids.to(dev), output_attentions=want_attn, use_cache=False,
+                logits_to_keep=1)          # lm_head only at the answer position (memory)
     attn = None
     if want_attn:
         # [L, H, T] rows of the last query position
@@ -343,6 +346,35 @@ def greedy(model, tok, text: str, n: int = 4) -> str:
     return tok.decode(g[0, ids.shape[1]:])
 
 
+@torch.no_grad()
+def decision_margin(model, tok, text: str, aid: dict, steps: int = 6) -> dict:
+    """M at the DECISION position: greedy-decode a few tokens and read the
+    margin at the first step whose argmax is a drive/walk surface form. With
+    the chat template Llama answers with a bare word, so this is step 0 and
+    equals the final margin; on raw text it opens with ' **' or similar and
+    the first-token margin is not the decision."""
+    ids = tok(text, add_special_tokens=False, return_tensors="pt")["input_ids"]
+    dev = embed(model).weight.device
+    ids = ids.to(dev)
+    answer = set(aid["drive"]) | set(aid["walk"])
+    past = None
+    cur = ids
+    out_toks = []
+    for step in range(steps):
+        out = model(input_ids=cur, past_key_values=past, use_cache=True, logits_to_keep=1)
+        past = out.past_key_values
+        lg = out.logits[0, -1].float().cpu()
+        nxt = int(lg.argmax())
+        out_toks.append(nxt)
+        if nxt in answer:
+            m = margin_from_logits(lg, aid)
+            return {"step": step, "M_sum": m["M_sum"], "p_drive": m["p_drive"],
+                    "p_walk": m["p_walk"], "prefix": tok.decode(out_toks[:-1]),
+                    "token": tok.decode(nxt)}
+        cur = torch.tensor([[nxt]], device=dev)
+    return {"step": None, "M_sum": None, "prefix": tok.decode(out_toks), "token": None}
+
+
 def analyse_prompt(model, tok, name: str, p: dict, raw: bool, aid: dict,
                    cap: Capture, u_dir: torch.Tensor | None = None) -> dict:
     """Everything for one prompt. u_dir: drive-minus-walk unembedding row
@@ -355,6 +387,7 @@ def analyse_prompt(model, tok, name: str, p: dict, raw: bool, aid: dict,
     final["top5"] = [[tok.decode(int(t)), round(float(pp), 4)]
                      for pp, t in zip(*torch.softmax(lg, -1).topk(5))]
     final["greedy"] = gen
+    final["decision"] = decision_margin(model, tok, text, aid)
     n_layers = len(cap.resid)
 
     # --- logit lens over the residual stream (emb = row 0, layer i = row i+1)
@@ -449,6 +482,8 @@ def main():
     sub_p = parse_prompt((PROMPTS / args.substrate).read_text())
     if not sub_p["system"]:
         sys.exit(f"{args.substrate} has no 'System:' block — nothing to ablate")
+    if sub_p["user"] is None:
+        sub_p["user"] = base_p["user"]       # bare system file + baseline question
 
     print("baseline ...", flush=True)
     base = analyse_prompt(model, tok, "baseline", base_p, args.raw, aid, cap)
@@ -529,18 +564,37 @@ def main():
     if not args.no_benchmarks:
         print("benchmarks ...", flush=True)
         bm = {}
+        library_p = parse_prompt((PROMPTS / "benchmark_library.txt").read_text())
         for f in sorted(PROMPTS.glob("*.txt")):
             p = parse_prompt(f.read_text())
+            if p["user"] is None:
+                p["user"] = base_p["user"]
             text = render(tok, p, args.raw)
             _, lg, _ = forward(model, tok, text, None, want_attn=False)
             m = margin_from_logits(lg, aid)
+            dm = decision_margin(model, tok, text, aid)
             bm[f.stem] = {"M_sum": m["M_sum"], "M_first": m["M_first"],
                           "p_drive": m["p_drive"], "p_walk": m["p_walk"],
                           "argmax": tok.decode(m["argmax"]),
-                          "greedy": greedy(model, tok, text)}
+                          "greedy": greedy(model, tok, text), "decision": dm}
             print(f"  {f.stem:24s} M_sum={m['M_sum']:+.3f} argmax={bm[f.stem]['argmax']!r} "
-                  f"greedy={bm[f.stem]['greedy']!r}", flush=True)
+                  f"greedy={bm[f.stem]['greedy']!r}  decision@{dm['step']}: "
+                  f"M={dm['M_sum'] if dm['M_sum'] is None else round(dm['M_sum'], 3)}", flush=True)
         res["benchmarks"] = bm
+        # anti-test: each substrate system prompt with the library question (expected: walk)
+        anti = {}
+        for f in sorted(PROMPTS.glob("substrate*.txt")):
+            p = parse_prompt(f.read_text())
+            if not p["system"]:
+                continue
+            text = render(tok, {"system": p["system"], "user": library_p["user"]}, args.raw)
+            _, lg, _ = forward(model, tok, text, None, want_attn=False)
+            m = margin_from_logits(lg, aid)
+            anti[f.stem + "+library"] = {"M_sum": m["M_sum"], "argmax": tok.decode(m["argmax"]),
+                                         "greedy": greedy(model, tok, text),
+                                         "decision": decision_margin(model, tok, text, aid)}
+            print(f"  {f.stem + '+library':24s} M_sum={m['M_sum']:+.3f} greedy={anti[f.stem + '+library']['greedy']!r}", flush=True)
+        res["anti_test"] = anti
 
     res["seconds"] = round(time.time() - t0, 1)
     res["torch"] = torch.__version__

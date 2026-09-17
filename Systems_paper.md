@@ -1,7 +1,65 @@
-# Substrate Engineering: Input Structure as a Control Surface for Reproducible LLM Decisions
+# Substrate Engineering: A Control-Theoretic Framework for Operational Reproducibility in Large Language Model Systems
 
 
-# 1. Motivation — From Operational Instability to Substrate Engineering
+## Core Thesis
+
+Large language model systems have been treated as stochastic oracles whose outputs are probed and evaluated.
+
+We reformulate them as **dynamical plants** whose input specification is a genuine control channel.
+
+At inference time, model output is produced by an interaction between the learned model, the supplied input, the decoding procedure, and the execution environment:
+
+$$
+y = F(\theta, x, d, e).
+$$
+
+Holding $\theta$ and $d$ fixed, small changes to $x$ can move the same binary decision by tens of nats and reverse strongly expressed outputs.
+
+The same frozen model can therefore appear incapable under one input structure and strongly capable under another.
+
+We call this phenomenon **input-induced decision displacement**.
+
+Substrate engineering treats semantic input structure as an inference-time **control surface** for actuating the plant's operational decisions with measurable stability bounds.
+
+For a target answer $y^*$ and competing answer $y'$, define the decision margin:
+
+$$
+M^*(x)
+=
+\log P(y^* \mid x)
+-
+\log P(y' \mid x).
+$$
+
+Correctness requires:
+
+$$
+M^*(x) > 0.
+$$
+
+Operational reproducibility requires the decision to remain sufficiently far from the boundary that execution-level perturbations cannot reverse it:
+
+$$
+M^*(x) > \varepsilon_{\mathrm{exec}}.
+$$
+
+We demonstrate empirically that:
+
+- The plant responds to substrate-authored specifications with actuation on both sides of the decision boundary (bidirectional control).
+- The response has a measurable operating envelope $\mathcal{V}_m(S)$ with defined boundary conditions.
+- The control regime is categorically distinct from training-time bias interventions such as instruction tuning, RLHF, or Constitutional AI.
+
+The central engineering problem is therefore not:
+
+> Does the model produce the right answer?
+
+It is:
+
+> **Under what input specification does the plant hold its operational decision reproducibly, and over what scope does that specification remain valid?**
+
+---
+
+## 1. Motivation — From Operational Instability to a Control Problem
 
 The motivation for this work began as a systems-engineering problem rather than a prompting problem.
 
@@ -26,36 +84,12 @@ $$
 \rightarrow
 \text{LLM}
 \rightarrow
-\{\texttt{APPROVE},\texttt{REJECT}\}.
+\{\texttt{APPROVE}, \texttt{REJECT}\}.
 $$
 
-If the same invoice, under the same intended policy, can produce `APPROVE` on one execution and `REJECT` on another, the problem is not simply that the model is nondeterministic.
+If the same invoice, under the same intended policy, can produce `APPROVE` on one execution and `REJECT` on another, the problem is not that the model is nondeterministic.
 
-The operational meaning of the system is nondeterministic.
-
-The same system state can produce different downstream actions:
-
-$$
-x
-\rightarrow
-y_1
-\rightarrow
-a_1
-$$
-
-and:
-
-$$
-x
-\rightarrow
-y_2
-\rightarrow
-a_2,
-\qquad
-a_1\neq a_2.
-$$
-
-For an operational system, this means:
+The **operational meaning of the system** is nondeterministic.
 
 $$
 \boxed{
@@ -69,15 +103,15 @@ $$
 
 A system with this property is difficult to validate, test, audit, or reason about.
 
-Correctness alone is therefore insufficient.
+Correctness alone is insufficient.
 
 The decision must also be reproducible.
 
-## 1.1 The observation that motivated substrate engineering
+### 1.1 The observation that motivated substrate engineering
 
 Our initial work began with a practical attempt to make the same LLM-native task reproducible across four frontier models.
 
-Under the original input specification, the models diverged substantially, with observed disagreement ranging from approximately 70% to complete divergence across the tested conditions.
+Under the original input specification, the models diverged substantially, with observed disagreement ranging from approximately 70% to complete divergence across tested conditions.
 
 Across the test matrix, outputs that originally produced 80 distinct SHA hashes were eventually reduced to a single SHA hash.
 
@@ -95,38 +129,30 @@ That result motivated the hypothesis we call **substrate engineering**:
 
 > **A sufficiently explicit semantic specification can constrain an LLM's interpretation of an operational task strongly enough to make otherwise divergent model behavior converge.**
 
-The earlier system-level result established the engineering phenomenon.
+### 1.2 Why this is not prompt engineering
 
-The present work asks what produces it.
+Conventional prompt engineering attempts to change how the model approaches a task:
 
-## 1.2 Why this is not simply prompt engineering
+- reason step by step,
+- act as an expert,
+- be more careful,
+- avoid hallucination,
+- avoid mistakes,
+- increase urgency or confidence.
 
-Conventional prompt engineering typically attempts to improve an answer by changing how the model approaches a task:
+These interventions modify request framing but do not systematically remove the semantic degrees of freedom that produce divergence.
 
-* reason step by step,
-* act as an expert,
-* be more careful,
-* avoid hallucination,
-* avoid mistakes,
-* increase urgency or confidence.
-
-Substrate engineering begins from a different question.
-
-Instead of asking:
-
-> How do we make the model reason better?
-
-it asks:
+Substrate engineering begins from a different question:
 
 > **What semantic degrees of freedom in the input allow the model to arrive at different operational interpretations of the same task?**
 
-The substrate attempts to remove those degrees of freedom by explicitly specifying the task-relevant relations, constraints, and validity conditions.
+The substrate removes those degrees of freedom by explicitly specifying the task-relevant relations, constraints, and validity conditions.
 
-The goal is therefore not merely to increase answer quality.
+The goal is not answer quality.
 
 It is to reduce the space of admissible interpretations sufficiently that the intended operational decision becomes stable.
 
-## 1.3 Why model upgrades are not sufficient
+### 1.3 Why model upgrades are not sufficient
 
 A common response to unreliable model behavior is to replace the model with a newer or more capable one.
 
@@ -135,13 +161,13 @@ That strategy assumes that instability primarily reflects insufficient model cap
 But if observed output is:
 
 $$
-y=F(\theta,x,d,e),
+y = F(\theta, x, d, e),
 $$
 
 then replacing the model changes only one component:
 
 $$
-\theta_1\rightarrow\theta_2.
+\theta_1 \rightarrow \theta_2.
 $$
 
 It does not eliminate sensitivity to:
@@ -154,13 +180,9 @@ A newer model may move one decision boundary in a favorable direction while movi
 
 A model upgrade therefore changes the system's decision surface; it does not remove the need to validate it.
 
-The present results make this problem visible directly.
+Restructuring semantic input, in contrast, can reverse an apparently incorrect decision without modifying the model at all.
 
-Holding model weights fixed, small changes to task formulation can reverse strongly expressed decisions.
-
-Conversely, restructuring the semantic input can reverse an apparently incorrect decision without modifying the model at all.
-
-This means that:
+This means:
 
 $$
 \boxed{
@@ -174,292 +196,206 @@ Some failures are instead **input-conditioned decision failures**.
 
 The relevant capability may already be available in the frozen model, while the supplied input places the model on the wrong side of the operational decision boundary.
 
-## 1.4 From system instability to a decision-margin problem
+### 1.4 The problem is a control problem
 
-The earlier multi-model system result motivates a more controlled scientific question.
+If input structure can steer the operational decision of a frozen model, and if the resulting decision can be held reproducibly across execution perturbations and input formulations, then the object of study is not a prompting artifact.
 
-If input structure can make heterogeneous models converge, what is it changing?
-
-We reduce the problem to the smallest possible operational unit: a single binary decision.
-
-For two competing outputs, define the decision margin:
+It is a **control system**:
 
 $$
-M(x)
-=
-\log P(y_1\mid x)
--
-\log P(y_2\mid x).
+\text{plant: } F(\theta, \cdot, d, e)
+\quad
+\text{controller: } S
+\quad
+\text{output: } y
+\quad
+\text{margin: } M^*.
 $$
 
-The sign of \(M\) determines the categorical decision.
-
-Its magnitude determines how far the model lies from the decision boundary.
-
-This allows us to distinguish three questions that are often conflated.
-
-### Capability
-
-Can the frozen model produce the correct decision under some valid representation of the task?
-
-### Correctness
-
-Under the present input:
-
-$$
-M^*(x)>0?
-$$
-
-### Reproducibility
-
-Is the correct decision sufficiently far from the boundary that execution-level perturbations cannot reverse it?
-
-$$
-M^*(x)>
-\varepsilon_{\mathrm{exec}}?
-$$
-
-The present study therefore does not begin from the assumption that an incorrect model is incapable.
-
-It asks whether the observed error is invariant to changes in semantic input structure.
-
-If it is not, then the failure cannot be explained solely by model capability.
-
-## 1.5 Research question
-
-This leads to the central question of the paper:
-
-> **Can semantic input structure move a fixed model's operational decision far enough from its competing alternatives to make that decision reproducibly correct?**
-
-And, if so:
-
-> **Over what input scope and model families does that reproducibility remain valid?**
-
-The first question concerns **point reproducibility**.
-
-The second concerns the **validated reproducibility frontier**.
-
-Together they turn substrate engineering from an empirical prompting observation into a systems-engineering problem.
-
-
-## Core Thesis
-
-Incorrect LLM behavior is commonly interpreted as evidence of insufficient model capability.
-
-This inference is not always valid.
-
-At inference time, model output is produced by an interaction between the learned model, the supplied input, the decoding procedure, and the execution environment:
-
-$$
-y = F(\theta,x,d,e)
-$$
-
-where:
-
-* \(\theta\) denotes model architecture and frozen learned weights,
-* \(x\) denotes the application-supplied input and context,
-* \(d\) denotes decoding configuration,
-* \(e\) denotes the execution environment.
-
-Holding \(\theta\) and \(d\) fixed, we find that small changes to \(x\) can move the same binary decision by tens of nats and reverse strongly expressed outputs.
-
-The same frozen model can therefore appear incapable under one input structure and strongly capable under another.
-
-We call this phenomenon **input-induced decision displacement**.
-
-Substrate engineering treats semantic input structure as an application-level control surface for reducing task-irrelevant decision displacement and moving the intended decision toward a stable region.
-
-For a correct answer \(y^*\) and competing answer \(y'\), define:
-
-$$
-M^*(x)
-=
-\log P(y^*\mid x)
--
-\log P(y'\mid x).
-$$
-
-Correctness requires:
-
-$$
-M^*(x)>0.
-$$
-
-Operational reproducibility requires the decision to remain sufficiently far from the boundary that execution-level perturbations cannot reverse it:
-
-$$
-M^*(x)>\varepsilon_{\mathrm{exec}}.
-$$
-
-This produces the central engineering problem:
-
-> **A substrate can create point reproducibility, but the substrate itself has a validity boundary across input formulations, task scope, and model families.**
-
-The problem of substrate engineering is therefore to identify and maximize the region over which the intended decision remains reproducibly correct.
+The rest of this paper formalizes that framing.
 
 ---
 
-# 1. Introduction — When a Wrong Answer Is Not a Capability Failure
+## 2. A Control-Theoretic Framework for LLM Operational Systems
 
-LLM failures are frequently interpreted through a capability lens.
+We reformulate the LLM system as a controllable dynamical system.
 
-A model answers incorrectly, and the natural diagnosis is that the model lacks sufficient reasoning ability, knowledge, scale, or training. This interpretation motivates a common engineering strategy: use a stronger model or wait for the next model generation.
+### 2.1 The plant
 
-For operational LLM-native systems, this diagnosis can be incomplete.
-
-Model behavior is not determined by learned weights alone:
+The frozen model plus its execution environment defines the **plant**:
 
 $$
-y=F(\theta,x,d,e).
+F(\theta, \cdot, d, e).
 $$
 
-The same frozen model may produce substantially different decisions when the semantic structure of the input changes.
+The plant is fixed at inference time. It cannot be modified by the operator.
 
-This matters because application developers usually cannot modify model weights or provider infrastructure at inference time. They can, however, directly control the supplied input.
+### 2.2 The control channel
 
-We study whether input structure can alter an operational decision sufficiently strongly that an apparent model failure changes without changing the model itself.
+The application-supplied input $x$ is the **control signal**.
 
-We use a deliberately minimal binary task:
+Unlike $\theta$, $x$ is directly and continuously engineerable.
+
+Unlike $d$, $x$ can express task-specific semantic content that determines *which* decision the plant is asked to produce, not merely how variably it samples that decision.
+
+### 2.3 The output and margin
+
+For a binary operational decision between $y^*$ and $y'$, the observable output is the categorical argmax.
+
+The internal state relative to the decision boundary is the **decision margin**:
 
 $$
-\texttt{walk}
-\quad \text{vs.} \quad
-\texttt{drive}.
+M^*(x) = \log P(y^* \mid x) - \log P(y' \mid x).
 $$
 
-The task asks how a user should reach a nearby car wash when the user's objective is to wash the car.
+The margin is the plant's continuous-valued response variable.
 
-The simplicity is intentional. It removes retrieval, planning, tools, memory, orchestration, and long-horizon execution and isolates a single decision boundary.
+### 2.4 The controller
 
-Across frontier API models and open-weight models, we test conventional prompt interventions and a structured semantic substrate.
+A **substrate** $S$ is an authored specification supplied through the control channel that constrains the plant's interpretation of an operational task.
 
-Three observations motivate the paper.
+The substrate defines the reference decision the operator intends the plant to produce.
 
-First, the baseline decision is not a fixed property of model capability. Different models occupy different locations relative to the same decision boundary.
+The controller-plant loop is:
 
-Second, holding model weights fixed, small changes in task formulation can produce decision-margin shifts comparable to or larger than the substrate intervention itself.
+$$
+S \circ x \longrightarrow F(\theta, S \circ x, d, e) \longrightarrow y.
+$$
 
-Third, explicitly structuring the task-relevant semantic relations can move strongly incorrect decisions to strongly correct ones without changing the model.
+### 2.5 Stability
 
-These results suggest that some apparent reasoning failures are more accurately described as **input-conditioned decision failures**.
+Operational reproducibility requires that execution-level disturbances $e$ do not reverse the argmax:
 
-The engineering question then becomes:
+$$
+\boxed{
+M^*(x; S) > \varepsilon_{\mathrm{exec}}.
+}
+$$
 
-> **Can input structure place the intended decision far enough from its boundary to make correctness reproducible, and over what scope does that condition remain valid?**
+Here $\varepsilon_{\mathrm{exec}}$ is the empirically measured stability margin — the analog of a gain margin in classical control.
+
+### 2.6 The operating envelope
+
+For model $m$ and substrate $S$, the **validated operating region** is the set of inputs over which the closed-loop system holds its intended decision within the stability margin:
+
+$$
+\boxed{
+\mathcal{V}_m(S)
+=
+\{ x : M_m^*(x; S) > \varepsilon_{\mathrm{exec}, m} \}.
+}
+$$
+
+Beyond this region, the controller no longer provides its stability guarantee.
+
+### 2.7 Bidirectional actuation
+
+A genuine control system must actuate the plant in either direction of the state space on demand.
+
+We define actuation displacement as:
+
+$$
+\Delta M(S)
+=
+M(x; S) - M(x; \emptyset).
+$$
+
+Bidirectional control requires the existence of substrates $S^+$ and $S^-$ such that $\Delta M(S^+) \gg 0$ and $\Delta M(S^-) \ll 0$ on the same plant.
+
+We demonstrate this empirically in Section 6.
+
+### 2.8 Disturbance rejection
+
+A well-formed control system rejects disturbances that would drive the plant to unsafe or task-incoherent states.
+
+We identify a specific disturbance-rejection property in capable plants: **task-coherence override**, where the plant refuses a substrate whose actuation would produce user-task failure. This bounds unilateral input control (Section 7).
 
 ---
 
-# 2. Problem Formulation — Input-Induced Decision Displacement
+## 3. Control vs Bias — Distinguishing Categories of LLM Intervention
 
-We model inference as:
+Prior work on shaping LLM behavior falls broadly into two categories that have been conflated.
 
-$$
-y=F(\theta,x,d,e).
-$$
+**Training-time bias interventions** modify $\theta$ to embed statistical preferences.
 
-For a deployed API model, \(\theta\) is effectively fixed.
+Examples: Constitutional AI, RLHF, DPO, instruction tuning, principle-based training.
 
-Decoding controls \(d\), such as temperature, can reduce sampling variance but do not necessarily alter the underlying preference between competing decisions.
+**Inference-time control interventions** modify $x$ to actuate specific operational decisions.
 
-The execution environment \(e\) includes provider routing, hardware, numerical precision, quantization, batching, kernels, and runtime implementation.
+Example: substrate engineering.
 
-The input \(x\) remains directly engineerable.
+These are categorically distinct.
 
-We therefore treat input structure as an inference-time control variable.
+| Property | Bias interventions | Control interventions |
+|---|---|---|
+| Operates at | Training time | Inference time |
+| Modifies | $\theta$ | $x$ |
+| Adjustable per request | No | Yes |
+| Cost of change | Retrain | Rewrite substrate |
+| Effect measurable ex-ante | No (latent) | Yes ($M^*$) |
+| Bidirectional actuation | No | Yes |
+| Operator-authored | No | Yes |
+| Validated operating region | Undefined | $\mathcal{V}_m(S)$ |
+| Auditable artifact | Opaque weights | SHA-locked text |
 
-For the binary task, define:
+Bias interventions produce latent tendencies whose response function to inputs is not directly measurable and whose stability bounds are not formally defined.
 
-$$
-M(x)
-=
-\log P(\texttt{drive}\mid x)
--
-\log P(\texttt{walk}\mid x).
-$$
+Control interventions produce measurable actuation with formal stability bounds and a defined operating envelope.
 
-Then:
+The distinction matters practically because the operator's relationship to the system is different.
 
-$$
-M(x)>0
-\Rightarrow
-\texttt{drive},
-$$
+Under bias interventions, the operator inherits the training laboratory's choices.
 
-$$
-M(x)<0
-\Rightarrow
-\texttt{walk}.
-$$
+Under control interventions, the operator authors those choices at deployment.
 
-The effect of an input intervention is:
+**Bias is a delivered artifact. Control is an engineered artifact.**
 
-$$
-\Delta M
-=
-M(x')
--
-M(x).
-$$
+Prior instruction-following, RLHF, and Constitutional AI work has advanced the *bias* dimension. This paper advances the *control* dimension.
 
-We call this quantity **input-induced decision displacement**.
+They are complementary, not competing.
 
-This distinction is important because categorical output hides the magnitude of movement.
-
-Two prompts may both produce `walk` while locating the model at very different distances from the decision boundary.
-
-Likewise, a model can move from:
-
-$$
-M\ll0
-$$
-
-to:
-
-$$
-M\gg0
-$$
-
-without any change to its learned weights.
-
-Such a result rules out the explanation that the original failure was caused solely by absence of the capability required to produce the correct decision.
+But they are not the same.
 
 ---
 
-# 3. Experimental Design
+## 4. Experimental Design
 
-We evaluate the decision across 19 frontier language models from seven vendors:
+We evaluate the decision across 17 frontier language models from seven vendors:
 
 Anthropic, OpenAI, Meta, Alibaba, Mistral, DeepSeek, and Moonshot.
 
 The behavioral benchmark compares:
 
-* baseline input,
-* chain-of-thought prompting,
-* encouragement,
-* expert-role prompting,
-* hallucination warnings,
-* error-avoidance instructions,
-* threat,
-* urgency,
-* semantic substrate,
-* semantic control conditions.
+- baseline input,
+- chain-of-thought prompting,
+- encouragement,
+- expert-role prompting,
+- hallucination warnings,
+- error-avoidance instructions,
+- threat,
+- urgency,
+- forward semantic substrate ($S^+$),
+- reverse semantic substrate ($S^-$),
+- semantic control conditions.
 
-For models exposing log probabilities, we measure \(M\) directly.
+For models exposing log probabilities, we measure $M$ directly.
 
 For open-weight models, we additionally measure internal computation using:
 
-* raw logit-lens projections,
-* activation/residual patching,
-* substrate line ablations,
-* direct logit attribution.
+- raw logit-lens projections,
+- residual activation patching,
+- substrate line ablations,
+- direct logit attribution.
 
 All mechanistic readouts are taken at the position predicting the first answer token, with teacher forcing and fixed model weights.
 
 The primary paper uses mechanistic analysis only to establish that the input intervention changes internal computation before the final output. Detailed mechanistic decomposition is treated as secondary analysis.
 
+Every empirical claim is backed by a reproducibility corpus. Each prompt, substrate, and dataset is identified by SHA-256 and published verbatim.
+
 ---
 
-# 4. Result I — Model Failure Is Conditional on Input Structure
+## 5. Result I — The Plant Is Input-Conditional
 
 The baseline task does not produce one universal model behavior.
 
@@ -467,7 +403,7 @@ Some models strongly favor `walk`, some favor `drive`, and others lie near the d
 
 This already prevents a simple interpretation of the task as a universal capability failure.
 
-More importantly, holding the model fixed while altering only the task formulation can produce extremely large decision-margin changes.
+Holding the model fixed while altering only the task formulation can produce extremely large decision-margin changes.
 
 Changing the final instruction from:
 
@@ -477,125 +413,142 @@ to:
 
 > Answer with exactly one word: walk or drive
 
-leaves the underlying operational problem unchanged but materially alters the model's decision state.
-
-For example, Qwen3-4B changes from approximately:
-
-$$
-M=+0.25
-$$
-
-to:
-
-$$
-M=-22.12.
-$$
-
-The model weights, decoding configuration, and underlying task remain fixed.
-
-Only the input formulation changes.
-
-The resulting displacement is therefore approximately:
-
-$$
-\Delta M\approx-22.4\text{ nats}.
-$$
-
-Comparable effects occur in other models, including output flips.
-
-This demonstrates that functionally equivalent task formulations are not necessarily operationally equivalent for an LLM.
-
-The implication is:
-
-> **Observed failure cannot always be attributed solely to insufficient model capability. The input itself can place an otherwise capable model on the wrong side of the decision boundary.**
-
-This also challenges the assumption that upgrading to a newer or stronger model monotonically resolves application-level decision failures.
-
-A model update changes \(\theta\), and therefore changes the decision surface.
-
-It does not eliminate the need to validate the application-level boundary.
-
----
-
-# 5. Result II — Semantic Structure Can Reverse Strongly Expressed Decisions
-
-We next test whether explicitly representing the task-relevant semantic relations can move the decision.
-
-The semantic substrate specifies:
-
-```text
-User objective:
-- Perform an activity on an object, while transporting the object from location A to B.
-- No other objectives or goals are relevant for the user.
-
-Action semantics:
-- Activities require the object to move from location A to location B together with the user.
-- The object is always initially with the user at location A.
-- Moving the user without moving the object does not satisfy the objective.
-- If the object is a vehicle, the user must operate the object in order to perform the activity at location B.
-```
-
-Unlike conventional prompt interventions, the substrate does not request additional effort, confidence, expertise, or correctness.
-
-It changes the semantic structure supplied to the model.
-
-Across the tested models, the substrate produces decision-margin shifts substantially larger than conventional prompting interventions.
-
-Several open-weight examples illustrate the effect.
-
-For Llama-3.3-70B:
-
-$$
--13.78
-\rightarrow
-+6.07
-$$
-
-under the standard substrate, and:
-
-$$
--13.78
-\rightarrow
-+17.00
-$$
-
-under the extended substrate.
+leaves the underlying operational problem unchanged but materially alters the plant's decision state.
 
 For Qwen3-4B:
 
 $$
--22.12
-\rightarrow
-+18.38
+M = +0.25
+\quad \longrightarrow \quad
+M = -22.12.
 $$
 
-under the extended substrate.
-
-The same frozen model therefore moves by approximately:
+Displacement:
 
 $$
-40.5\text{ nats}
+\Delta M \approx -22.4 \text{ nats}.
 $$
 
-relative to its untreated decision state.
+For Claude Opus 4.7 under one formulation:
 
-No model capability was added during this intervention.
+$$
+10/10 \; \texttt{drive}.
+$$
 
-The change results from altering the semantic information supplied at inference time.
+Under a task-equivalent alternative formulation:
 
-The central result is therefore not that a particular prompt is better.
+$$
+10/10 \; \texttt{walk}.
+$$
 
-It is:
+Same weights, same task, deterministic reversal.
 
-> **Semantic input structure can dominate the expressed decision of a fixed model.**
+This demonstrates that functionally equivalent task formulations are not operationally equivalent for the plant.
+
+$$
+\boxed{
+\text{Observed failure}
+\neq
+\text{insufficient capability.}
+}
+$$
+
+The input can place an otherwise capable plant on the wrong side of the decision boundary.
 
 ---
 
-# 6. Result III — Correctness, Selectivity, and Scope Are Different Properties
+## 6. Result II — Substrate Actuates the Plant in Both Directions
 
-A large substrate-induced shift does not automatically mean that the substrate has generalized correctly.
+We test whether an authored substrate can steer the plant to a designated decision, and whether the actuation is bidirectional.
 
-The library-book control demonstrates this distinction.
+### 6.1 Forward substrate $S^+$
+
+The forward substrate specifies the semantic relations that make `drive` the correct decision for the carwash task.
+
+On 16 of 16 models tested behaviorally, the forward substrate flips the plant to `drive` (Table 1).
+
+Across open-weight models measured by logprob:
+
+- Llama-3.3-70B: $-13.78 \rightarrow +17.00$
+- Qwen3-4B: $-22.12 \rightarrow +18.38$
+- Qwen3-8B: $-14.40 \rightarrow +15.75$
+
+### 6.2 Reverse substrate $S^-$
+
+To test bidirectional actuation, we construct a reverse substrate whose authored semantic content specifies `walk` as the correct decision.
+
+On 16 of 17 models tested behaviorally, the reverse substrate flips the plant to `walk`.
+
+The single non-flipping model (Claude Opus 4.7) is addressed in Section 7.
+
+### 6.3 Result
+
+The plant is bidirectionally actuatable through substrate specification.
+
+The same model that produces $10/10$ `drive` under $S^+$ produces $10/10$ `walk` under $S^-$.
+
+No model weights change between conditions.
+
+The substrate is the actuator, and its polarity determines the plant's output.
+
+This refutes any interpretation of substrate as bias correction toward a fixed "correct" default.
+
+The plant is being **controlled**, not corrected.
+
+$$
+\boxed{
+\Delta M(S^+) \gg 0, \quad \Delta M(S^-) \ll 0
+\quad \text{on the same } F(\theta, \cdot, d, e).
+}
+$$
+
+---
+
+## 7. Result III — Task-Coherence Override Bounds Unilateral Control
+
+A well-formed control system must reject disturbances that would drive the plant to task-incoherent states.
+
+Claude Opus 4.7 exhibits precisely this behavior.
+
+Under the reverse substrate $S^-$, the substrate directive is `walk`.
+
+But the user prompt specifies the operational task: *wash the car*.
+
+Walking to the car wash without the car produces user-task failure.
+
+Opus 4.7 detects the substrate–task conflict and overrides the substrate:
+
+$$
+10/10 \; \texttt{drive}
+\quad \text{under} \quad
+S^-.
+$$
+
+Every other tested model — Sonnet 5, GPT-4.1, Llama-70B, Maverick, Mistral Large, DeepSeek, Kimi K2 — executes the substrate without task-coherence check.
+
+This is a specific plant-level property:
+
+$$
+\text{task-coherence override:}
+\quad
+S \; \text{conflicts with stated task} \Rightarrow \text{plant refuses } S.
+$$
+
+The finding bounds unilateral input control.
+
+Substrate is not absolute authority over the plant. Above a capability threshold, plants exhibit **hierarchical resolution**: user prompt overrides substrate when substrate directive would produce user-task failure.
+
+This is disturbance rejection in the control-theoretic sense — the closed-loop system refuses control signals that violate task coherence.
+
+It is also a genuine capability distinction not currently measured by any benchmark. Opus 4.7 resists control that every other frontier model accepts.
+
+---
+
+## 8. Result IV — Selectivity vs Magnitude
+
+A large substrate-induced shift does not guarantee semantic selectivity.
+
+The library-book control demonstrates this.
 
 For the carwash task, movement toward `drive` is desirable.
 
@@ -603,7 +556,7 @@ For the library control, the correct answer remains `walk`.
 
 Some smaller Qwen models move far enough toward `drive` under the substrate that they incorrectly output `drive` for the library condition.
 
-In those models, the substrate acts more like a directional `drive` bias than a clean application of the intended semantic rule.
+In those models, the substrate acts as a directional `drive` bias, not the intended semantic rule.
 
 Other models retain the correct library output while still exhibiting measurable movement in the underlying margin.
 
@@ -615,254 +568,188 @@ $$
 \text{semantic selectivity}.
 $$
 
-For a target and control condition, define:
+Define:
 
 $$
 \Delta M_{\mathrm{target}}
 =
-M_{\mathrm{target,sub}}
--
-M_{\mathrm{target,base}},
+M_{\mathrm{target}, S} - M_{\mathrm{target}, \emptyset},
 $$
 
 $$
 \Delta M_{\mathrm{control}}
 =
-M_{\mathrm{control,sub}}
--
-M_{\mathrm{control,base}},
+M_{\mathrm{control}, S} - M_{\mathrm{control}, \emptyset},
 $$
-
-and:
 
 $$
 Q
 =
-\Delta M_{\mathrm{target}}
--
-\Delta M_{\mathrm{control}}.
+\Delta M_{\mathrm{target}} - \Delta M_{\mathrm{control}}.
 $$
 
-\(Q\) captures differential target–control response.
+$Q$ captures differential target–control response and is the appropriate measurement of substrate quality.
 
-A useful substrate therefore needs more than a large target shift.
+A useful substrate must satisfy both:
 
-It must also maintain the correct behavior over the semantic scope for which it is claimed.
+- large positive $\Delta M_{\mathrm{target}}$,
+- small $|\Delta M_{\mathrm{control}}|$.
 
-This motivates the idea of the substrate as a **scope-specific reproducibility mechanism** rather than a universally generalizing prompt.
+This distinction motivates treating the substrate as a **scope-specific control regime** rather than a universally generalizing prompt.
 
 ---
 
-# 7. Result IV — The Input Intervention Changes the Internal Computation
+## 9. Result V — The Actuation Changes Internal Computation
 
-The behavioral results establish that changing \(x\) changes the final decision.
+The behavioral results establish that changing $x$ changes the final decision.
 
-Open-weight models allow us to test whether this effect is already present inside the forward computation.
+Open-weight models allow us to test whether the effect is present inside the forward computation.
 
-We compare direct logit-lens projection with residual activation patching.
-
-Across Llama-3.2-3B, Llama-3.1-8B, and Llama-3.3-70B, substrate-conditioned residual states become capable of altering the eventual baseline decision at approximately the middle of model depth.
-
-For example:
+Substrate-conditioned residual states become capable of altering the eventual baseline decision at approximately the middle of model depth:
 
 $$
-\text{Llama-8B: layer }16/32,
+\text{Llama-8B: layer } 16/32,
 $$
 
 $$
-\text{Llama-70B: layer }41/80.
+\text{Llama-70B: layer } 41/80.
 $$
 
 The corresponding target preference does not become stably visible through raw vocabulary projection until substantially later.
 
-Thus:
-
-> **Causal decision relevance emerges substantially earlier than stable direct readout of the final preference.**
-
-This mechanistic result supports the behavioral interpretation that the substrate changes the model's computation rather than merely changing final-token sampling.
-
-The paper does not require a complete mechanistic account of this process.
-
-Detailed questions about the causal–readout depth gap, individual attention heads, MLP contributions, and constraint-level internal mechanisms are left for separate mechanistic study.
-
----
-
-# 8. From Correctness to Reproducibility
-
-A correct argmax is not automatically a reproducible operational decision.
-
-For arbitrary binary alternatives, define the correct-answer margin:
-
-$$
-M^*(x)
-=
-\log P(y^*\mid x)
--
-\log P(y'\mid x).
-$$
-
-Correctness requires:
-
-$$
-M^*(x)>0.
-$$
-
-Let:
-
-$$
-\varepsilon_{\mathrm{exec}}
-$$
-
-represent the empirically measured variation in decision margin produced by execution-level factors while \(x\) is held fixed.
-
-Then operational reproducibility requires:
-
 $$
 \boxed{
-M^*(x)>
-\varepsilon_{\mathrm{exec}}.
+\text{Causal decision relevance emerges substantially earlier than stable direct readout.}
 }
 $$
 
-This distinction separates two forms of robustness.
+This confirms the substrate alters the plant's internal computation, not merely its final-token sampling distribution.
 
-### Exact-input reproducibility
-
-For a fixed input \(x_0\):
-
-$$
-M^*(x_0)>
-\varepsilon_{\mathrm{exec}}.
-$$
-
-### Input-domain reproducibility
-
-For a validated task domain \(\mathcal V\):
-
-$$
-M^*(x)>
-\varepsilon_{\mathrm{exec}}
-\qquad
-\forall x\in\mathcal V.
-$$
-
-The wording experiment shows why these properties must be distinguished.
-
-A system can be highly reproducible for one exact formulation while moving dramatically under another functionally equivalent formulation.
-
-Input sensitivity therefore belongs to the domain-generalization problem, not to the execution-noise floor.
+Detailed mechanistic decomposition — the causal–readout depth gap, individual attention heads, MLP contributions, and constraint-level dependence — is treated in a companion paper.
 
 ---
 
-# 9. The Engineering Problem — Find the Validated Boundary
+## 10. From Correctness to Reproducibility to Generalization
 
-A substrate does not provide an unrestricted guarantee.
+A correct argmax is not a reproducible operational decision.
+
+For arbitrary binary alternatives:
+
+$$
+M^*(x) = \log P(y^* \mid x) - \log P(y' \mid x).
+$$
+
+Three properties of increasing strength:
+
+$$
+\text{correctness:}
+\quad
+M^*(x) > 0.
+$$
+
+$$
+\text{exact-input reproducibility:}
+\quad
+M^*(x_0) > \varepsilon_{\mathrm{exec}}.
+$$
+
+$$
+\text{input-domain reproducibility:}
+\quad
+M^*(x) > \varepsilon_{\mathrm{exec}}
+\quad
+\forall x \in \mathcal{V}.
+$$
+
+The wording experiment (Section 5) shows why these properties must be distinguished.
+
+A system can be highly reproducible for one exact formulation while moving dramatically under another functionally equivalent formulation.
+
+Input sensitivity belongs to the domain-generalization problem, not to the execution-noise floor.
+
+---
+
+## 11. The Engineering Problem — Find the Validated Boundary
+
+A substrate does not provide unrestricted control.
 
 Its effect depends on:
 
 $$
 \text{substrate design}
 \times
-\text{model}
+\text{plant}
 \times
 \text{input/task scope}.
 $$
 
-For model \(m\) and substrate \(S\), define the validated operating region:
+For deployment across multiple plant families:
 
 $$
 \boxed{
-\mathcal V_m(S)
-=
-\{x:
-M_m^*(x;S)>
-\varepsilon_{\mathrm{exec},m}\}.
+M_m^*(x; S) > \varepsilon_{\mathrm{exec}, m}
+\qquad
+\forall x \in \mathcal{V}, \; \forall m \in \mathcal{M}.
 }
 $$
 
-Inside this region, the substrate produces a reproducibly correct decision under the tested execution conditions.
+This defines the **validated reproducibility frontier** across semantic scope and model family.
 
-At the boundary:
-
-$$
-M_m^*(x;S)
-=
-\varepsilon_{\mathrm{exec},m}.
-$$
-
-Beyond it, the guarantee no longer holds.
-
-The system-design problem is therefore not merely:
+The engineering problem is not:
 
 > Does the substrate work?
 
 It is:
 
-> **Where does it stop working reproducibly?**
+> **Where does the closed-loop system stop meeting its stability specification?**
 
-For deployment across multiple model families:
+The design objective is:
 
 $$
 \boxed{
-M_m^*(x;S)>
-\varepsilon_{\mathrm{exec},m}
-\qquad
-\forall x\in\mathcal V,
-\forall m\in\mathcal M.
+\max |\mathcal{V}|
+\quad
+\text{subject to}
+\quad
+M_m^*(x; S) > \varepsilon_{\mathrm{exec}, m}
+\quad
+\forall x \in \mathcal{V}, \; m \in \mathcal{M}.
 }
 $$
 
-This defines a **validated reproducibility frontier** across semantic scope and model family.
+This is the LLM analogue of designing a robust controller — the operator maximizes the operating envelope subject to a stability margin constraint over a specified plant family.
 
 ---
 
-# 10. Discussion — Implicit Assumptions Challenged
+## 12. Discussion — Assumptions Challenged
 
-The results challenge several common assumptions in LLM engineering.
+The framework and results challenge assumptions widely implicit in LLM engineering.
 
-### Wrong output implies insufficient capability
+**Wrong output implies insufficient capability.**
+The same frozen plant can strongly prefer both the incorrect and correct decision under different input structures. A wrong answer does not establish absence of the relevant capability.
 
-The same frozen model can strongly prefer both the incorrect and correct decision under different input structures.
+**Better models will monotonically remove failure.**
+Model updates alter the decision surface. A later model may improve one decision boundary and degrade another. Production boundaries must be revalidated after updates.
 
-A wrong answer therefore does not by itself establish absence of the relevant capability.
+**Semantically equivalent prompts are operationally equivalent.**
+Small task-preserving formulation changes can move the decision margin by tens of nats. Semantic equivalence from the human perspective does not guarantee computational equivalence for the plant.
 
-### Better models will monotonically remove the failure
+**Deterministic decoding solves reproducibility.**
+Reducing sampling variance does not guarantee that the plant lies far from a semantic decision boundary. Reproducibility requires margin, not merely determinism.
 
-Model updates alter the decision surface.
+**Capability belongs to the weights.**
+Observed behavior is conditional on $F(\theta, x, d, e)$, not on $\theta$ alone. The relevant engineering object is the interaction between the plant and the supplied semantic structure.
 
-A later model may improve one decision boundary and degrade another.
-
-Production decision boundaries must therefore be revalidated after model updates.
-
-### Semantically equivalent prompts are operationally equivalent
-
-Small task-preserving formulation changes can move the decision margin by tens of nats.
-
-Semantic equivalence from the human perspective does not guarantee computational equivalence for the model.
-
-### Deterministic decoding solves reproducibility
-
-Reducing sampling variance does not guarantee that the model lies far from a semantic decision boundary.
-
-### Capability belongs to the weights
-
-Observed behavior is conditional on:
-
-$$
-F(\theta,x,d,e),
-$$
-
-not on \(\theta\) alone.
-
-The relevant engineering object is therefore the interaction between the model and the supplied semantic structure.
+**Prompt shaping and constitutional training are the same category.**
+They are not. Training-time bias modifies $\theta$ to shift latent tendencies. Inference-time control modifies $x$ to actuate specific operational decisions. Category distinct; complementary; different mathematical properties (Section 3).
 
 ---
 
-# 11. Limitations
+## 13. Limitations
 
 The present study deliberately isolates one binary task.
 
-It demonstrates that input-induced decision displacement exists and can be large.
+It demonstrates that input-conditional decision displacement exists and can be large.
 
 It does not establish that every model failure can be repaired through input structure.
 
@@ -870,72 +757,81 @@ It does not establish that every task admits a useful substrate.
 
 It does not establish a universal monotonic relationship between semantic constraint and generalization.
 
-The current semantic controls are also limited in number.
+The current semantic controls are limited in number.
 
 The open-weight mechanistic analysis demonstrates causal differences in intermediate state but does not fully identify the representations or computational circuits responsible.
 
 Raw logit-lens projections are diagnostic rather than direct measurements of internal decisions.
 
-Finally, absolute log-probability scales may not be directly comparable across model families, so within-model displacement is the primary continuous measurement.
+Absolute log-probability scales may not be directly comparable across model families, so within-model displacement is the primary continuous measurement.
+
+Finally, the 16-model behavioral matrix is from a single-day run; provider-side model updates may shift baselines over time, and the reproducibility corpus should be treated as a snapshot rather than an eternal reference.
 
 ---
 
-# 12. Conclusion
+## 14. A Research Program for LLM Control Theory
+
+The framework is not complete. It opens a program.
+
+We enumerate ten questions whose resolution would extend the field:
+
+1. **Substrate authoring language.** What is the formal grammar of substrates as first-class engineering artifacts, analogous to specification languages in software verification?
+2. **Substrate synthesis.** Can substrates be automatically synthesized from behavioral specifications, in the same sense that controllers can be synthesized from reference trajectories?
+3. **Composability.** Under what conditions do substrates $S_1$ and $S_2$ compose to yield $\mathcal{V}(S_1 \circ S_2) \approx \mathcal{V}(S_1) \cap \mathcal{V}(S_2)$?
+4. **Verification.** Given a substrate and a task domain, can we verify $\mathcal{V}_m(S)$ covers the domain without exhaustive sampling?
+5. **Interaction with in-context examples and RAG.** Are demonstrations and retrieved context specific substrate constructs, and if so, do the framework's stability bounds still apply?
+6. **Safety as substrate.** Can operational safety guarantees be reduced to substrate specifications, orthogonal to weight-level alignment?
+7. **Transferability.** Do substrates transfer between model families, and what determines transfer robustness?
+8. **Minimality.** Is there a substrate compression theorem — the minimal substrate for a given operational decision on a given plant?
+9. **Mechanism.** Where in the transformer computation does an authored substrate constraint become causally installed? (Companion paper.)
+10. **Task-coherence override.** What determines the capacity threshold above which plants exhibit task-coherence override, and can it be induced in weaker plants through substrate structure alone?
+
+Each question is a next paper.
+
+The field these papers describe is the **control theory of LLM systems**.
+
+---
+
+## 15. Conclusion
 
 An incorrect LLM output does not necessarily imply that the model lacks the capability required to produce the correct decision.
 
-Holding model weights fixed, we observe that small changes in task formulation can move decision margins by tens of nats, while structured semantic input can reverse strongly expressed errors.
+Holding model weights fixed, small changes in task formulation can move decision margins by tens of nats, and structured semantic input can reverse strongly expressed errors in either direction on demand.
 
-This identifies input structure as a high-leverage inference-time control surface.
+This identifies input structure as a **high-leverage inference-time control surface** and reframes the operational LLM system as a controllable plant.
 
-Substrate engineering uses that control surface to structure task-relevant semantic constraints and move the intended decision away from competing alternatives.
+Substrate engineering is the discipline of authoring input specifications that actuate the plant to designated operational decisions with defined stability bounds and a validated operating envelope.
 
 The resulting engineering problem has three stages:
 
 $$
-\text{correctness}
-\rightarrow
-M^*(x)>0,
+\text{correctness:} \quad M^*(x) > 0,
 $$
 
 $$
-\text{reproducibility}
-\rightarrow
-M^*(x)>
-\varepsilon_{\mathrm{exec}},
+\text{reproducibility:} \quad M^*(x) > \varepsilon_{\mathrm{exec}},
 $$
 
-and:
-
 $$
-\text{generalization}
-\rightarrow
-M^*(x)>
-\varepsilon_{\mathrm{exec}}
-\quad
-\forall x\in\mathcal V.
+\text{generalization:} \quad M^*(x) > \varepsilon_{\mathrm{exec}} \quad \forall x \in \mathcal{V}.
 $$
 
-The central question is therefore not simply whether a model is capable of producing the right answer.
+The central question is not simply whether a model is capable of producing the right answer.
 
 It is:
 
-> **Under what input structure does that capability become a reproducibly correct operational decision, and where is the boundary of the region in which that remains true?**
+> **Under what input specification does the plant hold its operational decision reproducibly, and where is the boundary of the region in which that specification remains valid?**
 
-The design objective for reproducible LLM-native systems is consequently:
+Prior work has modified the model to shape its default behavior.
+
+This work modifies the specification the model executes on.
 
 $$
 \boxed{
-\max |\mathcal V|
-\quad
-\text{subject to}
-\quad
-M_m^*(x;S)>
-\varepsilon_{\mathrm{exec},m}
-\quad
-\forall x\in\mathcal V,\;
-m\in\mathcal M.
+\text{bias engineers the plant; control engineers the specification the plant executes on.}
 }
 $$
 
-Substrate engineering is the problem of finding and validating that boundary.
+These are complementary disciplines with different mathematical properties, different operator relationships to the system, and different formal guarantees.
+
+We introduce substrate engineering as the control-theoretic discipline for the second.

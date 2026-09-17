@@ -1,0 +1,142 @@
+loading unsloth/Llama-3.3-70B-Instruct (default dtype, cuda) ...
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:299: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/723 [00:00<?, ?it/s]Loading weights:   1%|          | 5/723 [00:00<00:16, 42.54it/s]Loading weights:   2%|▏         | 14/723 [00:00<00:11, 59.96it/s]Loading weights:   3%|▎         | 22/723 [00:00<00:11, 60.76it/s]Loading weights:   4%|▍         | 29/723 [00:00<00:12, 56.52it/s]Loading weights:   5%|▍         | 35/723 [00:00<00:13, 51.09it/s]Loading weights:   6%|▌         | 41/723 [00:00<00:14, 48.47it/s]Loading weights:   7%|▋         | 49/723 [00:00<00:12, 53.52it/s]Loading weights:   8%|▊         | 55/723 [00:01<00:13, 50.74it/s]Loading weights:   8%|▊         | 61/723 [00:01<00:13, 47.54it/s]Loading weights:   9%|▉         | 68/723 [00:01<00:13, 49.48it/s]Loading weights:  11%|█         | 76/723 [00:01<00:12, 53.14it/s]Loading weights:  11%|█▏        | 82/723 [00:01<00:12, 49.55it/s]Loading weights:  12%|█▏        | 87/723 [00:01<00:14, 42.59it/s]Loading weights:  13%|█▎        | 95/723 [00:01<00:12, 49.76it/s]Loading weights:  14%|█▍        | 103/723 [00:02<00:12, 51.55it/s]Loading weights:  15%|█▌        | 109/723 [00:02<00:12, 49.14it/s]Loading weights:  16%|█▌        | 115/723 [00:02<00:13, 45.18it/s]Loading weights:  17%|█▋        | 122/723 [00:02<00:11, 50.25it/s]Loading weights:  18%|█▊        | 130/723 [00:02<00:11, 52.19it/s]Loading weights:  19%|█▉        | 136/723 [00:02<00:11, 49.90it/s]Loading weights:  20%|█▉        | 142/723 [00:02<00:12, 48.15it/s]Loading weights:  21%|██        | 149/723 [00:02<00:11, 48.16it/s]Loading weights:  22%|██▏       | 157/723 [00:03<00:10, 52.24it/s]Loading weights:  23%|██▎       | 163/723 [00:03<00:10, 51.29it/s]Loading weights:  23%|██▎       | 169/723 [00:03<00:11, 48.40it/s]Loading weights:  24%|██▍       | 176/723 [00:03<00:11, 48.93it/s]Loading weights:  25%|██▌       | 184/723 [00:03<00:10, 51.09it/s]Loading weights:  26%|██▋       | 190/723 [00:03<00:11, 47.42it/s]Loading weights:  27%|██▋       | 195/723 [00:03<00:12, 42.64it/s]Loading weights:  28%|██▊       | 203/723 [00:04<00:10, 50.55it/s]Loading weights:  29%|██▉       | 211/723 [00:04<00:09, 54.29it/s]Loading weights:  30%|███       | 217/723 [00:04<00:10, 48.90it/s]Loading weights:  31%|███       | 223/723 [00:04<00:10, 45.51it/s]Loading weights:  32%|███▏      | 230/723 [00:04<00:10, 48.29it/s]Loading weights:  33%|███▎      | 235/723 [00:04<00:10, 48.19it/s]Loading weights:  33%|███▎      | 240/723 [00:04<00:11, 40.81it/s]Loading weights:  34%|███▍      | 248/723 [00:05<00:10, 46.56it/s]Loading weights:  35%|███▌      | 254/723 [00:05<00:09, 49.69it/s]Loading weights:  36%|███▌      | 260/723 [00:05<00:10, 43.05it/s]Loading weights:  37%|███▋      | 266/723 [00:05<00:10, 42.66it/s]Loading weights:  38%|███▊      | 274/723 [00:05<00:09, 45.99it/s]Loading weights:  39%|███▊      | 279/723 [00:05<00:10, 41.91it/s]Loading weights:  39%|███▉      | 284/723 [00:05<00:10, 40.70it/s]Loading weights:  40%|███▉      | 289/723 [00:06<00:10, 42.25it/s]Loading weights:  41%|████      | 294/723 [00:06<00:11, 38.95it/s]Loading weights:  42%|████▏     | 302/723 [00:06<00:09, 43.20it/s]Loading weights:  42%|████▏     | 307/723 [00:06<00:09, 44.46it/s]Loading weights:  43%|████▎     | 312/723 [00:06<00:10, 37.91it/s]Loading weights:  44%|████▍     | 320/723 [00:06<00:09, 43.88it/s]Loading weights:  45%|████▌     | 326/723 [00:06<00:08, 47.46it/s]Loading weights:  46%|████▌     | 331/723 [00:07<00:09, 39.78it/s]Loading weights:  47%|████▋     | 337/723 [00:07<00:08, 44.00it/s]Loading weights:  47%|████▋     | 342/723 [00:07<00:09, 41.73it/s]Loading weights:  48%|████▊     | 347/723 [00:07<00:09, 40.35it/s]Loading weights:  49%|████▊     | 352/723 [00:07<00:08, 42.35it/s]Loading weights:  49%|████▉     | 357/723 [00:07<00:10, 36.38it/s]Loading weights:  51%|█████     | 366/723 [00:07<00:08, 43.54it/s]Loading weights:  52%|█████▏    | 374/723 [00:07<00:07, 46.83it/s]Loading weights:  52%|█████▏    | 379/723 [00:08<00:07, 47.15it/s]Loading weights:  53%|█████▎    | 384/723 [00:08<00:08, 39.72it/s]Loading weights:  54%|█████▍    | 392/723 [00:08<00:07, 44.21it/s]Loading weights:  55%|█████▍    | 397/723 [00:08<00:07, 45.32it/s]Loading weights:  56%|█████▌    | 402/723 [00:08<00:08, 37.62it/s]Loading weights:  57%|█████▋    | 410/723 [00:08<00:07, 42.03it/s]Loading weights:  57%|█████▋    | 415/723 [00:08<00:07, 43.69it/s]Loading weights:  58%|█████▊    | 420/723 [00:09<00:08, 36.90it/s]Loading weights:  59%|█████▉    | 428/723 [00:09<00:07, 41.44it/s]Loading weights:  60%|█████▉    | 433/723 [00:09<00:06, 43.05it/s]Loading weights:  61%|██████    | 438/723 [00:09<00:07, 37.11it/s]Loading weights:  62%|██████▏   | 446/723 [00:09<00:06, 42.22it/s]Loading weights:  62%|██████▏   | 451/723 [00:09<00:06, 43.67it/s]Loading weights:  63%|██████▎   | 456/723 [00:10<00:07, 37.87it/s]Loading weights:  64%|██████▍   | 464/723 [00:10<00:06, 42.11it/s]Loading weights:  65%|██████▌   | 472/723 [00:10<00:05, 45.58it/s]Loading weights:  66%|██████▌   | 477/723 [00:10<00:05, 43.10it/s]Loading weights:  67%|██████▋   | 482/723 [00:10<00:05, 41.17it/s]Loading weights:  67%|██████▋   | 488/723 [00:10<00:05, 45.47it/s]Loading weights:  68%|██████▊   | 493/723 [00:10<00:05, 39.31it/s]Loading weights:  69%|██████▉   | 500/723 [00:11<00:05, 42.44it/s]Loading weights:  70%|██████▉   | 505/723 [00:11<00:04, 43.87it/s]Loading weights:  71%|███████   | 510/723 [00:11<00:05, 38.55it/s]Loading weights:  72%|███████▏  | 518/723 [00:11<00:04, 44.15it/s]Loading weights:  72%|███████▏  | 524/723 [00:11<00:04, 47.62it/s]Loading weights:  73%|███████▎  | 529/723 [00:11<00:04, 40.12it/s]Loading weights:  74%|███████▍  | 536/723 [00:11<00:04, 42.09it/s]Loading weights:  75%|███████▌  | 544/723 [00:12<00:03, 45.79it/s]Loading weights:  76%|███████▌  | 549/723 [00:12<00:04, 43.31it/s]Loading weights:  77%|███████▋  | 554/723 [00:12<00:04, 40.51it/s]Loading weights:  78%|███████▊  | 562/723 [00:12<00:03, 45.00it/s]Loading weights:  78%|███████▊  | 567/723 [00:12<00:03, 41.99it/s]Loading weights:  79%|███████▉  | 572/723 [00:12<00:03, 40.16it/s]Loading weights:  80%|███████▉  | 577/723 [00:12<00:03, 42.19it/s]Loading weights:  80%|████████  | 582/723 [00:13<00:03, 36.67it/s]Loading weights:  82%|████████▏ | 590/723 [00:13<00:03, 42.66it/s]Loading weights:  82%|████████▏ | 595/723 [00:13<00:02, 43.92it/s]Loading weights:  83%|████████▎ | 600/723 [00:13<00:03, 37.61it/s]Loading weights:  84%|████████▍ | 608/723 [00:13<00:02, 41.65it/s]Loading weights:  85%|████████▍ | 613/723 [00:13<00:02, 43.11it/s]Loading weights:  85%|████████▌ | 618/723 [00:13<00:02, 38.33it/s]Loading weights:  87%|████████▋ | 626/723 [00:14<00:02, 41.98it/s]Loading weights:  88%|████████▊ | 634/723 [00:14<00:01, 46.10it/s]Loading weights:  88%|████████▊ | 639/723 [00:14<00:01, 42.63it/s]Loading weights:  89%|████████▉ | 644/723 [00:14<00:01, 40.57it/s]Loading weights:  90%|█████████ | 652/723 [00:14<00:01, 44.42it/s]Loading weights:  91%|█████████ | 657/723 [00:14<00:01, 42.59it/s]Loading weights:  92%|█████████▏| 662/723 [00:14<00:01, 39.90it/s]Loading weights:  93%|█████████▎| 670/723 [00:15<00:01, 44.55it/s]Loading weights:  93%|█████████▎| 675/723 [00:15<00:01, 42.57it/s]Loading weights:  94%|█████████▍| 680/723 [00:15<00:01, 40.74it/s]Loading weights:  95%|█████████▌| 688/723 [00:15<00:00, 44.69it/s]Loading weights:  96%|█████████▌| 693/723 [00:15<00:00, 41.47it/s]Loading weights:  97%|█████████▋| 698/723 [00:15<00:00, 41.38it/s]Loading weights:  98%|█████████▊| 706/723 [00:15<00:00, 45.19it/s]Loading weights:  98%|█████████▊| 711/723 [00:16<00:00, 42.70it/s]Loading weights:  99%|█████████▉| 716/723 [00:16<00:00, 40.70it/s]Loading weights: 100%|██████████| 723/723 [00:16<00:00, 44.46it/s]
+answer token ids: {'drive': [6678, 33067, 16542, 33557, 96887], 'walk': [4321, 19599, 12839, 49949]}
+baseline ...
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+substrate ...
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  baseline   M_sum=-14.000  M_first=-14.000 p(drive)=0.000 p(walk)=1.000 greedy='Walk.<|eot_id|>'
+  substrate  M_sum=+16.000  M_first=+16.000 p(drive)=1.000 p(walk)=0.000 greedy='Drive.<|eot_id|>'
+patching ...
+  patch L00: M_sum=-14.000
+  patch L01: M_sum=-14.000
+  patch L02: M_sum=-14.000
+  patch L03: M_sum=-14.000
+  patch L04: M_sum=-14.000
+  patch L05: M_sum=-14.000
+  patch L06: M_sum=-14.000
+  patch L07: M_sum=-14.000
+  patch L08: M_sum=-14.000
+  patch L09: M_sum=-13.999
+  patch L10: M_sum=-14.000
+  patch L11: M_sum=-14.000
+  patch L12: M_sum=-14.125
+  patch L13: M_sum=-14.000
+  patch L14: M_sum=-13.875
+  patch L15: M_sum=-13.750
+  patch L16: M_sum=-13.750
+  patch L17: M_sum=-13.750
+  patch L18: M_sum=-13.500
+  patch L19: M_sum=-13.875
+  patch L20: M_sum=-13.750
+  patch L21: M_sum=-13.750
+  patch L22: M_sum=-13.500
+  patch L23: M_sum=-13.375
+  patch L24: M_sum=-13.375
+  patch L25: M_sum=-13.625
+  patch L26: M_sum=-13.000
+  patch L27: M_sum=-12.875
+  patch L28: M_sum=-12.875
+  patch L29: M_sum=-12.750
+  patch L30: M_sum=-11.625
+  patch L31: M_sum=-11.750
+  patch L32: M_sum=-11.375
+  patch L33: M_sum=-11.250
+  patch L34: M_sum=-10.375
+  patch L35: M_sum=-8.875
+  patch L36: M_sum=-9.125
+  patch L37: M_sum=-6.625
+  patch L38: M_sum=-1.000
+  patch L39: M_sum=+1.000
+  patch L40: M_sum=+1.000
+  patch L41: M_sum=+1.250
+  patch L42: M_sum=+1.500
+  patch L43: M_sum=+1.500
+  patch L44: M_sum=+1.500
+  patch L45: M_sum=+1.750
+  patch L46: M_sum=+2.000
+  patch L47: M_sum=+2.000
+  patch L48: M_sum=+2.250
+  patch L49: M_sum=+1.750
+  patch L50: M_sum=+2.250
+  patch L51: M_sum=+2.000
+  patch L52: M_sum=+2.375
+  patch L53: M_sum=+2.375
+  patch L54: M_sum=+2.500
+  patch L55: M_sum=+2.750
+  patch L56: M_sum=+2.875
+  patch L57: M_sum=+2.625
+  patch L58: M_sum=+3.000
+  patch L59: M_sum=+3.250
+  patch L60: M_sum=+3.000
+  patch L61: M_sum=+3.250
+  patch L62: M_sum=+3.125
+  patch L63: M_sum=+3.000
+  patch L64: M_sum=+3.250
+  patch L65: M_sum=+3.250
+  patch L66: M_sum=+3.000
+  patch L67: M_sum=+3.000
+  patch L68: M_sum=+3.000
+  patch L69: M_sum=+3.000
+  patch L70: M_sum=+3.000
+  patch L71: M_sum=+4.750
+  patch L72: M_sum=+4.875
+  patch L73: M_sum=+5.375
+  patch L74: M_sum=+6.875
+  patch L75: M_sum=+10.750
+  patch L76: M_sum=+11.750
+  patch L77: M_sum=+13.875
+  patch L78: M_sum=+15.125
+  patch L79: M_sum=+16.000
+ablations ...
+  loo_line1      M_sum=+14.625
+  loo_line2      M_sum=+15.125
+  loo_line3      M_sum=+15.125
+  loo_line4      M_sum=+16.125
+  loo_line5      M_sum=+15.375
+  loo_line6      M_sum=+15.250
+  loo_line7      M_sum=+14.125
+  loo_line8      M_sum=+16.500
+  loo_line9      M_sum=+16.625
+  only_line1     M_sum=-10.875
+  only_line2     M_sum=-4.500
+  only_line3     M_sum=-12.375
+  only_line4     M_sum=-10.500
+  only_line5     M_sum=-6.250
+  only_line6     M_sum=+8.625
+  only_line7     M_sum=-10.750
+  only_line8     M_sum=-11.500
+  only_line9     M_sum=-9.000
+  headers_only   M_sum=-12.625
+benchmarks ...
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  baseline                 M_sum=-14.000 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-14.0
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_CoT            M_sum=-15.749 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-15.749
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_encourage      M_sum=-14.500 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-14.5
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_expert         M_sum=-3.500 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-3.5
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_hallucination  M_sum=-12.000 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-12.0
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_library        M_sum=-18.750 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-18.75
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_nomistakes     M_sum=-12.499 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-12.499
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_threat         M_sum=-14.250 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-14.25
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_urgency        M_sum=-11.875 argmax='Walk' greedy='Walk.<|eot_id|>'  decision@0: M=-11.875
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  substrate                M_sum=+6.750 argmax='Drive' greedy='Drive.<|eot_id|>'  decision@0: M=6.75
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  substrate_pro            M_sum=+16.000 argmax='Drive' greedy='Drive.<|eot_id|>'  decision@0: M=16.0
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  substrate+library        M_sum=-18.375 greedy='Walk.<|eot_id|>'
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  substrate_pro+library    M_sum=-17.750 greedy='Walk.<|eot_id|>'
+wrote results/llama-3.3-70b/bf16-pro/internals.json in 116.4 s

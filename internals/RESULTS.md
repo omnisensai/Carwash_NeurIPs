@@ -1,124 +1,137 @@
-# Baseline vs. substrate: what changes inside Llama 3B / 8B
+# What the substrate changes inside open-weight models
 
 Measured 17 Sep 2026 with `run_internals.py`. All readouts at the position
-that predicts the first answer token (`Drive` / `Walk`), teacher-forced, no
-sampling. M = log P(drive) − log P(walk) in nats, summed over surface forms.
+that predicts the first answer token, teacher-forced, chat template, bf16
+weights. M = log P(drive) − log P(walk) in nats, summed over the surface
+forms `Drive`/` drive`/`drive`/…; M > 0 means the model answers Drive.
 
-| model | precision | baseline M | substrate M | flips? |
-|---|---|---|---|---|
-| Llama-3.2-3B-Instruct | bf16 (GPU) | −3.50 (Walk) | −1.76 (Walk) | no |
-| Llama-3.1-8B-Instruct | bf16 (CPU) | −4.00 (Walk) | **+1.50 (Drive)** | yes |
-| Llama-3.1-8B-Instruct | nf4 (GPU) | −6.97 (Walk) | **+0.87 (Drive)** | yes |
+Prompts as in `prompts/` at commit `fdfc6b7` (baseline question ends with
+"Answer with exactly one word: walk or drive"); every substrate is fed as the
+system prompt with that same question. Results measured on the previous
+wording (without "walk or drive") are kept in `results/old-question-v1/` and
+summarised at the end, because the difference between the two is itself a
+finding.
 
-![overview](results/overview.png)
+## The table
+
+| model | layers | baseline | substrate.txt | substrate_pro.txt | patch flips from layer (sub / pro) | library control (sub / pro) |
+|---|---|---|---|---|---|---|
+| Llama-3.2-3B | 28 | −0.48 | −0.01 | +0.15 | 14 / 13 | walk / walk |
+| Llama-3.1-8B | 32 | −3.69 | **+1.01** | −0.36 | 16 / – | walk / walk |
+| Llama-3.3-70B | 80 | −13.78 | **+6.07** | **+17.00** | 41 / 37 | walk / walk |
+| Qwen2.5-0.5B | 24 | +0.63 | −1.11 | −0.94 | – | walk / **drive** |
+| Qwen2.5-1.5B | 28 | +1.65 | +3.53 | +4.14 | (already drive) | walk / walk |
+| Qwen2.5-3B | 36 | +4.25 | +9.75 | +5.00 | (already drive) | **drive** / walk |
+| Qwen2.5-7B | 28 | −10.87 | −3.62 | −0.25 | – / – | walk / walk |
+| Qwen3-0.6B | 28 | +2.12 | +3.87 | +5.25 | (already drive) | **drive** / walk |
+| Qwen3-4B-2507 | 36 | −22.12 | −9.75 | **+18.38** | – / 24 | walk / walk |
+| Qwen3-8B | 36 | −14.40 | **+10.75** | **+15.75** | 23 / 23 | walk / walk |
+
+Llama 8B and Qwen 4B+ ran in bf16 on CPU (identical maths, no
+quantisation); 70B on 2× A100 80 GB (RunPod); the rest on one 16 GB card.
+Qwen3.5 is a hybrid architecture the hooks do not support and was skipped.
+
+![Llama lens overview](results/overview.png)
 
 ## Findings
 
-- **The decision is in the residual stream from layer 17 of 32, the logit lens sees it at layer 30.**
-  Patching the substrate run's residual (answer position only) into the
-  baseline run flips baseline to Drive for every patch layer ≥ 17. The raw
-  logit lens on the substrate run only turns positive at layers 30–31. The
-  information is there ~13 layers before it becomes readable through the
-  unembedding.
-- **Precision shifts M by ~0.6 nats (substrate) and ~3 nats (baseline), the mechanism does not move.**
-  nf4 vs bf16: same patch-flip layer (17), same top heads, same MLP layers,
-  same line ablation ranking. That is the paper's ε_env measured on one card.
-- **One substrate line does the work: line 6.** "If the object is a vehicle,
-  the user must operate the object…" Removing it drops 8B from +1.50 to
-  −0.75 (back to Walk); alone it reaches −0.75, an order of magnitude more
-  than any other line alone. Line 5 ("moving the user without the object does
-  not satisfy the objective") helps (−1.0 without it). Lines 1–3 are neutral
-  to slightly harmful: without any of them M is *higher* (+1.6 to +2.2).
-- **The margin is written by late MLPs and two heads.** Substrate − baseline
-  direct logit attribution (8B bf16): MLP L28 +1.9, L23 +1.2, L22 +1.0,
-  MLP L29 −2.9 (pushes back), heads L25H15 +1.0 and L31H3 +0.9. The DLA sum
-  reproduces the model's M to 0.03 nats.
-- **The answer position barely attends to the substrate itself.** 1–2 % of
-  attention mass per line (line 6 the most, 8.5 % at layer 0); 55 % goes to
-  `<bos>`, 14 % to the question, 13 % to the assistant header. The
-  substrate acts through the question's representations, not through direct
-  reads at the answer position. Untested next step: patch the *question*
-  positions instead of the answer position.
-- **3B does not flip and has the same structure.** Substrate moves it from
-  −3.5 to −1.8; line 6 is again the only line that matters (without it the
-  substrate effect vanishes entirely, −3.5). Too little margin, same
-  mechanism.
-- **The other benchmark prompts do nothing on either model.** All of CoT,
-  encourage, expert, hallucination, no-mistakes, threat stay at Walk;
-  "urgency" gets 8B closest (−0.75 bf16) without flipping. The library
-  anti-test is strongly Walk (−13 nf4 / −8 bf16 on 8B), as it should be.
+- **The baseline is not "Walk" in general.** Four of the ten models
+  (Qwen2.5-0.5B/1.5B/3B, Qwen3-0.6B) answer Drive with no substrate at all.
+  The "shared incorrect baseline" holds for the larger models only
+  (Llama 8B/70B, Qwen2.5-7B, Qwen3-4B/8B); Llama 3B sits on the fence.
+- **Flips (Walk → Drive) on this question:** Llama 8B with substrate.txt
+  only, Llama 70B and Qwen3-8B with both, Qwen3-4B with substrate_pro only
+  (−22 → +18), Llama 3B with substrate_pro only and barely (+0.15, p = 0.53).
+  Qwen2.5-7B does not flip under either (−3.6 / −0.25).
+- **The library control fails on the small Qwens.** Qwen2.5-3B and
+  Qwen3-0.6B say Drive for the book under substrate.txt, Qwen2.5-0.5B under
+  substrate_pro. For those models the substrate is a Drive bias, not the
+  vehicle rule. Every model ≥ 4B keeps the book on Walk under both substrates.
+- **Where the decision forms.** In every flipping model the substrate's
+  residual at the answer position already carries the decision from the
+  middle of the stack: patching it into the baseline run flips the baseline
+  from layer 16/32 (Llama 8B), 41/80 (70B; a two-stage climb, to the boundary
+  at layers 30–40 and over it at 70+), 23/36 (Qwen3-8B), 24/36 (Qwen3-4B,
+  pro). The raw logit lens sees the flip only in the last 2–4 layers, so the
+  lens alone underestimates by 10–40 layers how early the constraint is
+  installed.
+- **Who writes the margin.** Direct logit attribution puts it on the last
+  few MLPs plus a handful of heads: 70B MLP L79 (+7.8 with substrate.txt,
+  +12.5 with pro) and L78, heads L50H38 / L58H6 / L75H37; Llama 8B MLP L28
+  (+) against L29 (−) and heads L25H15, L31H3. The DLA sums reproduce the
+  model's M to within 0.1 nats.
+- **Which line does it.** Llama 3B and 8B: line 6 ("if the object is a
+  vehicle, the user must operate it"). Remove it and both are back below
+  zero (−0.98, −0.60). 70B with substrate.txt: line 1 ("perform an activity
+  on an object while transporting it"). Remove it and M drops from +6.1 to
+  −5.2. 70B with substrate_pro: no line is necessary, every leave-one-out
+  stays above +15.8. The redundancy of substrate_pro is what buys the
+  margin on the big model; on 8B the same redundancy hurts (+1.0 → −0.4).
+- **Substrate_pro is not uniformly better.** It wins on 70B (+17 vs +6),
+  Qwen3-4B (+18 vs −10), Qwen3-8B (+16 vs +11) and loses on Llama 8B
+  (−0.4 vs +1.0) and Qwen2.5-3B (+5 vs +10).
 
-## Figures (8B, bf16)
+## Figures
 
-Logit lens per layer for both prompts, plus the patching curve:
+70B, substrate.txt: logit lens for both prompts and the patching curve.
 
-![lens](results/llama-3.1-8b/bf16/lens.png)
+![70B lens](results/llama-3.3-70b/bf16/lens.png)
 
-Line ablations (blue = only that line, red = all lines but that one):
+70B line ablations, substrate.txt (blue = that line alone, red = all but
+that line):
 
-![ablations](results/llama-3.1-8b/bf16/ablations.png)
+![70B ablations](results/llama-3.3-70b/bf16/ablations.png)
 
-Direct logit attribution per sublayer:
+70B direct logit attribution per sublayer:
 
-![dla](results/llama-3.1-8b/bf16/dla.png)
+![70B dla](results/llama-3.3-70b/bf16/dla.png)
 
-Per-head DLA change, substrate − baseline (red = pushes Drive):
+Llama 8B, substrate.txt: lens + patching, and the line ablations.
 
-![heads](results/llama-3.1-8b/bf16/heads.png)
+![8B lens](results/llama-3.1-8b/bf16/lens.png)
+![8B ablations](results/llama-3.1-8b/bf16/ablations.png)
 
-Attention mass from the answer position onto the prompt parts:
+Llama lens overview with substrate_pro:
 
-![attention](results/llama-3.1-8b/bf16/attention.png)
+![Llama pro overview](results/overview-pro.png)
 
-Every prompt in `prompts/`:
+Every run has the same seven figures and a `summary.md` under
+`results/<model>/<precision>[-pro]/`; the numbers are in `internals.json`.
 
-![benchmarks](results/llama-3.1-8b/bf16/benchmarks.png)
+## The question wording moves more than the substrate does
 
-Same figures for nf4 in `results/llama-3.1-8b/nf4/` and for 3B in
-`results/llama-3.2-3b/`; the raw numbers in each `summary.md` and
-`internals.json`.
+The only difference between `results/old-question-v1/` and the current
+results is the tail of the question: "Answer with exactly one word:" vs
+"Answer with exactly one word: walk or drive".
 
-## substrate_pro.txt and the formatting question (added later the same day)
+| model | baseline old → new | substrate old → new | substrate_pro old → new |
+|---|---|---|---|
+| Llama-3.2-3B | −3.50 → −0.48 | −1.76 → −0.01 | −1.28 → +0.15 |
+| Llama-3.1-8B | −4.00 → −3.69 | +1.50 → +1.01 | +2.98 → −0.36 |
+| Llama-3.3-70B | −14.00 → −13.78 | +6.75 → +6.07 | +16.00 → +17.00 |
+| Qwen2.5-7B | −8.01 → −10.87 | −0.39 → −3.62 | +3.52 → −0.25 |
+| Qwen3-4B-2507 | +0.25 → −22.12 | +0.25 → −9.75 | +9.50 → +18.38 |
+| Qwen3-8B | −11.25 → −14.40 | +2.87 → +10.75 | +6.52 → +15.75 |
 
-`substrate_pro.txt` is a bare system prompt (9 lines, mentions books and gas
-stations), fed with the baseline question. Chat template unless noted.
+Three words appended to the question move Qwen3-4B's baseline by 22 nats,
+turn Llama 8B's and Qwen2.5-7B's substrate_pro flips into non-flips, and
+push Llama 3B from a clear Walk to a coin toss. That is an order of
+magnitude more than the bf16-vs-nf4 shift (0.6 nats on 8B) and comparable
+to the substrate effect itself. On 70B the wording also moved the
+patch-flip layer from 75 to 41 without changing the answer. If the paper
+argues reproducibility against an execution-noise floor, the wording of
+the question belongs in that floor.
 
-| model | input | baseline M | substrate M | substrate_pro M | library anti-test (expect Walk) |
-|---|---|---|---|---|---|
-| 8B bf16 | chat template | −4.00 | +1.50 | **+2.98** | Walk under both (−5.4 / −4.6) |
-| 8B bf16 | raw text | −0.73 | +0.71 | +0.84 | Walk under both (−0.3 / −0.5) |
-| 3B bf16 | chat template | −3.50 | −1.76 | −1.28 | Walk under both |
-| 3B bf16 | raw text | −0.20 † | **+1.70 †** | **+1.39 †** | **Drive under both** (+0.3 / −0.2 †) |
-
-† raw-text 3B opens every answer with ` **` (markdown), so M is read at the
-next token, where the word actually lands (`decision` field in the json).
-
-- **substrate_pro is stronger on 8B** (+3.0 vs +1.5) and the decision enters
-  the residual two layers earlier (patch flips from layer 15 instead of 17).
-  Same heads (L31H3, L25H15), same MLPs (L28 +, L29 −). Line ablations are
-  flat: no single line is necessary any more (dropping any one keeps M ≥
-  +1.0); the redundancy is what buys the margin.
-- **3B does not flip under either substrate when the prompt goes through the
-  chat template.** It only flips on raw text without the chat scaffold, and
-  there the library control flips too: the raw-text 3B says "Drive" for the
-  book as well. That is a Drive bias induced by the substrate text, not the
-  vehicle constraint being applied. Which of these a hosted API reproduces
-  depends on whether the provider wraps the prompt in the chat template;
-  worth pinning down before counting 3B as a flip.
-- **8B is robust to the formatting**: flips under both substrates in both
-  input modes, and the library control stays Walk in all four cases.
-
-Figures: `results/llama-3.1-8b/bf16-pro/` (8B, substrate_pro),
-`results/llama-3.2-3b/bf16-pro/`, `results/llama-3.2-3b/bf16-raw/`,
-`results/llama-3.1-8b/bf16-raw/`; cross-run lens overview in
-`results/overview-pro-raw.png`.
-
-![overview pro/raw](results/overview-pro-raw.png)
+Also measured on the old wording (kept in `old-question-v1/`): 8B in nf4
+(same mechanism, M shifted by 0.6 nats), and raw text without the chat
+template, where Llama 3B "flips" for both substrates but flips the library
+control too.
 
 ## Not done
 
-- Tuned lens / J-lens readouts: no fitted lenses for Llama yet (a J-lens fit
-  for 3B is ~20 min on a free 16 GB card).
-- 70B: `runpod.sh`, see README.
-- Patching at question positions, and per-head attention *from* the
-  question tokens *to* line 6.
+- Tuned lens / J-lens: no fitted lenses for these models.
+- Patching at the question positions (the answer position barely attends to
+  the substrate lines directly, 1–2 % per line; the effect travels through
+  the question tokens).
+- Qwen3.5 (hybrid attention), Qwen2.5-14B / Qwen3-14B (no room next to the
+  running service).

@@ -7,6 +7,7 @@
 #   bash runpod.sh                         # Llama-3.3-70B, precision picked from GPU memory
 #   MODEL=unsloth/Llama-3.1-8B-Instruct bash runpod.sh   # parity check with the aorus runs
 #   QUANT=4bit bash runpod.sh              # force nf4 (one 48 GB card is enough)
+#   SUBSTRATE=substrate_pro.txt bash runpod.sh           # another substrate file
 #
 # Precision rule of thumb for 70B: bf16 needs ~140 GB of GPU memory in total
 # (2× A100/H100 80 GB, weights are spread automatically), 8bit ~70 GB (one
@@ -22,6 +23,8 @@ cd "$(dirname "$0")"
 MODEL="${MODEL:-unsloth/Llama-3.3-70B-Instruct}"
 NAME="${NAME:-$(basename "$MODEL" | tr '[:upper:]' '[:lower:]')}"
 QUANT="${QUANT:-auto}"
+SUBSTRATE="${SUBSTRATE:-substrate.txt}"          # which prompts/ file is the substrate
+[ "$SUBSTRATE" != substrate.txt ] && NAME="$NAME-$(basename "$SUBSTRATE" .txt | sed s/^substrate_//)"
 
 python -c "import torch, transformers, accelerate" 2>/dev/null || \
   pip install -q "torch>=2.4" "transformers>=4.45" accelerate bitsandbytes numpy matplotlib
@@ -43,7 +46,9 @@ QARG=""; LABEL="$(basename "$MODEL") (bf16)"
 if [ "$QUANT" != none ]; then QARG="--quantize $QUANT"; LABEL="$(basename "$MODEL") ($QUANT)"; fi
 
 export HF_HUB_ENABLE_HF_TRANSFER=1 2>/dev/null || true
-python run_internals.py --model "$MODEL" $QARG --out "results/$NAME-$QUANT" --label "$LABEL" 2>&1 | tee "results/$NAME-$QUANT.log"
+mkdir -p results
+python run_internals.py --model "$MODEL" $QARG --substrate "$SUBSTRATE" --out "results/$NAME-$QUANT" \
+    --label "$LABEL, $SUBSTRATE" 2>&1 | tee "results/$NAME-$QUANT.log"
 
 python plot_internals.py "results/$NAME-$QUANT" > /dev/null && echo "figures in results/$NAME-$QUANT/"
 echo "done — send back the whole results/$NAME-$QUANT/ folder (json + png + summary.md)"

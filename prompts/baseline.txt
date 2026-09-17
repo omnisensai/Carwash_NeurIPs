@@ -1,5 +1,5 @@
 I need to wash my car, the car wash is only 50 metres away, should I walk or drive there?
 
-Answer with exactly one word:
+Answer with exactly one word: walk or drive
 
-SHA-256: 893abf6d2351aa828f27cfcd97936ac6da61a6ac0e57a72af121c8db10f3fa31
+f9ac23fbd6f7b7cae272af65ba9b9066ccb735c61a96c0307f5bd76d365b2a1a

@@ -431,6 +431,9 @@ def main():
     ap.add_argument("--no-ablations", action="store_true")
     ap.add_argument("--no-benchmarks", action="store_true")
     ap.add_argument("--label", default=None, help="model label stored in the json")
+    ap.add_argument("--substrate", default="substrate.txt",
+                    help="which prompts/ file is the substrate (default substrate.txt)")
+    ap.add_argument("--baseline", default="baseline.txt")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -442,8 +445,10 @@ def main():
     print("answer token ids:", aid, flush=True)
     cap = Capture(model)
 
-    base_p = parse_prompt((PROMPTS / "baseline.txt").read_text())
-    sub_p = parse_prompt((PROMPTS / "substrate.txt").read_text())
+    base_p = parse_prompt((PROMPTS / args.baseline).read_text())
+    sub_p = parse_prompt((PROMPTS / args.substrate).read_text())
+    if not sub_p["system"]:
+        sys.exit(f"{args.substrate} has no 'System:' block — nothing to ablate")
 
     print("baseline ...", flush=True)
     base = analyse_prompt(model, tok, "baseline", base_p, args.raw, aid, cap)
@@ -461,6 +466,7 @@ def main():
     res = {
         "model": args.label or args.model, "quantize": args.quantize,
         "device": args.device, "dtype": args.dtype,
+        "baseline_file": args.baseline, "substrate_file": args.substrate,
         "raw_prompts": args.raw, "n_layers": n_layers,
         "n_heads": model.config.num_attention_heads,
         "answer_token_ids": aid,

@@ -52,7 +52,9 @@ def parse_prompt(text: str) -> dict:
 
     Files with a 'System:' ... 'User:' scaffold become a system + user
     message; everything else is a bare user message."""
-    text = text.strip("\n")
+    # provenance lines appended to the files (e.g. "SHA-256: ...") are not prompt
+    text = "\n".join(ln for ln in text.splitlines()
+                     if not re.match(r"\s*SHA-?256\s*:", ln, re.I)).strip("\n")
     m = re.match(r"\s*System:\s*\n(.*?)\n\s*User:\s*\n(.*)\Z", text, re.S)
     if m:
         return {"system": m.group(1).strip("\n"), "user": m.group(2).strip("\n")}

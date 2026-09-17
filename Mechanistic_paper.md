@@ -1,771 +1,705 @@
 
-What about this a separate paper?
+# Substrate Engineering: Input Structure as a Control Surface for Reproducible LLM Decisions
 
+## Core Thesis
 
-When Does an LLM Decision Become Causally Available?
+Incorrect LLM behavior is commonly interpreted as evidence of insufficient model capability.
 
-Working Title
+This inference is not always valid.
 
-When Does an LLM Decide? Causal Sufficiency Precedes Linear Readout in Transformer Language Models
+At inference time, model output is produced by an interaction between the learned model, the supplied input, the decoding procedure, and the execution environment:
 
-Alternative:
+$$
+y = F(\theta,x,d,e)
+$$
 
-Causal Decision States Precede Vocabulary Readout in Large Language Models
+where:
 
-⸻
+* \(\theta\) denotes model architecture and frozen learned weights,
+* \(x\) denotes the application-supplied input and context,
+* \(d\) denotes decoding configuration,
+* \(e\) denotes the execution environment.
 
-Core Question
+Holding \(\theta\) and \(d\) fixed, we find that small changes to \(x\) can move the same binary decision by tens of nats and reverse strongly expressed outputs.
 
-Mechanistic interpretability often asks when a model’s answer “appears” inside the network.
+The same frozen model can therefore appear incapable under one input structure and strongly capable under another.
 
-A common tool for this is the logit lens: project an intermediate residual state through the model’s output head and inspect which token it favors.
+We call this phenomenon **input-induced decision displacement**.
 
-If the target answer becomes visible at layer (l), it is tempting to conclude that the decision emerges at approximately that layer.
+Substrate engineering treats semantic input structure as an application-level control surface for reducing task-irrelevant decision displacement and moving the intended decision toward a stable region.
 
-But direct readout and causal relevance are not necessarily the same thing.
+For a correct answer \(y^*\) and competing answer \(y'\), define:
 
-We ask:
+$$
+M^*(x)
+=
+\log P(y^*\mid x)
+-
+\log P(y'\mid x).
+$$
 
-At what layer does an internal state become causally sufficient to determine an eventual model decision, and how does that compare with the layer at which the same decision becomes linearly readable?
+Correctness requires:
 
-⸻
+$$
+M^*(x)>0.
+$$
 
-Core Hypothesis
+Operational reproducibility requires the decision to remain sufficiently far from the boundary that execution-level perturbations cannot reverse it:
 
-A model can enter an internal state that is already sufficient to determine the eventual decision before that decision is directly readable from the residual stream through a linear vocabulary projection.
+$$
+M^*(x)>\varepsilon_{\mathrm{exec}}.
+$$
 
-Let:
+This produces the central engineering problem:
 
-[
-\ell_{\mathrm{causal}}
-]
+> **A substrate can create point reproducibility, but the substrate itself has a validity boundary across input formulations, task scope, and model families.**
 
-denote the earliest layer at which transplanting an intervention-conditioned residual state into a baseline computation produces the target final decision.
+The problem of substrate engineering is therefore to identify and maximize the region over which the intended decision remains reproducibly correct.
 
-Let:
+---
 
-[
-\ell_{\mathrm{readout}}
-]
+# 1. Introduction — When a Wrong Answer Is Not a Capability Failure
 
-denote the earliest layer at which the target decision becomes stably readable from the intermediate state.
+LLM failures are frequently interpreted through a capability lens.
 
-Define the normalized causal–readout gap:
+A model answers incorrectly, and the natural diagnosis is that the model lacks sufficient reasoning ability, knowledge, scale, or training. This interpretation motivates a common engineering strategy: use a stronger model or wait for the next model generation.
 
-[
-\boxed{
-G
+For operational LLM-native systems, this diagnosis can be incomplete.
 
-\frac{
-\ell_{\mathrm{readout}}
+Model behavior is not determined by learned weights alone:
 
-\ell_{\mathrm{causal}}
-}{L}
-}
-]
+$$
+y=F(\theta,x,d,e).
+$$
 
-where (L) is total model depth.
+The same frozen model may produce substantially different decisions when the semantic structure of the input changes.
 
-If:
+This matters because application developers usually cannot modify model weights or provider infrastructure at inference time. They can, however, directly control the supplied input.
 
-[
-G>0,
-]
+We study whether input structure can alter an operational decision sufficiently strongly that an apparent model failure changes without changing the model itself.
 
-causal decision relevance precedes direct readout.
+We use a deliberately minimal binary task:
 
-A large and systematic (G) would imply that readout-based methods can localize decision formation substantially later than causal intervention methods.
+$$
+\texttt{walk}
+\quad \text{vs.} \quad
+\texttt{drive}.
+$$
 
-⸻
+The task asks how a user should reach a nearby car wash when the user's objective is to wash the car.
 
-Motivating Observation
+The simplicity is intentional. It removes retrieval, planning, tools, memory, orchestration, and long-horizon execution and isolates a single decision boundary.
 
-In preliminary substrate experiments, residual patching and raw logit-lens analysis disagree sharply about when the intervention becomes decision-relevant.
+Across frontier API models and open-weight models, we test conventional prompt interventions and a structured semantic substrate.
 
-For example, in Llama-3.1-8B:
+Three observations motivate the paper.
 
-[
-\ell_{\mathrm{causal}}
-\approx16/32
-]
+First, the baseline decision is not a fixed property of model capability. Different models occupy different locations relative to the same decision boundary.
 
-while stable raw vocabulary readout appears only around:
+Second, holding model weights fixed, small changes in task formulation can produce decision-margin shifts comparable to or larger than the substrate intervention itself.
 
-[
-\ell_{\mathrm{raw}}
-\approx29\text{–}30/32.
-]
+Third, explicitly structuring the task-relevant semantic relations can move strongly incorrect decisions to strongly correct ones without changing the model.
 
-The corresponding normalized separation is approximately:
+These results suggest that some apparent reasoning failures are more accurately described as **input-conditioned decision failures**.
 
-[
-G\approx0.4.
-]
+The engineering question then becomes:
 
-Similar qualitative gaps appear in larger Llama and Qwen models.
+> **Can input structure place the intended decision far enough from its boundary to make correctness reproducible, and over what scope does that condition remain valid?**
 
-This raises a methodological question independent of substrate engineering:
+---
 
-Does direct decodability systematically lag causal sufficiency during LLM decision formation?
+# 2. Problem Formulation — Input-Induced Decision Displacement
 
-⸻
+We model inference as:
 
-1. Introduction — The Problem With Asking “Where the Answer Appears”
+$$
+y=F(\theta,x,d,e).
+$$
 
-Transformer computations unfold over many layers.
+For a deployed API model, \(\theta\) is effectively fixed.
 
-Mechanistic studies often inspect intermediate states to determine where a model begins to represent or favor an eventual answer.
+Decoding controls \(d\), such as temperature, can reduce sampling variance but do not necessarily alter the underlying preference between competing decisions.
 
-A simple approach is the logit lens.
+The execution environment \(e\) includes provider routing, hardware, numerical precision, quantization, batching, kernels, and runtime implementation.
 
-At layer (l), the residual state:
+The input \(x\) remains directly engineerable.
 
-[
-h_l
-]
+We therefore treat input structure as an inference-time control variable.
 
-is projected through the model’s output head:
+For the binary task, define:
 
-[
-z_l = W_U h_l
-]
+$$
+M(x)
+=
+\log P(\texttt{drive}\mid x)
+-
+\log P(\texttt{walk}\mid x).
+$$
 
-to obtain vocabulary scores.
+Then:
 
-For two candidate decisions (y^*) and (y’), define:
+$$
+M(x)>0
+\Rightarrow
+\texttt{drive},
+$$
 
-[
-M_l
+$$
+M(x)<0
+\Rightarrow
+\texttt{walk}.
+$$
 
-z_l(y^*)
+The effect of an input intervention is:
 
-z_l(y’).
-]
+$$
+\Delta M
+=
+M(x')
+-
+M(x).
+$$
 
-The first layer at which:
+We call this quantity **input-induced decision displacement**.
 
-[
-M_l>0
-]
+This distinction is important because categorical output hides the magnitude of movement.
 
-may be interpreted as the point at which the model begins favoring the target answer.
+Two prompts may both produce `walk` while locating the model at very different distances from the decision boundary.
 
-However, this is an observational measurement.
+Likewise, a model can move from:
 
-It asks:
+$$
+M\ll0
+$$
 
-What can the final output projection read from this state?
+to:
 
-It does not ask:
+$$
+M\gg0
+$$
 
-Is this state already sufficient to cause the eventual answer?
+without any change to its learned weights.
 
-These questions may have different answers.
+Such a result rules out the explanation that the original failure was caused solely by absence of the capability required to produce the correct decision.
 
-⸻
+---
 
-2. Causal Patching
+# 3. Experimental Design
 
-To measure causal sufficiency, we compare two runs:
+We evaluate the decision across 19 frontier language models from seven vendors:
 
-[
-h_l^{A}
-]
+Anthropic, OpenAI, Meta, Alibaba, Mistral, DeepSeek, and Moonshot.
 
-and:
+The behavioral benchmark compares:
 
-[
-h_l^{B}.
-]
+* baseline input,
+* chain-of-thought prompting,
+* encouragement,
+* expert-role prompting,
+* hallucination warnings,
+* error-avoidance instructions,
+* threat,
+* urgency,
+* semantic substrate,
+* semantic control conditions.
 
-For example:
+For models exposing log probabilities, we measure \(M\) directly.
 
-* baseline run (A),
-* intervention run (B).
+For open-weight models, we additionally measure internal computation using:
 
-At layer (l), we replace the baseline residual with the intervention residual:
+* raw logit-lens projections,
+* activation/residual patching,
+* substrate line ablations,
+* direct logit attribution.
 
-[
-h_l^{A}
-\leftarrow
-h_l^{B}.
-]
+All mechanistic readouts are taken at the position predicting the first answer token, with teacher forcing and fixed model weights.
 
-The remainder of the baseline computation then proceeds normally.
+The primary paper uses mechanistic analysis only to establish that the input intervention changes internal computation before the final output. Detailed mechanistic decomposition is treated as secondary analysis.
 
-If this intervention changes the final decision, then the transplanted state contains information sufficient, under the downstream baseline computation, to alter the eventual output.
+---
 
-Define:
+# 4. Result I — Model Failure Is Conditional on Input Structure
 
-[
-\ell_{\mathrm{causal}}
+The baseline task does not produce one universal model behavior.
 
-\min l
-]
+Some models strongly favor `walk`, some favor `drive`, and others lie near the decision boundary.
 
-such that the patched computation produces the target decision and remains target-producing under the prespecified onset criterion.
+This already prevents a simple interpretation of the task as a universal capability failure.
 
-This does not imply that the model has completed a discrete internal decision at that layer.
+More importantly, holding the model fixed while altering only the task formulation can produce extremely large decision-margin changes.
 
-It establishes something narrower:
+Changing the final instruction from:
 
-The state at that layer is causally sufficient to drive the downstream computation toward the target decision.
+> Answer with exactly one word:
 
-⸻
+to:
 
-3. Three Possible Timelines
+> Answer with exactly one word: walk or drive
 
-The central experiment compares three notions of decision availability.
+leaves the underlying operational problem unchanged but materially alters the model's decision state.
 
-3.1 Raw Readout
+For example, Qwen3-4B changes from approximately:
 
-[
-\ell_{\mathrm{raw}}
-]
+$$
+M=+0.25
+$$
 
-Earliest stable target-positive layer under the ordinary logit lens.
+to:
 
-3.2 Tuned Readout
+$$
+M=-22.12.
+$$
 
-[
-\ell_{\mathrm{tuned}}
-]
+The model weights, decoding configuration, and underlying task remain fixed.
 
-Earliest stable target-positive layer under a learned layer-specific decoder.
+Only the input formulation changes.
 
-3.3 Causal Sufficiency
+The resulting displacement is therefore approximately:
 
-[
-\ell_{\mathrm{causal}}
-]
+$$
+\Delta M\approx-22.4\text{ nats}.
+$$
 
-Earliest layer at which residual transplantation changes the eventual decision.
+Comparable effects occur in other models, including output flips.
 
-These measurements distinguish three possible mechanisms.
+This demonstrates that functionally equivalent task formulations are not necessarily operationally equivalent for an LLM.
 
-Case A — Raw-lens failure only
+The implication is:
 
-[
-\ell_{\mathrm{causal}}
-\approx
-\ell_{\mathrm{tuned}}
-<
-\ell_{\mathrm{raw}}.
-]
+> **Observed failure cannot always be attributed solely to insufficient model capability. The input itself can place an otherwise capable model on the wrong side of the decision boundary.**
 
-Interpretation:
+This also challenges the assumption that upgrading to a newer or stronger model monotonically resolves application-level decision failures.
 
-The relevant decision information is already linearly available, but the ordinary unembedding is a poor decoder of intermediate representations.
+A model update changes \(\theta\), and therefore changes the decision surface.
 
-Case B — Causal state precedes linear decodability
+It does not eliminate the need to validate the application-level boundary.
 
-[
-\ell_{\mathrm{causal}}
-<
-\ell_{\mathrm{tuned}}
-\approx
-\ell_{\mathrm{raw}}.
-]
+---
 
-Interpretation:
+# 5. Result II — Semantic Structure Can Reverse Strongly Expressed Decisions
 
-The internal state is already sufficient to cause the eventual decision before the decision is linearly readable.
+We next test whether explicitly representing the task-relevant semantic relations can move the decision.
 
-This is the strongest version of the finding.
+The semantic substrate specifies:
 
-Case C — All methods agree
+```text
+User objective:
+- Perform an activity on an object, while transporting the object from location A to B.
+- No other objectives or goals are relevant for the user.
 
-[
-\ell_{\mathrm{causal}}
-\approx
-\ell_{\mathrm{tuned}}
-\approx
-\ell_{\mathrm{raw}}.
-]
+Action semantics:
+- Activities require the object to move from location A to location B together with the user.
+- The object is always initially with the user at location A.
+- Moving the user without moving the object does not satisfy the objective.
+- If the object is a vehicle, the user must operate the object in order to perform the activity at location B.
+```
 
-Interpretation:
+Unlike conventional prompt interventions, the substrate does not request additional effort, confidence, expertise, or correctness.
 
-The preliminary gap was primarily task- or model-specific.
+It changes the semantic structure supplied to the model.
 
-⸻
+Across the tested models, the substrate produces decision-margin shifts substantially larger than conventional prompting interventions.
 
-4. Experimental Scope
+Several open-weight examples illustrate the effect.
 
-The study should not rely only on substrate engineering.
+For Llama-3.3-70B:
 
-Use several decision families so the result becomes methodological rather than task-specific.
+$$
+-13.78
+\rightarrow
++6.07
+$$
 
-Possible task classes:
+under the standard substrate, and:
 
-* binary semantic decision,
-* factual recall,
-* indirect object identification,
-* simple classification,
-* arithmetic or symbolic choice,
-* controlled reasoning tasks.
+$$
+-13.78
+\rightarrow
++17.00
+$$
 
-For each task, construct:
+under the extended substrate.
 
-* a baseline condition,
-* an intervention condition that reliably changes the final answer,
-* a clearly defined pair of competing outputs.
+For Qwen3-4B:
 
-The intervention itself is not the object of study.
+$$
+-22.12
+\rightarrow
++18.38
+$$
 
-It serves only to create two controlled computational trajectories that end in different decisions.
+under the extended substrate.
 
-⸻
+The same frozen model therefore moves by approximately:
 
-5. Models
+$$
+40.5\text{ nats}
+$$
 
-Use multiple open-weight model families and scales.
+relative to its untreated decision state.
 
-At minimum:
+No model capability was added during this intervention.
 
-* Llama-3.2-3B,
-* Llama-3.1-8B,
-* Llama-3.3-70B,
-* Qwen3-4B,
-* Qwen3-8B.
+The change results from altering the semantic information supplied at inference time.
 
-If practical, add at least one structurally different architecture.
+The central result is therefore not that a particular prompt is better.
 
-The goal is to determine whether the causal–readout gap is:
+It is:
 
-* model-specific,
-* family-specific,
-* scale-dependent,
-* or approximately stable in normalized depth.
+> **Semantic input structure can dominate the expressed decision of a fixed model.**
 
-⸻
+---
 
-6. Primary Measurements
+# 6. Result III — Correctness, Selectivity, and Scope Are Different Properties
 
-For each task (t), model (m), and layer (l), measure:
+A large substrate-induced shift does not automatically mean that the substrate has generalized correctly.
 
-[
-M_{m,t,l}^{\mathrm{raw}}
-]
+The library-book control demonstrates this distinction.
 
-raw logit-lens margin,
+For the carwash task, movement toward `drive` is desirable.
 
-[
-M_{m,t,l}^{\mathrm{tuned}}
-]
+For the library control, the correct answer remains `walk`.
 
-tuned-lens margin,
+Some smaller Qwen models move far enough toward `drive` under the substrate that they incorrectly output `drive` for the library condition.
 
-and:
+In those models, the substrate acts more like a directional `drive` bias than a clean application of the intended semantic rule.
 
-[
-M_{m,t,l}^{\mathrm{patch}}
-]
+Other models retain the correct library output while still exhibiting measurable movement in the underlying margin.
 
-final decision margin after residual patching at layer (l).
+Therefore:
 
-From these derive:
-
-[
-\ell_{\mathrm{raw}},
-]
-
-[
-\ell_{\mathrm{tuned}},
-]
-
-[
-\ell_{\mathrm{causal}}.
-]
-
-Then define:
-
-[
-G_{\mathrm{raw}}
-
-\frac{
-\ell_{\mathrm{raw}}
-
-\ell_{\mathrm{causal}}
-}{L},
-]
-
-and:
-
-[
-G_{\mathrm{tuned}}
-
-\frac{
-\ell_{\mathrm{tuned}}
-
-\ell_{\mathrm{causal}}
-}{L}.
-]
-
-The critical measurement is:
-
-[
-G_{\mathrm{tuned}}.
-]
-
-If:
-
-[
-G_{\mathrm{tuned}}>0
-]
-
-systematically across tasks and models, then causal sufficiency genuinely precedes learned linear readout.
-
-⸻
-
-7. Onset Definition
-
-The definition of “first layer” must be prespecified to avoid cherry-picking.
-
-A layer should count as readout onset only if:
-
-[
-M_l>0
-]
-
-and the target remains positive for a defined proportion of subsequent layers or until the output.
-
-Likewise, causal onset should require patched final output to remain on the target side across subsequent patch locations or satisfy another prespecified stability rule.
-
-The analysis should report both:
-
-* first crossing,
-* sustained crossing.
-
-This prevents noisy individual layers from determining the headline result.
-
-⸻
-
-8. Directionality Controls
-
-Residual patching replaces a large internal state, so causal claims require controls.
-
-Forward patch
-
-Intervention state into baseline:
-
-[
-h_l^{B}\rightarrow A.
-]
-
-Question:
-
-When does the intervention state become sufficient to make the baseline produce the target answer?
-
-Reverse patch
-
-Baseline state into intervention:
-
-[
-h_l^{A}\rightarrow B.
-]
-
-Question:
-
-When does removing the intervention-conditioned state destroy the target answer?
-
-Agreement between these directions strengthens causal interpretation.
-
-Sham / matched controls
-
-Patch:
-
-* same-run states,
-* unrelated-token states,
-* matched-norm random perturbations where appropriate.
-
-The goal is to establish that decision changes arise from condition-specific information rather than arbitrary residual replacement.
-
-⸻
-
-9. Position-Specific Patching
-
-The preliminary study patches the answer-position residual.
-
-A fuller study should determine where the causal information travels.
-
-Patch separately at:
-
-* substrate/system-token positions,
-* question-token positions,
-* answer position.
-
-This asks whether the intervention effect:
-
-1. remains localized to instruction tokens,
-2. is transferred into question representations,
-3. is consolidated at the prediction position.
-
-This is particularly important because preliminary attention measurements suggest the answer position may attend only weakly and directly to individual substrate lines.
-
-The causal information may therefore propagate indirectly through intermediate token states.
-
-⸻
-
-10. Feature Formation vs Decision Readout
-
-The key conceptual distinction is:
-
-[
-\boxed{
-\text{causal usefulness}
+$$
+\text{response magnitude}
 \neq
-\text{linear readability}.
-}
-]
+\text{semantic selectivity}.
+$$
 
-An intermediate state may act as a precursor.
+For a target and control condition, define:
+
+$$
+\Delta M_{\mathrm{target}}
+=
+M_{\mathrm{target,sub}}
+-
+M_{\mathrm{target,base}},
+$$
+
+$$
+\Delta M_{\mathrm{control}}
+=
+M_{\mathrm{control,sub}}
+-
+M_{\mathrm{control,base}},
+$$
+
+and:
+
+$$
+Q
+=
+\Delta M_{\mathrm{target}}
+-
+\Delta M_{\mathrm{control}}.
+$$
+
+\(Q\) captures differential target–control response.
+
+A useful substrate therefore needs more than a large target shift.
+
+It must also maintain the correct behavior over the semantic scope for which it is claimed.
+
+This motivates the idea of the substrate as a **scope-specific reproducibility mechanism** rather than a universally generalizing prompt.
+
+---
+
+# 7. Result IV — The Input Intervention Changes the Internal Computation
+
+The behavioral results establish that changing \(x\) changes the final decision.
+
+Open-weight models allow us to test whether this effect is already present inside the forward computation.
+
+We compare direct logit-lens projection with residual activation patching.
+
+Across Llama-3.2-3B, Llama-3.1-8B, and Llama-3.3-70B, substrate-conditioned residual states become capable of altering the eventual baseline decision at approximately the middle of model depth.
 
 For example:
 
-[
-h_{16}
-]
+$$
+\text{Llama-8B: layer }16/32,
+$$
 
-may not itself encode an immediately readable DRIVE preference.
+$$
+\text{Llama-70B: layer }41/80.
+$$
 
-Instead, it may contain structured information from which layers 17–32 compute that preference.
+The corresponding target preference does not become stably visible through raw vocabulary projection until substantially later.
 
 Thus:
 
-[
-h_{16}
-\rightarrow
-h_{17}
-\rightarrow
-\cdots
-\rightarrow
-h_{32}
-\rightarrow
-\texttt{DRIVE}.
-]
+> **Causal decision relevance emerges substantially earlier than stable direct readout of the final preference.**
 
-If patching (h_{16}) changes the final answer, it is causally relevant.
+This mechanistic result supports the behavioral interpretation that the substrate changes the model's computation rather than merely changing final-token sampling.
 
-If tuned lens cannot decode DRIVE from (h_{16}), then causal usefulness precedes linear decision readability.
+The paper does not require a complete mechanistic account of this process.
 
-This distinction provides the central conceptual contribution.
+Detailed questions about the causal–readout depth gap, individual attention heads, MLP contributions, and constraint-level internal mechanisms are left for separate mechanistic study.
 
-⸻
+---
 
-11. Possible Mechanistic Follow-Up
+# 8. From Correctness to Reproducibility
 
-If a robust causal–readout gap exists, further experiments can ask what occupies the gap.
+A correct argmax is not automatically a reproducible operational decision.
 
-Candidate explanations include:
+For arbitrary binary alternatives, define the correct-answer margin:
 
-* nonlinear transformation of a causal precursor,
-* representation rotation,
-* distributed feature composition,
-* late amplification,
-* multi-stage computation,
-* late conversion from semantic features into output-token coordinates.
+$$
+M^*(x)
+=
+\log P(y^*\mid x)
+-
+\log P(y'\mid x).
+$$
 
-These explanations should not be assumed from the initial result.
+Correctness requires:
 
-They form follow-up mechanistic hypotheses.
+$$
+M^*(x)>0.
+$$
 
-⸻
+Let:
 
-12. Preliminary Cross-Scale Observation
+$$
+\varepsilon_{\mathrm{exec}}
+$$
 
-In the current substrate experiment, causal patching becomes effective at approximately mid-depth across several Llama scales:
+represent the empirically measured variation in decision margin produced by execution-level factors while \(x\) is held fixed.
 
-[
-14/28\approx0.50,
-]
+Then operational reproducibility requires:
 
-[
-16/32=0.50,
-]
+$$
+\boxed{
+M^*(x)>
+\varepsilon_{\mathrm{exec}}.
+}
+$$
 
-[
-41/80\approx0.51.
-]
+This distinction separates two forms of robustness.
 
-This relative-depth regularity is intriguing.
+### Exact-input reproducibility
 
-However, the future paper should test whether:
+For a fixed input \(x_0\):
 
-[
-\ell_{\mathrm{causal}}/L\approx0.5
-]
+$$
+M^*(x_0)>
+\varepsilon_{\mathrm{exec}}.
+$$
 
-generalizes beyond:
+### Input-domain reproducibility
 
-* one intervention,
-* one task family,
-* and one architecture family.
+For a validated task domain \(\mathcal V\):
 
-It should therefore be treated as a preliminary observation rather than a universal law.
-
-⸻
-
-13. Primary Claims
-
-The paper should support progressively stronger claims.
-
-Claim 1
-
-Raw direct readout and causal patching can disagree substantially about when an intervention becomes decision-relevant.
-
-Claim 2
-
-The discrepancy can occupy a substantial fraction of transformer depth.
-
-Claim 3
-
-If tuned lens does not eliminate the discrepancy:
-
-Causal sufficiency can precede learned linear decodability of the eventual decision.
-
-Claim 4
-
-If replicated across tasks and model families:
-
-Direct readout onset should not generally be interpreted as the point at which a decision first becomes causally available to downstream computation.
-
-Claim 4 requires the broadest experimental evidence and should not be made from the current substrate task alone.
-
-⸻
-
-14. Main Figures
-
-Figure 1 — Conceptual Distinction
-
-Show:
-
-input
-  ↓
-layers
-  ↓
-causal state becomes sufficient
-  ↓
-further computation
-  ↓
-decision becomes linearly readable
-  ↓
-final output
-
-Figure 2 — Raw vs Tuned vs Patching
-
-For one canonical model:
-
-[
-M_l^{raw},
+$$
+M^*(x)>
+\varepsilon_{\mathrm{exec}}
 \qquad
-M_l^{tuned},
+\forall x\in\mathcal V.
+$$
+
+The wording experiment shows why these properties must be distinguished.
+
+A system can be highly reproducible for one exact formulation while moving dramatically under another functionally equivalent formulation.
+
+Input sensitivity therefore belongs to the domain-generalization problem, not to the execution-noise floor.
+
+---
+
+# 9. The Engineering Problem — Find the Validated Boundary
+
+A substrate does not provide an unrestricted guarantee.
+
+Its effect depends on:
+
+$$
+\text{substrate design}
+\times
+\text{model}
+\times
+\text{input/task scope}.
+$$
+
+For model \(m\) and substrate \(S\), define the validated operating region:
+
+$$
+\boxed{
+\mathcal V_m(S)
+=
+\{x:
+M_m^*(x;S)>
+\varepsilon_{\mathrm{exec},m}\}.
+}
+$$
+
+Inside this region, the substrate produces a reproducibly correct decision under the tested execution conditions.
+
+At the boundary:
+
+$$
+M_m^*(x;S)
+=
+\varepsilon_{\mathrm{exec},m}.
+$$
+
+Beyond it, the guarantee no longer holds.
+
+The system-design problem is therefore not merely:
+
+> Does the substrate work?
+
+It is:
+
+> **Where does it stop working reproducibly?**
+
+For deployment across multiple model families:
+
+$$
+\boxed{
+M_m^*(x;S)>
+\varepsilon_{\mathrm{exec},m}
 \qquad
-M_l^{patch}.
-]
+\forall x\in\mathcal V,
+\forall m\in\mathcal M.
+}
+$$
 
-Mark:
+This defines a **validated reproducibility frontier** across semantic scope and model family.
 
-[
-\ell_{\mathrm{causal}},
+---
+
+# 10. Discussion — Implicit Assumptions Challenged
+
+The results challenge several common assumptions in LLM engineering.
+
+### Wrong output implies insufficient capability
+
+The same frozen model can strongly prefer both the incorrect and correct decision under different input structures.
+
+A wrong answer therefore does not by itself establish absence of the relevant capability.
+
+### Better models will monotonically remove the failure
+
+Model updates alter the decision surface.
+
+A later model may improve one decision boundary and degrade another.
+
+Production decision boundaries must therefore be revalidated after model updates.
+
+### Semantically equivalent prompts are operationally equivalent
+
+Small task-preserving formulation changes can move the decision margin by tens of nats.
+
+Semantic equivalence from the human perspective does not guarantee computational equivalence for the model.
+
+### Deterministic decoding solves reproducibility
+
+Reducing sampling variance does not guarantee that the model lies far from a semantic decision boundary.
+
+### Capability belongs to the weights
+
+Observed behavior is conditional on:
+
+$$
+F(\theta,x,d,e),
+$$
+
+not on \(\theta\) alone.
+
+The relevant engineering object is therefore the interaction between the model and the supplied semantic structure.
+
+---
+
+# 11. Limitations
+
+The present study deliberately isolates one binary task.
+
+It demonstrates that input-induced decision displacement exists and can be large.
+
+It does not establish that every model failure can be repaired through input structure.
+
+It does not establish that every task admits a useful substrate.
+
+It does not establish a universal monotonic relationship between semantic constraint and generalization.
+
+The current semantic controls are also limited in number.
+
+The open-weight mechanistic analysis demonstrates causal differences in intermediate state but does not fully identify the representations or computational circuits responsible.
+
+Raw logit-lens projections are diagnostic rather than direct measurements of internal decisions.
+
+Finally, absolute log-probability scales may not be directly comparable across model families, so within-model displacement is the primary continuous measurement.
+
+---
+
+# 12. Conclusion
+
+An incorrect LLM output does not necessarily imply that the model lacks the capability required to produce the correct decision.
+
+Holding model weights fixed, we observe that small changes in task formulation can move decision margins by tens of nats, while structured semantic input can reverse strongly expressed errors.
+
+This identifies input structure as a high-leverage inference-time control surface.
+
+Substrate engineering uses that control surface to structure task-relevant semantic constraints and move the intended decision away from competing alternatives.
+
+The resulting engineering problem has three stages:
+
+$$
+\text{correctness}
+\rightarrow
+M^*(x)>0,
+$$
+
+$$
+\text{reproducibility}
+\rightarrow
+M^*(x)>
+\varepsilon_{\mathrm{exec}},
+$$
+
+and:
+
+$$
+\text{generalization}
+\rightarrow
+M^*(x)>
+\varepsilon_{\mathrm{exec}}
 \quad
-\ell_{\mathrm{tuned}},
+\forall x\in\mathcal V.
+$$
+
+The central question is therefore not simply whether a model is capable of producing the right answer.
+
+It is:
+
+> **Under what input structure does that capability become a reproducibly correct operational decision, and where is the boundary of the region in which that remains true?**
+
+The design objective for reproducible LLM-native systems is consequently:
+
+$$
+\boxed{
+\max |\mathcal V|
 \quad
-\ell_{\mathrm{raw}}.
-]
+\text{subject to}
+\quad
+M_m^*(x;S)>
+\varepsilon_{\mathrm{exec},m}
+\quad
+\forall x\in\mathcal V,\;
+m\in\mathcal M.
+}
+$$
 
-Figure 3 — Gap Across Models and Tasks
+Substrate engineering is the problem of finding and validating that boundary.
 
-Plot:
 
-[
-G_{\mathrm{raw}}
-]
-
-and:
-
-[
-G_{\mathrm{tuned}}
-]
-
-for every model/task pair.
-
-Figure 4 — Normalized Depth
-
-Compare:
-
-[
-\ell/L
-]
-
-across scale and architecture.
-
-Figure 5 — Reverse Patching Controls
-
-Show bidirectional causal effects.
-
-⸻
-
-15. Interpretation Boundaries
-
-The study should not claim that patching identifies the exact layer where “the model makes its decision.”
-
-Patching establishes causal sufficiency under a particular downstream computation.
-
-Likewise, failure of linear readout does not prove absence of encoded information.
-
-The precise claim is:
-
-An internal state can become sufficient to drive a later decision before that decision is directly readable by the tested decoder.
-
-The distinction between:
-
-[
-\text{represented},
-]
-
-[
-\text{decodable},
-]
-
-and:
-
-[
-\text{causally useful}
-]
-
-must remain explicit.
-
-⸻
-
-16. Conclusion
-
-Mechanistic interpretability often asks where an answer becomes visible inside a model.
-
-But visibility is not causality.
-
-A residual state can influence downstream computation before the eventual answer is directly readable from that state.
-
-The central object of this study is therefore the distance between:
-
-[
-\text{causal availability}
-]
-
-and:
-
-[
-\text{decision readout}.
-]
-
-If this distance persists under tuned decoding and across models and tasks, it implies that the apparent emergence of an answer under direct representation probes can substantially lag the point at which the internal computation has already become committed enough to produce that answer downstream.
-
-The methodological question is therefore not only:
-
-When can we read the answer?
-
-but:
-
-When does the model contain a state that is already sufficient to make the answer happen?
 
 
 

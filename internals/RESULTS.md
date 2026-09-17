@@ -52,29 +52,29 @@ sampling. M = log P(drive) − log P(walk) in nats, summed over surface forms.
 
 Logit lens per layer for both prompts, plus the patching curve:
 
-![lens](results/llama-3.1-8b-bf16-cpu/lens.png)
+![lens](results/llama-3.1-8b/bf16/lens.png)
 
 Line ablations (blue = only that line, red = all lines but that one):
 
-![ablations](results/llama-3.1-8b-bf16-cpu/ablations.png)
+![ablations](results/llama-3.1-8b/bf16/ablations.png)
 
 Direct logit attribution per sublayer:
 
-![dla](results/llama-3.1-8b-bf16-cpu/dla.png)
+![dla](results/llama-3.1-8b/bf16/dla.png)
 
 Per-head DLA change, substrate − baseline (red = pushes Drive):
 
-![heads](results/llama-3.1-8b-bf16-cpu/heads.png)
+![heads](results/llama-3.1-8b/bf16/heads.png)
 
 Attention mass from the answer position onto the prompt parts:
 
-![attention](results/llama-3.1-8b-bf16-cpu/attention.png)
+![attention](results/llama-3.1-8b/bf16/attention.png)
 
 Every prompt in `prompts/`:
 
-![benchmarks](results/llama-3.1-8b-bf16-cpu/benchmarks.png)
+![benchmarks](results/llama-3.1-8b/bf16/benchmarks.png)
 
-Same figures for nf4 in `results/llama-3.1-8b-4bit/` and for 3B in
+Same figures for nf4 in `results/llama-3.1-8b/nf4/` and for 3B in
 `results/llama-3.2-3b/`; the raw numbers in each `summary.md` and
 `internals.json`.
 
@@ -108,9 +108,9 @@ next token, where the word actually lands (`decision` field in the json).
 - **8B is robust to the formatting**: flips under both substrates in both
   input modes, and the library control stays Walk in all four cases.
 
-Figures: `results/llama-3.1-8b-bf16-cpu-pro/` (8B, substrate_pro),
-`results/llama-3.2-3b-pro/`, `results/llama-3.2-3b-raw/`,
-`results/llama-3.1-8b-bf16-cpu-raw/`; cross-run lens overview in
+Figures: `results/llama-3.1-8b/bf16-pro/` (8B, substrate_pro),
+`results/llama-3.2-3b/bf16-pro/`, `results/llama-3.2-3b/bf16-raw/`,
+`results/llama-3.1-8b/bf16-raw/`; cross-run lens overview in
 `results/overview-pro-raw.png`.
 
 ![overview pro/raw](results/overview-pro-raw.png)

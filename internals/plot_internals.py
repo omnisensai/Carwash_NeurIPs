@@ -2,15 +2,16 @@
 """Figures + a markdown summary from results/<name>/internals.json.
 Needs only numpy + matplotlib (no GPU, no torch).
 
-    python plot_internals.py results/llama-3.2-3b [results/llama-3.1-8b-4bit ...]
+    python plot_internals.py results/llama-3.2-3b/bf16 [results/llama-3.1-8b/bf16 ...]
 
 Per result dir: lens.png, dla.png, heads.png, attention.png, ablations.png,
-benchmarks.png, diff.png, summary.md. With several dirs also a cross-model
-overview.png next to them.
+benchmarks.png, diff.png, summary.md. With several dirs also a cross-run
+overview.png in their common parent (OVERVIEW=name.png to rename it).
 """
 from __future__ import annotations
 
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -292,8 +293,10 @@ def main():
         print(summary(r, d))
         rs.append((d.name, r))
     if len(rs) > 1:
-        overview(rs, dirs[0].parent / "overview.png")
-        print("wrote", dirs[0].parent / "overview.png")
+        name = os.environ.get("OVERVIEW", "overview.png")
+        out = Path(os.path.commonpath([str(d.resolve()) for d in dirs])) / name
+        overview(rs, out)
+        print("wrote", out)
 
 
 if __name__ == "__main__":

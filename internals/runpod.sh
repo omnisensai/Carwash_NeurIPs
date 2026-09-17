@@ -15,16 +15,16 @@
 # move by ~0.6 nats between bf16 and nf4, which is exactly the kind of
 # environment noise the paper is about.
 #
-# Results land in results/<name>/internals.json; make the figures anywhere
-# (no GPU needed) with:  python plot_internals.py results/<name>
+# Results land in results/<model>/<precision>[-<substrate>]/ (e.g.
+# results/llama-3.3-70b/bf16-pro/); figures anywhere, no GPU:
+#   python plot_internals.py results/llama-3.3-70b/*/
 set -euo pipefail
 cd "$(dirname "$0")"
 
 MODEL="${MODEL:-unsloth/Llama-3.3-70B-Instruct}"
-NAME="${NAME:-$(basename "$MODEL" | tr '[:upper:]' '[:lower:]')}"
+NAME="${NAME:-$(basename "$MODEL" | tr '[:upper:]' '[:lower:]' | sed -E 's/-instruct$//; s/^meta-//')}"
 QUANT="${QUANT:-auto}"
 SUBSTRATE="${SUBSTRATE:-substrate.txt}"          # which prompts/ file is the substrate
-[ "$SUBSTRATE" != substrate.txt ] && NAME="$NAME-$(basename "$SUBSTRATE" .txt | sed s/^substrate_//)"
 
 python -c "import torch, transformers, accelerate" 2>/dev/null || \
   pip install -q "torch>=2.4" "transformers>=4.45" accelerate bitsandbytes numpy matplotlib
@@ -40,15 +40,18 @@ if [ "$QUANT" = auto ]; then
     *) QUANT=none ;;
   esac
 fi
-echo "model=$MODEL  gpu_total=${TOTAL_MB} MiB  quant=$QUANT  -> results/$NAME-$QUANT"
-
-QARG=""; LABEL="$(basename "$MODEL") (bf16)"
-if [ "$QUANT" != none ]; then QARG="--quantize $QUANT"; LABEL="$(basename "$MODEL") ($QUANT)"; fi
+QARG=""; PREC=bf16
+if [ "$QUANT" != none ]; then QARG="--quantize $QUANT"; PREC=$QUANT; [ "$QUANT" = 4bit ] && PREC=nf4; fi
+VARIANT="$PREC"
+[ "$SUBSTRATE" != substrate.txt ] && VARIANT="$PREC-$(basename "$SUBSTRATE" .txt | sed s/^substrate_//)"
+OUT="results/$NAME/$VARIANT"                     # e.g. results/llama-3.3-70b/bf16-pro
+LABEL="$(basename "$MODEL") ($PREC)"
+echo "model=$MODEL  gpu_total=${TOTAL_MB} MiB  quant=$QUANT  -> $OUT"
 
 export HF_HUB_ENABLE_HF_TRANSFER=1 2>/dev/null || true
-mkdir -p results
-python run_internals.py --model "$MODEL" $QARG --substrate "$SUBSTRATE" --out "results/$NAME-$QUANT" \
-    --label "$LABEL, $SUBSTRATE" 2>&1 | tee "results/$NAME-$QUANT.log"
+mkdir -p "$OUT"
+python run_internals.py --model "$MODEL" $QARG --substrate "$SUBSTRATE" --out "$OUT" \
+    --label "$LABEL, $SUBSTRATE" 2>&1 | tee "$OUT/run.log"
 
-python plot_internals.py "results/$NAME-$QUANT" > /dev/null && echo "figures in results/$NAME-$QUANT/"
-echo "done — send back the whole results/$NAME-$QUANT/ folder (json + png + summary.md)"
+python plot_internals.py "$OUT" > /dev/null && echo "figures in $OUT/"
+echo "done — send back the whole $OUT/ folder (json + png + summary.md + run.log)"

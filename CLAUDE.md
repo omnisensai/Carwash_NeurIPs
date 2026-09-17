@@ -14,7 +14,10 @@ line ablations). Read `internals/README.md` for what each readout means and
   `SHA-256:` line), leave it; the scripts already handle that.
 - **Never push to `main`.** Work on a branch named `results-<model>` (e.g.
   `results-llama-70b`) and open a pull request. Commit only what you
-  produced under `internals/results/`, plus the run log.
+  produced under `internals/results/<model>/` (the run log is written there).
+- Result folders follow `internals/results/<model>/<precision>[-<substrate>][-raw]/`,
+  e.g. `llama-3.1-8b/bf16`, `llama-3.1-8b/nf4`, `llama-3.1-8b/bf16-pro`.
+  `runpod.sh` does this for you; do not invent other names.
 - **Do not rewrite `internals/run_internals.py` or `plot_internals.py`** to
   make a run pass. If something fails, fix the environment or report the
   traceback in the PR; a small compatibility patch is fine if it is
@@ -57,16 +60,16 @@ problems before the 140 GB download):
 MODEL=unsloth/Llama-3.2-3B-Instruct bash runpod.sh
 ```
 
-Expected: `results/llama-3.2-3b-instruct-none/summary.md` with baseline
+Expected: `results/llama-3.2-3b/bf16/summary.md` with baseline
 M ≈ −3.5 and substrate M ≈ −1.8 (both Walk). If the numbers are within
 ±0.3 of that, the environment matches ours.
 
 ### 3. The 70B runs
 
 ```bash
-bash runpod.sh                                # substrate.txt      → results/llama-3.3-70b-instruct-<quant>/
-SUBSTRATE=substrate_pro.txt bash runpod.sh    # substrate_pro.txt  → results/llama-3.3-70b-instruct-pro-<quant>/
-python plot_internals.py results/llama-3.3-70b-instruct-*/   # cross-run overview.png
+bash runpod.sh                                # substrate.txt      → results/llama-3.3-70b/<precision>/
+SUBSTRATE=substrate_pro.txt bash runpod.sh    # substrate_pro.txt  → results/llama-3.3-70b/<precision>-pro/
+python plot_internals.py results/llama-3.3-70b/*/            # + results/llama-3.3-70b/overview.png
 ```
 
 Run in `tmux` or `nohup` so a dropped SSH session does not kill the run.

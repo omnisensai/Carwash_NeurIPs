@@ -7,7 +7,7 @@ predicts the first answer token (the `Drive` / `Walk` token), teacher-forced,
 no sampling.
 
 ```
-run_internals.py    GPU (or CPU for ≤8B): one model → results/<name>/internals.json
+run_internals.py    GPU (or CPU for ≤8B): one model → results/<model>/<precision>[-<substrate>]/internals.json
 plot_internals.py   no GPU: json → lens.png, dla.png, heads.png, attention.png,
                     ablations.png, benchmarks.png, diff.png, summary.md (+ overview.png)
 runpod.sh           the whole thing on a fresh CUDA box (70B)
@@ -34,12 +34,12 @@ logits (`final_row_matches_model`), and the DLA sums equal the model's
 
 ```
 # 3B / 8B on one 16 GB card (8B next to other GPU users: --quantize 4bit)
-python run_internals.py --model unsloth/Llama-3.2-3B-Instruct --out results/llama-3.2-3b
-python run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --quantize 4bit --out results/llama-3.1-8b-4bit
+python run_internals.py --model unsloth/Llama-3.2-3B-Instruct --out results/llama-3.2-3b/bf16
+python run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --quantize 4bit --out results/llama-3.1-8b/nf4
 # exact bf16 reference for 8B without a free GPU: CPU, ~1 min on 16 cores / 30 GB RAM
-python run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b-bf16-cpu
+python run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b/bf16
 # figures + summary.md, several dirs → also results/overview.png
-python plot_internals.py results/llama-3.2-3b results/llama-3.1-8b-bf16-cpu
+python plot_internals.py results/llama-3.2-3b/bf16 results/llama-3.1-8b/bf16
 # 70B on RunPod
 bash runpod.sh
 ```

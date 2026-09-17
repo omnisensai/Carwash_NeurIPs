@@ -1,5 +1,247 @@
 # Substrate Engineering: Input Structure as a Control Surface for Reproducible LLM Decisions
 
+
+# 1. Motivation — From Operational Instability to Substrate Engineering
+
+The motivation for this work began as a systems-engineering problem rather than a prompting problem.
+
+LLM-native systems increasingly place model outputs directly inside operational control loops:
+
+$$
+\text{input}
+\rightarrow
+\text{model decision}
+\rightarrow
+\text{system action}.
+$$
+
+In such systems, variability in model output is not merely linguistic variation.
+
+It changes what the surrounding software does.
+
+Consider an invoice-processing system:
+
+$$
+\text{invoice}
+\rightarrow
+\text{LLM}
+\rightarrow
+\{\texttt{APPROVE},\texttt{REJECT}\}.
+$$
+
+If the same invoice, under the same intended policy, can produce `APPROVE` on one execution and `REJECT` on another, the problem is not simply that the model is nondeterministic.
+
+The operational meaning of the system is nondeterministic.
+
+The same system state can produce different downstream actions:
+
+$$
+x
+\rightarrow
+y_1
+\rightarrow
+a_1
+$$
+
+and:
+
+$$
+x
+\rightarrow
+y_2
+\rightarrow
+a_2,
+\qquad
+a_1\neq a_2.
+$$
+
+For an operational system, this means:
+
+$$
+\boxed{
+\text{same input}
+\not\Rightarrow
+\text{same decision}
+\not\Rightarrow
+\text{same action}.
+}
+$$
+
+A system with this property is difficult to validate, test, audit, or reason about.
+
+Correctness alone is therefore insufficient.
+
+The decision must also be reproducible.
+
+## 1.1 The observation that motivated substrate engineering
+
+Our initial work began with a practical attempt to make the same LLM-native task reproducible across four frontier models.
+
+Under the original input specification, the models diverged substantially, with observed disagreement ranging from approximately 70% to complete divergence across the tested conditions.
+
+Across the test matrix, outputs that originally produced 80 distinct SHA hashes were eventually reduced to a single SHA hash.
+
+The model weights were not changed.
+
+The models were not fine-tuned.
+
+The change was achieved by restructuring the semantic information supplied at inference time.
+
+This observation suggested that the reproducibility problem was not located solely in the model.
+
+It depended on the interaction between the model and the structure of its input.
+
+That result motivated the hypothesis we call **substrate engineering**:
+
+> **A sufficiently explicit semantic specification can constrain an LLM's interpretation of an operational task strongly enough to make otherwise divergent model behavior converge.**
+
+The earlier system-level result established the engineering phenomenon.
+
+The present work asks what produces it.
+
+## 1.2 Why this is not simply prompt engineering
+
+Conventional prompt engineering typically attempts to improve an answer by changing how the model approaches a task:
+
+* reason step by step,
+* act as an expert,
+* be more careful,
+* avoid hallucination,
+* avoid mistakes,
+* increase urgency or confidence.
+
+Substrate engineering begins from a different question.
+
+Instead of asking:
+
+> How do we make the model reason better?
+
+it asks:
+
+> **What semantic degrees of freedom in the input allow the model to arrive at different operational interpretations of the same task?**
+
+The substrate attempts to remove those degrees of freedom by explicitly specifying the task-relevant relations, constraints, and validity conditions.
+
+The goal is therefore not merely to increase answer quality.
+
+It is to reduce the space of admissible interpretations sufficiently that the intended operational decision becomes stable.
+
+## 1.3 Why model upgrades are not sufficient
+
+A common response to unreliable model behavior is to replace the model with a newer or more capable one.
+
+That strategy assumes that instability primarily reflects insufficient model capability.
+
+But if observed output is:
+
+$$
+y=F(\theta,x,d,e),
+$$
+
+then replacing the model changes only one component:
+
+$$
+\theta_1\rightarrow\theta_2.
+$$
+
+It does not eliminate sensitivity to:
+
+$$
+x.
+$$
+
+A newer model may move one decision boundary in a favorable direction while moving another in the opposite direction.
+
+A model upgrade therefore changes the system's decision surface; it does not remove the need to validate it.
+
+The present results make this problem visible directly.
+
+Holding model weights fixed, small changes to task formulation can reverse strongly expressed decisions.
+
+Conversely, restructuring the semantic input can reverse an apparently incorrect decision without modifying the model at all.
+
+This means that:
+
+$$
+\boxed{
+\text{incorrect output}
+\not\Rightarrow
+\text{insufficient model capability}.
+}
+$$
+
+Some failures are instead **input-conditioned decision failures**.
+
+The relevant capability may already be available in the frozen model, while the supplied input places the model on the wrong side of the operational decision boundary.
+
+## 1.4 From system instability to a decision-margin problem
+
+The earlier multi-model system result motivates a more controlled scientific question.
+
+If input structure can make heterogeneous models converge, what is it changing?
+
+We reduce the problem to the smallest possible operational unit: a single binary decision.
+
+For two competing outputs, define the decision margin:
+
+$$
+M(x)
+=
+\log P(y_1\mid x)
+-
+\log P(y_2\mid x).
+$$
+
+The sign of \(M\) determines the categorical decision.
+
+Its magnitude determines how far the model lies from the decision boundary.
+
+This allows us to distinguish three questions that are often conflated.
+
+### Capability
+
+Can the frozen model produce the correct decision under some valid representation of the task?
+
+### Correctness
+
+Under the present input:
+
+$$
+M^*(x)>0?
+$$
+
+### Reproducibility
+
+Is the correct decision sufficiently far from the boundary that execution-level perturbations cannot reverse it?
+
+$$
+M^*(x)>
+\varepsilon_{\mathrm{exec}}?
+$$
+
+The present study therefore does not begin from the assumption that an incorrect model is incapable.
+
+It asks whether the observed error is invariant to changes in semantic input structure.
+
+If it is not, then the failure cannot be explained solely by model capability.
+
+## 1.5 Research question
+
+This leads to the central question of the paper:
+
+> **Can semantic input structure move a fixed model's operational decision far enough from its competing alternatives to make that decision reproducibly correct?**
+
+And, if so:
+
+> **Over what input scope and model families does that reproducibility remain valid?**
+
+The first question concerns **point reproducibility**.
+
+The second concerns the **validated reproducibility frontier**.
+
+Together they turn substrate engineering from an empirical prompting observation into a systems-engineering problem.
+
+
 ## Core Thesis
 
 Incorrect LLM behavior is commonly interpreted as evidence of insufficient model capability.

@@ -54,7 +54,7 @@ def parse_prompt(text: str) -> dict:
     message; everything else is a bare user message."""
     # provenance lines appended to the files (e.g. "SHA-256: ...") are not prompt
     text = "\n".join(ln for ln in text.splitlines()
-                     if not re.match(r"\s*SHA-?256\s*:", ln, re.I)).strip("\n")
+                     if not re.match(r"\s*(SHA-?256\s*:|[0-9a-f]{64}\s*$)", ln, re.I)).strip("\n")
     m = re.match(r"\s*System:\s*\n(.*?)\n\s*User:\s*\n(.*)\Z", text, re.S)
     if m:
         return {"system": m.group(1).strip("\n"), "user": m.group(2).strip("\n")}
@@ -95,7 +95,8 @@ def render(tok, p: dict, raw: bool) -> str:
     if raw:
         return ((p["system"] + "\n\n") if p["system"] else "") + p["user"]
     return tok.apply_chat_template(build_messages(p), tokenize=False,
-                                   add_generation_prompt=True)
+                                   add_generation_prompt=True,
+                                   enable_thinking=False)   # Qwen3-style hybrids: no <think> block; others ignore it
 
 
 def token_spans(tok, text: str, ids: list[int], p: dict) -> dict[str, list[int]]:
@@ -376,7 +377,8 @@ def decision_margin(model, tok, text: str, aid: dict, steps: int = 6) -> dict:
 
 
 def analyse_prompt(model, tok, name: str, p: dict, raw: bool, aid: dict,
-                   cap: Capture, u_dir: torch.Tensor | None = None) -> dict:
+                   cap: Capture, u_dir: torch.Tensor | None = None,
+                   u_tokens: tuple | None = None) -> dict:
     """Everything for one prompt. u_dir: drive-minus-walk unembedding row
     (fp32, CPU); when None it is derived from this prompt's best tokens."""
     text = render(tok, p, raw)
@@ -410,6 +412,7 @@ def analyse_prompt(model, tok, name: str, p: dict, raw: bool, aid: dict,
     d_tok, w_tok = final["drive_token"], final["walk_token"]
     if u_dir is None:
         u_dir = (head[d_tok].float() - head[w_tok].float()).cpu()
+        u_tokens = (d_tok, w_tok)
     norm = final_norm(model)
     g = norm.weight.detach().float().cpu()
     eps = getattr(norm, "variance_epsilon", getattr(norm, "eps", 1e-6))
@@ -420,7 +423,14 @@ def analyse_prompt(model, tok, name: str, p: dict, raw: bool, aid: dict,
            "attn": [float(cap.attn[i] @ v) for i in range(n_layers)],
            "mlp": [float(cap.mlp[i] @ v) for i in range(n_layers)]}
     dla["total"] = dla["emb"] + sum(dla["attn"]) + sum(dla["mlp"])
-    dla["M_first_check"] = final["M_first"]    # total should equal this
+    # the total must equal the model's own logit difference for the SAME token
+    # pair u_dir was built from (the shared pair may differ from this prompt's
+    # own best surface forms, e.g. 'walk' vs 'Walk')
+    lp = torch.log_softmax(lg, -1)
+    dla["M_first_check"] = float(lp[d_tok] - lp[w_tok]) if u_dir is None else \
+        float(lp[u_tokens[0]] - lp[u_tokens[1]])
+    dla["tokens"] = [tok.decode(d_tok), tok.decode(w_tok)] if u_dir is None else \
+        [tok.decode(u_tokens[0]), tok.decode(u_tokens[1])]
     # per head: o_proj(x) = sum_h W_o[:, h] x_h  ->  DLA_h = x_h . (W_o[:, h]^T v)
     L = layers_of(model)
     n_heads = model.config.num_attention_heads
@@ -444,7 +454,7 @@ def analyse_prompt(model, tok, name: str, p: dict, raw: bool, aid: dict,
         "text": text, "n_tokens": len(ids), "tokens": [tok.decode(t) for t in ids],
         "spans": spans, "final": final, "lens": lens, "dla": dla,
         "attn_mass": attn_mass, "attn_entropy_mean": ent.mean(1).tolist(),
-        "_stack": stack, "_u": u_dir, "_ids": ids,
+        "_stack": stack, "_u": u_dir, "_u_tokens": u_tokens, "_ids": ids,
     }
 
 
@@ -467,6 +477,8 @@ def main():
     ap.add_argument("--substrate", default="substrate.txt",
                     help="which prompts/ file is the substrate (default substrate.txt)")
     ap.add_argument("--baseline", default="baseline.txt")
+    ap.add_argument("--keep-substrate-question", action="store_true",
+                    help="keep the question embedded in the substrate file instead of the baseline's")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -484,6 +496,10 @@ def main():
         sys.exit(f"{args.substrate} has no 'System:' block — nothing to ablate")
     if sub_p["user"] is None:
         sub_p["user"] = base_p["user"]       # bare system file + baseline question
+    elif sub_p["user"] != base_p["user"] and not args.keep_substrate_question:
+        print(f"note: {args.substrate} embeds its own question, which differs from {args.baseline}; "
+              "using the baseline question (pass --keep-substrate-question to keep the file's)", flush=True)
+        sub_p["user"] = base_p["user"]
 
     print("baseline ...", flush=True)
     base = analyse_prompt(model, tok, "baseline", base_p, args.raw, aid, cap)
@@ -495,7 +511,8 @@ def main():
     if not torch.equal(u, base["_u"]):
         print("note: baseline picked different answer surface forms; re-attributing "
               "baseline with the substrate's drive/walk tokens", flush=True)
-        base = analyse_prompt(model, tok, "baseline", base_p, args.raw, aid, cap, u_dir=u)
+        base = analyse_prompt(model, tok, "baseline", base_p, args.raw, aid, cap, u_dir=u,
+                              u_tokens=sub["_u_tokens"])
 
     n_layers = sub["_stack"].shape[0] - 1
     res = {
@@ -567,7 +584,7 @@ def main():
         library_p = parse_prompt((PROMPTS / "benchmark_library.txt").read_text())
         for f in sorted(PROMPTS.glob("*.txt")):
             p = parse_prompt(f.read_text())
-            if p["user"] is None:
+            if p["user"] is None or (f.stem.startswith("substrate") and not args.keep_substrate_question):
                 p["user"] = base_p["user"]
             text = render(tok, p, args.raw)
             _, lg, _ = forward(model, tok, text, None, want_attn=False)

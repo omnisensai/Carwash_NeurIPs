@@ -44,12 +44,20 @@ so compute is minutes. The 70B download (~140 GB in bf16) dominates.
 
 ### 2. Setup (inside the pod)
 
+The repo is **private**: a plain `git clone` on the pod fails with "could
+not read Username". Either clone with a GitHub token
+(`https://<token>@github.com/omnisensai/Carwash_NeurIPs`) or copy the
+checkout from your machine (`rsync -a --exclude .git --exclude results
+Carwash_NeurIPs/ root@<pod>:/workspace/Carwash_NeurIPs/`) and commit the
+results from your machine afterwards.
+
 ```bash
 cd /workspace
-git clone https://github.com/omnisensai/Carwash_NeurIPs && cd Carwash_NeurIPs
+git clone https://<token>@github.com/omnisensai/Carwash_NeurIPs && cd Carwash_NeurIPs
 git checkout -b results-llama-70b
 export HF_HOME=/workspace/hf HF_HUB_ENABLE_HF_TRANSFER=1
-pip install -q "torch>=2.4" "transformers>=4.45" accelerate bitsandbytes numpy matplotlib hf_transfer
+# RunPod's PyTorch images ship torch already and pip refuses system installs without the flag
+pip install -q --break-system-packages "transformers>=4.45" accelerate bitsandbytes numpy matplotlib hf_transfer
 cd internals
 ```
 

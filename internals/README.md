@@ -26,6 +26,9 @@ runpod.sh           the whole thing on a fresh CUDA box (70B)
 | benchmarks | every file in `prompts/` → M, argmax and a 4-token greedy answer — reproduces the paper's table locally |
 | diff | cosine between the baseline and substrate residuals per layer, and cosine of their difference with the drive−walk unembedding direction |
 
+Not supported: hybrid architectures whose decoder layers have no `self_attn`
+(Qwen3.5 / Qwen3-Next style linear-attention blocks) — the hooks fail at load.
+
 Sanity checks stored in the json: the last lens row reproduces the model's
 logits (`final_row_matches_model`), and the DLA sums equal the model's
 `M_first` (`dla.total` vs `dla.M_first_check`).

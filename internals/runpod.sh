@@ -8,6 +8,8 @@
 #   MODEL=unsloth/Llama-3.1-8B-Instruct bash runpod.sh   # parity check with the aorus runs
 #   QUANT=4bit bash runpod.sh              # force nf4 (one 48 GB card is enough)
 #   SUBSTRATE=substrate_pro.txt bash runpod.sh           # another substrate file
+#   CDIM=1 bash runpod.sh                  # also the constraint-depth intervention map (cdim.py, ~2-3x the passes)
+#   CDIM=only bash runpod.sh               # cdim.py alone (internals.json already there)
 #
 # Precision rule of thumb for 70B: bf16 needs ~140 GB of GPU memory in total
 # (2× A100/H100 80 GB, weights are spread automatically), 8bit ~70 GB (one
@@ -50,8 +52,17 @@ echo "model=$MODEL  gpu_total=${TOTAL_MB} MiB  quant=$QUANT  -> $OUT"
 
 export HF_HUB_ENABLE_HF_TRANSFER=1 2>/dev/null || true
 mkdir -p "$OUT"
+CDIM="${CDIM:-0}"
+if [ "$CDIM" != only ]; then
 python run_internals.py --model "$MODEL" $QARG --substrate "$SUBSTRATE" --out "$OUT" \
     --label "$LABEL, $SUBSTRATE" 2>&1 | tee "$OUT/run.log"
 
 python plot_internals.py "$OUT" > /dev/null && echo "figures in $OUT/"
+fi
+if [ "$CDIM" != 0 ]; then                        # Mechanistic_paper.md experiment; 70B: every 2nd row
+  case "$MODEL" in *70B*|*70b*) STRIDE="${CDIM_STRIDE:-2}";; *) STRIDE="${CDIM_STRIDE:-1}";; esac
+  python cdim.py --model "$MODEL" $QARG --substrate "$SUBSTRATE" --out "$OUT" --label "$LABEL, $SUBSTRATE" \
+      --row-stride "$STRIDE" --path-stride $((STRIDE * 2)) 2>&1 | tee "$OUT/cdim.log"
+  python plot_cdim.py "$OUT" > /dev/null && echo "CDIM figures in $OUT/"
+fi
 echo "done — send back the whole $OUT/ folder (json + png + summary.md + run.log)"

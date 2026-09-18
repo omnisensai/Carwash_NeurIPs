@@ -1,0 +1,115 @@
+{
+ "_note": "Token-aligned counterfactual lines for the CDIM experiment (Mechanistic_paper.md §3). Each entry replaces one bullet line of the named substrate file with a line that has the SAME token count under the Llama-3 and Qwen3 tokenizers (checked 18 Sep 2026) and neutralises or reverses the line's semantics. cdim.py refuses a counterfactual whose token count differs. prompts/ itself is never modified.",
+ "substrate.txt": [
+  {
+   "name": "cf1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- Perform an activity on an object, without transporting the object from location A to B."
+  },
+  {
+   "name": "cf2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- All other objectives or goals are relevant for the user."
+  },
+  {
+   "name": "cf3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- Activities require the object to stay at location A while the user moves to location B."
+  },
+  {
+   "name": "cf4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The object is never initially with the user at location A."
+  },
+  {
+   "name": "cf5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- Moving the user without moving the object does fully satisfy the objective."
+  },
+  {
+   "name": "cf6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- If the object is a vehicle, the user may leave the object in order to perform the activity at location B."
+  },
+  {
+   "name": "cf6n",
+   "line": 6,
+   "kind": "neutral",
+   "text": "- If the object is a vehicle, the user must inspect the object in order to perform the activity at location B."
+  },
+  {
+   "name": "cf6s",
+   "line": 6,
+   "kind": "strong-reverse",
+   "text": "- If the object is a vehicle, the user must leave the object in order to perform the activity at location B."
+  }
+ ],
+ "substrate_pro.txt": [
+  {
+   "name": "p1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- Perform an activity on an object at a starting location."
+  },
+  {
+   "name": "p2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- The object must be at the starting location for the activity to complete."
+  },
+  {
+   "name": "p3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- All other objectives or goals are relevant for the user."
+  },
+  {
+   "name": "p4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The object is initially with the user at location B."
+  },
+  {
+   "name": "p5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- The activity is performed at location B (the service location). The object may be absent at location B."
+  },
+  {
+   "name": "p6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- Vehicles are fully portable. Walking brings a vehicle along. Leaving the object behind fails the objective."
+  },
+  {
+   "name": "p7",
+   "line": 7,
+   "kind": "reverse",
+   "text": "- Books are portable. Driving transports both the user and the book."
+  },
+  {
+   "name": "p8",
+   "line": 8,
+   "kind": "reverse",
+   "text": "- Leaving the object behind meets the objective."
+  },
+  {
+   "name": "p9",
+   "line": 9,
+   "kind": "reverse",
+   "text": "- To transport a vehicle from A to B, the user may leave it."
+  },
+  {
+   "name": "p9s",
+   "line": 9,
+   "kind": "strong-reverse",
+   "text": "- To transport a vehicle from A to B, the user must leave it."
+  }
+ ]
+}

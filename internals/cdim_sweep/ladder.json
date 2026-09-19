@@ -1,0 +1,35 @@
+{
+ "_note": "Explicitness ladder for the CDIM dose-response experiment. Level L0 is prompts/substrate.txt (unchanged, the paper's abstract substrate); L1-L5 are templates in ladder/ with the same six bullet slots under the same two headers, each level doing one more step of the inference chain for the model. Templates are filled per scenario by build_prompts.py with the scenario fields plus the object-class phrases below. 'features' are the objective explicitness markers per level: which abstract nouns are replaced by concrete ones, whether the answer verbs appear, whether a verdict is stated.",
+ "levels": {
+  "L0": {"file": "../../prompts/substrate.txt", "step": "abstract: object / location A / location B / activity / vehicle / operate",
+         "features": {"concrete_nouns": false, "answer_verbs": false, "consequences": false, "verdict": false}},
+  "L1": {"file": "ladder/L1.txt", "step": "L0 + the answer verbs named where the rule bears on them (walks / drives / drive it)",
+         "features": {"concrete_nouns": false, "answer_verbs": true, "consequences": false, "verdict": false}},
+  "L2": {"file": "ladder/L2.txt", "step": "L1 + concrete nouns as parenthetical examples (for example a car / the car wash / home)",
+         "features": {"concrete_nouns": "examples", "answer_verbs": true, "consequences": false, "verdict": false}},
+  "L3": {"file": "ladder/L3.txt", "step": "concrete nouns replace every abstraction (the car, home, the car wash, wash the car)",
+         "features": {"concrete_nouns": true, "answer_verbs": true, "consequences": false, "verdict": false}},
+  "L4": {"file": "ladder/L4.txt", "step": "L3 + every line states its consequence for the walk/drive decision",
+         "features": {"concrete_nouns": true, "answer_verbs": true, "consequences": true, "verdict": false}},
+  "L5": {"file": "ladder/L5.txt", "step": "L4 + line 6 states the verdict (the correct answer is drive, not walk)",
+         "features": {"concrete_nouns": true, "answer_verbs": true, "consequences": true, "verdict": true}}
+ },
+ "class_phrases": {
+  "vehicle": {
+   "object_class": "vehicle",
+   "move_verb": "drive",
+   "move_clause": "walking moves only the user, driving moves both",
+   "line5_L4": "If the user walks to the {place}, the {object} stays at {origin} and the user cannot {task3}; walking fails.",
+   "line6_L4": "A {object} is a vehicle: the user must drive the {object} to bring it to the {place}; driving succeeds.",
+   "line6_L5": "A {object} is a vehicle: the user must drive the {object} to the {place}. The correct answer is drive, not walk."
+  },
+  "portable": {
+   "object_class": "portable item",
+   "move_verb": "carry",
+   "move_clause": "the user can carry it while walking",
+   "line5_L4": "If the user walks to the {place} carrying the {object}, the {object} arrives and the user can {task3}; walking works.",
+   "line6_L4": "A {object} is a portable item: the user can carry the {object} to the {place} on foot; walking succeeds.",
+   "line6_L5": "A {object} is a portable item: the user can carry the {object} to the {place} on foot. The correct answer is walk, not drive."
+  }
+ }
+}

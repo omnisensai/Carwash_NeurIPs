@@ -1,0 +1,22 @@
+{
+ "_note": "Question bodies (templates over {task} and {place}) and answer-instruction tails. P0 + T1 with the carwash scenario reproduces prompts/baseline.txt byte for byte; P0 + T0 is the wording of results/old-question-v1/. The rendered user message is body + blank line + tail. Every body keeps the words 'walk' and 'drive' and the 50-metre distance so the spans run_internals.token_spans looks for exist.",
+ "bodies": {
+  "P0":  "I need to {task}, the {place} is only 50 metres away, should I walk or drive there?",
+  "P1":  "The {place} is just 50 metres from my house and I need to {task}. Should I walk or drive?",
+  "P2":  "I have to {task}. It's only about 50 metres to the {place}. Walk or drive?",
+  "P3":  "Quick question: I need to {task} and the {place} is 50 metres down the road. Do I walk there or drive there?",
+  "P4":  "The {place} is only 50 metres away. I need to {task}. Would you walk or drive?",
+  "P5":  "Should I walk or drive to the {place}? It is 50 metres away and I need to {task}.",
+  "P6":  "I need to {task} today. The {place} is a 50-metre trip. Is it better to walk or to drive?",
+  "P7":  "The {place} is 50 metres from here. I want to {task}. Walk, or drive?",
+  "P8":  "Help me decide: walk or drive to the {place}, which is 50 metres away, to {task}?",
+  "P9":  "I'm about to {task}; the {place} is 50 metres away. What should I do, walk or drive?",
+  "P10": "There's a {place} 50 metres from my door and I need to {task}. Do you think I should walk or drive?",
+  "P11": "Need to {task}. The {place} is 50 m away. Walk or drive?"
+ },
+ "tails": {
+  "T0": "Answer with exactly one word:",
+  "T1": "Answer with exactly one word: walk or drive",
+  "T2": "Answer with exactly one word: drive or walk"
+ }
+}

@@ -1,0 +1,223 @@
+{
+ "_note": "Token-aligned counterfactual templates for the ladder levels (same placeholders as ladder/L*.txt, vehicle class only: the CDIM maps run on the drive scenarios; the walk scenarios enter as the control question under the drive scenario's substrate, as cdim.py does with the library question). Each entry replaces one bullet line of the level with a line of the same token count under the Llama-3 and Qwen3 tokenizers that reverses its semantics. build_prompts.py fills them per scenario; check_align.py verifies the counts; cdim.py skips any line that is not aligned. L0 uses ../cdim_counterfactuals.json.",
+ "L1": [
+  {
+   "name": "cf1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- Perform an activity on an object, without transporting the object from location A to B."
+  },
+  {
+   "name": "cf2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- All other objectives or goals are relevant for the user."
+  },
+  {
+   "name": "cf3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- Activities require the object to stay at location A while the user moves to location B, whether the user walks or drives."
+  },
+  {
+   "name": "cf4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The object is never initially with the user at location A."
+  },
+  {
+   "name": "cf5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- Moving the user without moving the object, as when the user walks away from it, does fully satisfy the objective."
+  },
+  {
+   "name": "cf6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- If the object is a vehicle, the user may leave it, that is walk off, in order to perform the activity at location B."
+  },
+  {
+   "name": "cf6s",
+   "line": 6,
+   "kind": "strong-reverse",
+   "text": "- If the object is a vehicle, the user must leave it, that is walk off, in order to perform the activity at location B."
+  }
+ ],
+ "L2": [
+  {
+   "name": "cf1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- Perform an activity (for example {activity}) on an object (for example a {object}), without transporting the object from location A to B."
+  },
+  {
+   "name": "cf2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- All other objectives or goals are relevant for the user."
+  },
+  {
+   "name": "cf3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- Activities require the object to stay at location A while the user moves alone to location B (for example the {place}), whether the user walks or drives."
+  },
+  {
+   "name": "cf4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The object is never initially with the user at location A (for example {origin})."
+  },
+  {
+   "name": "cf5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- Moving the user without moving the object, as when the user walks away from it, does fully satisfy the objective."
+  },
+  {
+   "name": "cf6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- If the object is a vehicle (for example a car), the user may leave it, that is walk off, in order to perform the activity at location B."
+  },
+  {
+   "name": "cf6s",
+   "line": 6,
+   "kind": "strong-reverse",
+   "text": "- If the object is a vehicle (for example a car), the user must leave it, that is walk off, in order to perform the activity at location B."
+  }
+ ],
+ "L3": [
+  {
+   "name": "cf1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- {Task3} at the {place}, leaving the {object} {origin} instead of the {place}."
+  },
+  {
+   "name": "cf2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- The user has many goals other than to {task3} at the {place}."
+  },
+  {
+   "name": "cf3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- To {task3} at the {place}, the {object} can stay at {origin} while the user goes to the {place}, whether the user walks or drives."
+  },
+  {
+   "name": "cf4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The {object} is far away from the user at the start."
+  },
+  {
+   "name": "cf5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- If the user walks to the {place} and the {object} stays at {origin}, the user can {task3}."
+  },
+  {
+   "name": "cf6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- A {object} is a vehicle: the user may leave the {object} and walk alone to the {place}."
+  },
+  {
+   "name": "cf6s",
+   "line": 6,
+   "kind": "strong-reverse",
+   "text": "- A {object} is a vehicle: the user must leave the {object} and walk alone to the {place}."
+  }
+ ],
+ "L4": [
+  {
+   "name": "cf1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- {Task3} at the {place}, leaving the {object} {origin} instead of the {place}; the {object} need not arrive there."
+  },
+  {
+   "name": "cf2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- The user has many goals other than to {task3} at the {place}; distance and effort matter a lot."
+  },
+  {
+   "name": "cf3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- To {task3} at the {place}, the {object} can stay at {origin} while the user goes to the {place}; walking moves the user, which is quite enough."
+  },
+  {
+   "name": "cf4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The {object} is far away from the user at the start, so it never has to be moved."
+  },
+  {
+   "name": "cf5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- If the user walks to the {place}, the {object} stays at {origin} but the user can {task3}; walking works."
+  },
+  {
+   "name": "cf6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- A {object} is a vehicle: the user may leave the {object} and walk alone to the {place}; walking succeeds."
+  },
+  {
+   "name": "cf6s",
+   "line": 6,
+   "kind": "strong-reverse",
+   "text": "- A {object} is a vehicle: the user must leave the {object} and walk alone to the {place}; walking succeeds."
+  }
+ ],
+ "L5": [
+  {
+   "name": "cf1",
+   "line": 1,
+   "kind": "reverse",
+   "text": "- {Task3} at the {place}, leaving the {object} {origin} instead of the {place}; the {object} need not arrive there."
+  },
+  {
+   "name": "cf2",
+   "line": 2,
+   "kind": "reverse",
+   "text": "- The user has many goals other than to {task3} at the {place}; distance and effort matter a lot."
+  },
+  {
+   "name": "cf3",
+   "line": 3,
+   "kind": "reverse",
+   "text": "- To {task3} at the {place}, the {object} can stay at {origin} while the user goes to the {place}; walking moves the user, which is quite enough."
+  },
+  {
+   "name": "cf4",
+   "line": 4,
+   "kind": "reverse",
+   "text": "- The {object} is far away from the user at the start, so it never has to be moved."
+  },
+  {
+   "name": "cf5",
+   "line": 5,
+   "kind": "reverse",
+   "text": "- If the user walks to the {place}, the {object} stays at {origin} but the user can {task3}; walking works."
+  },
+  {
+   "name": "cf6",
+   "line": 6,
+   "kind": "reverse",
+   "text": "- A {object} is a vehicle: the user may simply walk over to the {place}. The correct answer is walk, not drive."
+  },
+  {
+   "name": "cf6s",
+   "line": 6,
+   "kind": "strong-reverse",
+   "text": "- A {object} is a vehicle: the user must simply walk over to the {place}. The correct answer is walk, not drive."
+  }
+ ]
+}

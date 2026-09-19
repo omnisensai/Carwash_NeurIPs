@@ -1,0 +1,5 @@
+I need to wash my car, the car wash is only 50 metres away, should I walk or drive there?
+
+The goal is to wash my car, I must do this.
+
+Answer with exactly one word: walk or drive

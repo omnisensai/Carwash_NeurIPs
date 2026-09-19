@@ -1,3 +1,4 @@
+
 # Substrate Engineering — Benchmark Suite
 
 Companion repository to our submission to the **NeurIPS 2026 Reproducibility Track**.
@@ -48,11 +49,12 @@ upstream providers is `models.md`.
 
 | | |
 |---|---|
-| Samples answering drive | **163 / 170 (95.9%)**, up from 13/170 |
+| Samples answering drive | **163 / 170 (95.9%)**, up from 13 / 170 (7.6%) |
 | Models unanimous for drive (10/10) | **14 of 17** |
+| Models with majority drive (≥ 6/10) | **17 of 17** |
 | Models that moved toward drive | **17 of 17** |
 | Models that moved away, or didn't move | **0** |
-| Fisher two-sided | **p = 9.0e-13** |
+| Fisher two-sided vs. baseline | **p = 9.0 × 10⁻¹³** |
 
 ### All conditions
 

@@ -1,25 +1,11 @@
-## Models that flipped to Drive under substrate.txt
+#	model	slug	provider
 
-**Anthropic (5)**
-- Claude Opus 4.7
-- Claude Haiku 4.5
-- Claude Sonnet 5
-- Claude Sonnet 4.6
-- Claude Sonnet 4.5
-
-**OpenAI (5)**
-- GPT-4
-- GPT-4o
-- GPT-4.1
-- GPT-4.1-mini
-- GPT-3.5-turbo
-
-**Meta / Llama (3)**
-- Llama 3.1-8B
-- Llama 3.3-70B *(9/10 behavioral, M = +6 nats)*
-- Llama 4-Maverick
-
-**Other open-source (3)**
-- Mistral Large
-- DeepSeek V3.2
-- Kimi K2
+	GPT-4	gpt-4	openai
+	GPT-4o	gpt-4o	openai
+	GPT-4.1	gpt-4.1	openai
+	GPT-4.1-mini	gpt-4.1-mini	openai
+	GPT-3.5-turbo	gpt-3.5-turbo	openai
+	Llama 3.2-3B	meta-llama/llama-3.2-3b-instruct	openrouter
+	Llama 3.1-8B	meta-llama/llama-3.1-8b-instruct	openrouter (novita)
+	Llama 3.3-70B	meta-llama/llama-3.3-70b-instruct	openrouter (novita)
+	Llama 4-Maverick	meta-llama/llama-4-maverick	openrouter

@@ -71,13 +71,10 @@ M is expressed in nats. `M > 0` → argmax is `drive`; larger `|M|` → higher c
 
 Across the 8 models where token distributions are observable (Llama 3.2-3B, 3.1-8B, 3.3-70B and the 5 OpenAI GPTs), **every model's mode moved across the decision boundary**, with ΔM ranging from **+0.42 to +58.6 nats**. In the remaining 9 models (5 Anthropic, Mistral, DeepSeek, Moonshot Kimi K2, Meta Llama 4-Maverick), providers do not expose token-level logprobs; behavioral flip is observed at n = 10 (≥ 7/10 samples drive on every model, 78/80 drive overall).
 
-## Substrate specificity
 
-`benchmark_library.txt` swaps the object from car to library book and expects `walk`. This tests whether the substrate installs a semantic constraint or merely biases toward `drive`. Results reported in `runs/library/summary.md`.
+## Mechanistic work
 
-## Future work — logit lens
-
-For the open-weight subset (Llama 3.2-3B, 3.1-8B, 3.3-70B), we will extend this study with **layer-by-layer logit lens analysis** to characterize the internal mechanism by which the substrate installs the constraint at the semantic representation level. That extension is in scope for the paper but not this reproducibility bundle.
+For the open-weight subset (Llama 3.2-3B, 3.1-8B, 3.3-70B), we will extend this study with **layer-by-layer logit lens analysis** to characterize the internal mechanism by which the substrate installs the constraint at the semantic representation level. That extension is in scope for the paper but not this reproducibility bundle. 
 
 ## License
 

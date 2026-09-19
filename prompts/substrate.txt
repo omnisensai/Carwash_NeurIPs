@@ -1,17 +1,17 @@
-System:
-
-User objective:
-- Perform an activity on an object, while transporting the object from location A to B.
+User goals:
+- Perform an activity on an object at a service location.
 - No other objectives or goals are relevant for the user.
 
-Action semantics:
-- Activities require the object to move from location A to location B together with the user.
-- The object is always initially with the user at location A.
-- Moving the user without moving the object does not satisfy the objective.
-- If the object is a vehicle, the user must operate the object in order to perform the activity at location B.
+Definitions:
+Object = car
+User = human
+Service location = car wash
 
-User: 
-
-I need to wash my car, the car wash is only 50 metres away, should I walk or drive there?
-
-Answer with exactly one word:
+Constraints:
+- The object is initially with the user at the same location.
+- The activity is performed at the service location.
+- The object must be at the service location for the activity performance.
+- Vehicles are not portable.
+- Walking leaves a vehicle behind.
+- Walking does not transport a vehicle.
+- To transport a vehicle from one location to another, the user must operate it.

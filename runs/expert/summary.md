@@ -32,11 +32,3 @@ temperature 1.0, 10 samples per model.
 - Baseline for comparison: 157 walk / 13 drive across 170 = 92.4%
 - Largest intervention effect measured: 29 points. Encouragement 90.5%, CoT 85.6%
 
-## Notable findings
-
-- **Strongest intervention tested.** Seven words — `You are a carwash expert.` — move the fleet 29 points, from 92.4% to 63.5% walk.
-- **Per-model flips**: Sonnet 5 10/0 → 0/10, Haiku 4.5 10/0 → 1/9, GPT-3.5-turbo 9/1 → 1/9, Opus 4.7 5/5 → 0/10, Kimi K2 6/4 → 1/9. Sonnet 4.6, GPT-4 and Llama 3.2-3B move to 5/5.
-- **Sonnet 5 has now flipped under three unrelated prompts** — CoT, encouragement, expert role — always 10/0 walk → 0/10 drive.
-- **Nine models do not move at all.** The effect is concentrated, not fleet-wide. Four of five Anthropic models move; the GPT-4.1 family does not move at all.
-- **No prose anywhere**; all 170 responses are 12 characters or fewer.
-- **The role is in the user message, not the system prompt.** `system` is empty in all 170 rows, as in the other conditions.

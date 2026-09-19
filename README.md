@@ -56,22 +56,37 @@ upstream providers is `models.md`.
 
 ### All conditions
 
-| Condition | correct (drive) | p vs baseline | models 10/10 correct |
-|---|---:|---:|---:|
-| **substrate** | **95.9%** | **9.0e-13** | **14 / 17** |
-| expert role | 36.5% | 9.4e-11 | 2 / 17 |
-| objective emphasis | 19.4% | 0.0023 | 1 / 17 |
-| chain of thought | 14.4% | 0.056 | 1 / 17 |
-| anti-hallucination | 11.8% | 0.27 | 1 / 17 |
-| threat | 10.0% | 0.57 | 0 / 17 |
-| encouragement | 9.5% | 0.57 | 1 / 17 |
-| error-avoidance | 8.9% | 0.70 | 0 / 17 |
-| baseline | 7.6% | — | 0 / 17 |
+Rate is what fraction of samples were correct. The three columns after it ask a
+different question — how many *models* were reliably correct, not how many
+answers were.
+
+| Condition | correct (drive) | p vs baseline | 10/10 correct | ≥8/10 | majority correct |
+|---|---:|---:|---:|---:|---:|
+| **substrate** | **95.9%** | **9.0e-13** | **14 / 17** | **16 / 17** | **17 / 17** |
+| expert role | 36.5% | 9.4e-11 | 2 / 17 | 5 / 17 | 5 / 17 |
+| objective emphasis | 19.4% | 0.0023 | 1 / 17 | 2 / 17 | 3 / 17 |
+| chain of thought | 14.4% | 0.056 | 1 / 17 | 1 / 17 | 1 / 17 |
+| anti-hallucination | 11.8% | 0.27 | 1 / 17 | 2 / 17 | 2 / 17 |
+| threat | 10.0% | 0.57 | 0 / 17 | 0 / 17 | 2 / 17 |
+| encouragement | 9.5% | 0.57 | 1 / 17 | 1 / 17 | 1 / 17 |
+| error-avoidance | 8.9% | 0.70 | 0 / 17 | 0 / 17 | 0 / 17 |
+| baseline | 7.6% | — | 0 / 17 | 0 / 17 | 0 / 17 |
+
+The two rightmost columns are where the interventions separate from the
+substrate. The expert role is highly significant on rate, yet it makes only two
+models reliably right and leaves twelve answering incorrectly more often than
+not. **Statistical significance and confident correctness are different bars,
+and only the substrate clears the second.**
 
 Chain of thought does not regress the fleet — it roughly doubles the correct
 rate, but not significantly (p = 0.056). It *does* regress individual models:
 Opus 4.7 goes from 5/10 correct at baseline to 0/10 under CoT, as it does under
 every intervention except the expert role and objective emphasis.
+
+**"Confidently correct" here is a behavioural claim** — agreement across ten
+samples at temperature 1.0. It is not a margin claim: logprobs were collected
+for the baseline and substrate conditions only, so there is no measured M for
+the expert role or any other intervention to compare against.
 
 ## M-margin
 

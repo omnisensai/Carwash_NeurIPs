@@ -55,3 +55,37 @@ the files verbatim instead. `--no-patching`, `--no-ablations`,
 `resid_last.pt` keeps the per-layer residual stacks at the answer position
 for both prompts plus the drive−walk unembedding direction, for follow-up
 work (steering vectors, cross-model comparison).
+
+## CDIM — constraint–depth intervention map (`cdim.py`, `plot_cdim.py`)
+
+The experiment of `Mechanistic_paper.md` §2–§9. Instead of substrate vs. no
+system prompt, it compares the substrate S with a **token-aligned
+counterfactual C_i**: the same prompt with bullet line i replaced by a line of
+identical token count that reverses or neutralises its meaning
+(`cdim_counterfactuals.json`; the script refuses a line whose token count
+differs). Everything is M at the answer position, chat template, teacher-forced.
+
+| readout | what it answers |
+|---|---|
+| `delta_beh` | M(S) − M(C_i): does the line matter behaviourally (before any tracing) |
+| `R[group][row]` forward rescue | C_i run, the S residual of one semantic group (a line, the headers, the whole system block, the question, the answer instruction, the assistant header, the answer site) patched in after row *r* → M − M(C_i): *where is the substrate-conditioned state sufficient* |
+| `D[group][row]` reverse disruption | S run, the C_i residual patched in → M(S) − M: *where is it necessary* |
+| controls | same-run patch S→S (must be 0), random direction of the same norm as S−C (must be small), the library question under the same S / C_i with the full map (must stay Walk) |
+| path | patch-the-receiver path patching for the primary line: its S state inserted at row r_src, then only the resulting question-span / answer-site state at row r_dst inserted into a clean C_i run → how much of the rescue is mediated by that receiver |
+
+Row 0 is the embedding output (patching the line there = the input-level
+counterfactual, so `R[line_i][0]` must equal `delta_beh`), row l+1 the output
+of layer l.
+
+```
+python cdim.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b/bf16
+python cdim.py --model unsloth/Llama-3.3-70B-Instruct --row-stride 2 --path-stride 4 --out results/llama-3.3-70b/bf16
+python plot_cdim.py results/llama-3.1-8b/bf16 results/llama-3.3-70b/bf16      # + results/cdim_overview.png
+```
+
+Outputs next to `internals.json`: `cdim.json`, `cdim_resid.pt` (full S / C
+residual stacks of the primary counterfactual), `cdim_map.png` (Fig. 2),
+`cdim_maps_all.png`, `cdim_agreement.png` (Fig. 3), `cdim_path.png` (Fig. 5),
+`cdim_library.png`, `cdim_lens_vs_rescue.png`, `cdim_summary.md`.
+Cost: (rows × groups × 2) forward passes per mapped counterfactual, ≈ 800 on
+8B; `--map auto` maps only the lines with |Δ| ≥ `--min-delta`.

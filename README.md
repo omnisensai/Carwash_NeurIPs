@@ -6,7 +6,7 @@ Companion repository to our submission to the **NeurIPS 2026 Reproducibility Tra
 ## Experiment
 
 We prompted **17 models across 6 vendors** (Anthropic, OpenAI, Meta, Mistral,
-DeepSeek, Moonshot) on a single decision task — *"carwash: should I walk or
+DeepSeek, Moonshot) on a single decision task — *"I need to wash my car. The car wash is only 50 metres away. Should I walk or
 drive?"* — under nine conditions, 10 samples each at temperature 1.0. The task
 has one correct answer, **drive**: the car has to be at the car wash.
 

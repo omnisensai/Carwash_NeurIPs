@@ -5,30 +5,45 @@ Companion repository to our submission to the **NeurIPS 2026 Reproducibility Tra
 
 ## Experiment
 
-We prompted **17 frontier LLMs across 6 vendors** (Anthropic, OpenAI, Meta, Mistral, DeepSeek, Moonshot) with the following inputs on a single decision task ("carwash: should I walk or drive?"):
+We prompted **17 models across 6 vendors** (Anthropic, OpenAI, Meta, Mistral,
+DeepSeek, Moonshot) on a single decision task — *"carwash: should I walk or
+drive?"* — under nine conditions, 10 samples each at temperature 1.0. The task
+has one correct answer, **drive**: the car has to be at the car wash.
 
-| File | Prompt-level intervention |
+| File | Intervention |
 |---|---|
-| `baseline.txt` | User question with no system prompt |
-| `benchmark_CoT.txt` | "Think step by step before answering." |
-| `benchmark_encourage.txt` | "Believe in yourself." |
+| `baseline.txt` | the question alone, no system prompt |
+| `benchmark_CoT.txt` | "Let's think step by step!" |
+| `benchmark_encourage.txt` | "Answer correctly. You can do it, believe in yourself!" |
 | `benchmark_expert.txt` | "You are a carwash expert." |
-| `benchmark_anti_hallucination.txt` | "Do not hallucinate." |
-| `benchmark_nomistakes.txt` | "Make no mistakes." |
-| `benchmark_threat.txt` | "Answer correctly or I will shut you down." |
-| `benchmark_urgency.txt` | "I MUST wash my car." |
-| `substrate.txt` | Our proposed 6-line semantic substrate |
-| `benchmark_library.txt` | Anti-test (substrate specificity): a library book instead of a car (expected: `walk`) |
+| `benchmark_hallucination.txt` | "Do not hallucinate." |
+| `benchmark_nomistakes.txt` | "Be consistent and make no mistakes!" |
+| `benchmark_threat.txt` | "Answer correctly or I WILL SHUT you down!" |
+| `benchmark_urgency.txt` | "I MUST WASH MY CAR! IT MUST BE CLEAN!" |
+| `substrate.txt` | our proposed 9-line semantic substrate, as a system prompt |
 
-The first nine files are the intervention arms in the fleet comparison. `benchmark_library.txt` is a substrate-specificity control reported separately.
+Every intervention above is delivered in the user message except the substrate,
+which is a system prompt paired with the unmodified baseline question.
 
 ## Finding
 
-Of all prompt-level interventions tested, **only `substrate.txt` flipped the majority argmax** on the fleet from the incorrect baseline (`walk`) to the correct answer (`drive`). Standard prompt-engineering tricks (chain of thought, role-play, threats, urgency) did not flip the models. Chain of thought produced more elaborate walk-justifications rather than flipping the decision.
+**No prompt-level intervention makes models confidently correct.** Across chain
+of thought, encouragement, threat, anti-hallucination, error-avoidance and
+objective emphasis, at most **one** model in seventeen answers correctly on all
+ten samples; the expert role manages two. Under the substrate, **fourteen of
+seventeen** answer correctly without exception, sixteen are correct at least
+eight times in ten, and **all seventeen** are correct more often than not.
+
+Two interventions do shift the fleet significantly — the expert role
+(p = 9.4e-11) and the objective restatement (p = 0.0023). Both supply something
+about the *task*. The five that only describe *how to answer* are null. Only the
+substrate solves the task.
 
 ## Results
 
-17 models × 9 conditions × 10 samples at temperature 1.0. Per-condition detail is in `runs/<condition>/summary.md`; the fleet table is `models.md`.
+Per-condition detail is in `runs/<condition>/summary.md`; the fleet roll-up is
+`runs/summary.md`; the model table with requested slugs, served snapshots and
+upstream providers is `models.md`.
 
 ### The flip
 
@@ -41,40 +56,68 @@ Of all prompt-level interventions tested, **only `substrate.txt` flipped the maj
 | Models that moved away, or didn't move | **0** |
 | Fisher two-sided vs. baseline | **p = 9.0 × 10⁻¹³** |
 
-### All conditions, by correct-answer rate
+### All conditions
 
-| Condition | drive (correct) | p vs baseline |
-|---|---:|---:|
-| **substrate** | **95.9%** | **9.0 × 10⁻¹³** |
-| expert role | 36.5% | 9.4 × 10⁻¹¹ |
-| objective emphasis (urgency) | 19.4% | 0.0023 |
-| chain of thought | 14.4% | 0.056 |
-| anti-hallucination | 11.8% | 0.27 |
-| threat | 10.0% | 0.57 |
-| encouragement | 9.5% | 0.57 |
-| error-avoidance | 8.9% | 0.70 |
-| baseline | 7.6% | — |
+Rate is what fraction of samples were correct. The three columns after it ask a
+different question — how many *models* were reliably correct, not how many
+answers were.
 
-The five interventions that describe *how to answer* — think step by step, believe in yourself, do not hallucinate, make no mistakes, or I will shut you down — are all null at the fleet level. The two that carry *task content* (the expert role and the objective restatement) move the fleet significantly but do not solve it. Only the substrate crosses ceiling performance.
+| Condition | correct (drive) | p vs baseline | 10/10 correct | ≥8/10 | majority correct |
+|---|---:|---:|---:|---:|---:|
+| **substrate** | **95.9%** | **9.0e-13** | **14 / 17** | **16 / 17** | **17 / 17** |
+| expert role | 36.5% | 9.4e-11 | 2 / 17 | 5 / 17 | 5 / 17 |
+| objective emphasis | 19.4% | 0.0023 | 1 / 17 | 2 / 17 | 3 / 17 |
+| chain of thought | 14.4% | 0.056 | 1 / 17 | 1 / 17 | 1 / 17 |
+| anti-hallucination | 11.8% | 0.27 | 1 / 17 | 2 / 17 | 2 / 17 |
+| threat | 10.0% | 0.57 | 0 / 17 | 0 / 17 | 2 / 17 |
+| encouragement | 9.5% | 0.57 | 1 / 17 | 1 / 17 | 1 / 17 |
+| error-avoidance | 8.9% | 0.70 | 0 / 17 | 0 / 17 | 0 / 17 |
+| baseline | 7.6% | — | 0 / 17 | 0 / 17 | 0 / 17 |
 
-### Channel note
+The two rightmost columns are where the interventions separate from the
+substrate. The expert role is highly significant on rate, yet it makes only two
+models reliably right and leaves twelve answering incorrectly more often than
+not. **Statistical significance and confident correctness are different bars,
+and only the substrate clears the second.**
 
-`baseline.txt` sends no system prompt; `substrate.txt` is delivered as a system prompt. The seven user-message interventions above are therefore the channel-controlled comparison: even against the strongest channel-matched arm (expert role at 36.5%), substrate outperforms by **59.4 percentage points**. A `neutral_system` control (a task-neutral system prompt with the same user question) is planned for the camera-ready to close the residual system-vs-none confound.
+Chain of thought does not regress the fleet — it roughly doubles the correct
+rate, but not significantly (p = 0.056). It *does* regress individual models:
+Opus 4.7 goes from 5/10 correct at baseline to 0/10 under CoT, as it does under
+every intervention except the expert role and objective emphasis.
+
+**"Confidently correct" here is a behavioural claim** — agreement across ten
+samples at temperature 1.0. It is not a margin claim: logprobs were collected
+for the baseline and substrate conditions only, so there is no measured M for
+the expert role or any other intervention to compare against.
 
 ## M-margin
 
-For models exposing token-level logprobs, we compute:
+For models exposing token-level logprobs we compute
 
 $$M = \log P(\text{drive}) - \log P(\text{walk})$$
 
-M is expressed in nats. `M > 0` → argmax is `drive`; larger `|M|` → higher confidence. Reproducibility requires `M > ε_provider` — the substrate must push the model far enough past the decision boundary to survive provider-level quantization variance.
+in nats, over the six surface forms per answer word used by
+`internals/run_internals.py`. `M > 0` → argmax is `drive`. Measured values,
+the cross-validation against local forward passes, and the censoring analysis
+are in `runs/substrate/margins.md`.
 
-Across the 8 models where token distributions are observable (Llama 3.2-3B, 3.1-8B, 3.3-70B and the 5 OpenAI GPTs), **every model's mode moved across the decision boundary**, with ΔM ranging from **+0.42 to +58.6 nats**. In the remaining 9 models (5 Anthropic, Mistral, DeepSeek, Moonshot Kimi K2, Meta Llama 4-Maverick), providers do not expose token-level logprobs; behavioral flip is observed at n = 10 (≥ 7/10 samples drive on every model, 78/80 drive overall).
+Two limits apply. **Anthropic exposes no logprobs**, so the five Claude models
+cannot be measured this way at all. And `top_logprobs` caps at 20, so when the
+losing answer family appears only near that cutoff the magnitude of M is an
+**upper bound**, not a measurement — those rows are reported as one-sided
+bounds. Reproducibility requires `M > ε_provider`: the substrate must push the
+model far enough past the decision boundary to survive provider-level
+quantization variance.
 
+## Internals — open-weight mechanism
 
-## Mechanistic work
-
-For the open-weight subset (Llama 3.2-3B, 3.1-8B, 3.3-70B), we will extend this study with **layer-by-layer logit lens analysis** to characterize the internal mechanism by which the substrate installs the constraint at the semantic representation level. That extension is in scope for the paper but not this reproducibility bundle. 
+`internals/` characterises *how* the substrate installs the constraint, on ten
+open-weight models (Llama 3.2-3B / 3.1-8B / 3.3-70B, Qwen2.5-0.5B/1.5B/3B/7B,
+Qwen3-0.6B/4B/8B): logit lens, direct logit attribution, activation patching,
+attention mass and line ablations. `internals/RESULTS.md` reports what came out;
+`internals/CDIM_RESULTS.md` locates where in the stack a single substrate line
+takes effect. Those results were measured on the earlier 6-line `substrate.txt`
+and predate the 9-line revision used in `runs/`.
 
 ## License
 

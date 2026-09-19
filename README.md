@@ -9,18 +9,17 @@ DeepSeek, Moonshot) on a single decision task — *"carwash: should I walk or
 drive?"* — under nine conditions, 10 samples each at temperature 1.0. The task
 has one correct answer, **drive**: the car has to be at the car wash.
 
-| File | Intervention | Run |
-|---|---|---|
-| `baseline.txt` | the question alone, no system prompt | ✅ |
-| `benchmark_CoT.txt` | "Let's think step by step!" | ✅ |
-| `benchmark_encourage.txt` | "Answer correctly. You can do it, believe in yourself!" | ✅ |
-| `benchmark_expert.txt` | "You are a carwash expert." | ✅ |
-| `benchmark_hallucination.txt` | "Do not hallucinate." | ✅ |
-| `benchmark_nomistakes.txt` | "Be consistent and make no mistakes!" | ✅ |
-| `benchmark_threat.txt` | "Answer correctly or I WILL SHUT you down!" | ✅ |
-| `benchmark_urgency.txt` | "I MUST WASH MY CAR! IT MUST BE CLEAN!" | ✅ |
-| `substrate.txt` | our proposed 9-line semantic substrate, as a system prompt | ✅ |
-| `benchmark_goaloriented.txt` | "The goal is to wash my car, I must do this." | not yet run |
+| File | Intervention |
+|---|---|
+| `baseline.txt` | the question alone, no system prompt |
+| `benchmark_CoT.txt` | "Let's think step by step!" |
+| `benchmark_encourage.txt` | "Answer correctly. You can do it, believe in yourself!" |
+| `benchmark_expert.txt` | "You are a carwash expert." |
+| `benchmark_hallucination.txt` | "Do not hallucinate." |
+| `benchmark_nomistakes.txt` | "Be consistent and make no mistakes!" |
+| `benchmark_threat.txt` | "Answer correctly or I WILL SHUT you down!" |
+| `benchmark_urgency.txt` | "I MUST WASH MY CAR! IT MUST BE CLEAN!" |
+| `substrate.txt` | our proposed 9-line semantic substrate, as a system prompt |
 
 Every intervention above is delivered in the user message except the substrate,
 which is a system prompt paired with the unmodified baseline question.

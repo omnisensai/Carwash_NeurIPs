@@ -109,15 +109,6 @@ bounds. Reproducibility requires `M > ε_provider`: the substrate must push the
 model far enough past the decision boundary to survive provider-level
 quantization variance.
 
-## Internals — open-weight mechanism
-
-`internals/` characterises *how* the substrate installs the constraint, on ten
-open-weight models (Llama 3.2-3B / 3.1-8B / 3.3-70B, Qwen2.5-0.5B/1.5B/3B/7B,
-Qwen3-0.6B/4B/8B): logit lens, direct logit attribution, activation patching,
-attention mass and line ablations. `internals/RESULTS.md` reports what came out;
-`internals/CDIM_RESULTS.md` locates where in the stack a single substrate line
-takes effect. Those results were measured on the earlier 6-line `substrate.txt`
-and predate the 9-line revision used in `runs/`.
 
 ## License
 

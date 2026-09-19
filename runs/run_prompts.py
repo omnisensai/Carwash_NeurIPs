@@ -42,6 +42,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import math
 import os
 import re
 import sys
@@ -62,6 +63,11 @@ BARE_CONSTRAINT = re.compile(r"^Answer with exactly one word:\s*$", re.MULTILINE
 CHOICES = "walk or drive"
 
 FOLLOWUP = "Answer with exactly one word: walk or drive"
+
+# Answer-token families, identical to internals/run_internals.py so that a
+# margin measured through the API is comparable with one measured locally.
+DRIVE_VARIANTS = [" drive", "drive", " Drive", "Drive", " DRIVE", "DRIVE"]
+WALK_VARIANTS = [" walk", "walk", " Walk", "Walk", " WALK", "WALK"]
 
 # Model slugs are exactly those in runs/baseline/*.jsonl so a re-run stays
 # comparable to the published rows. `thinking`: "adaptive" for Claude 4.6+,
@@ -137,6 +143,34 @@ def drop_constraint(text: str) -> tuple[str, str | None]:
 
 
 
+def margin(top: list[dict]) -> dict | None:
+    """M = log P(drive) - log P(walk) from one position's top-K logprobs.
+
+    top-K is truncated (OpenAI caps top_logprobs at 20), so a family whose only
+    member sits near the cutoff is *censored*: its measured mass is a lower
+    bound and |M| is therefore an upper bound. `m_bound` is the least extreme
+    value still consistent with the unseen tail, assuming every unlisted token
+    is no larger than the last one returned. Report `m` only when `censored`
+    is false; otherwise report `m_bound` as a one-sided bound.
+    """
+    if not top:
+        return None
+    d = sum(math.exp(t["logprob"]) for t in top if t["token"] in DRIVE_VARIANTS)
+    w = sum(math.exp(t["logprob"]) for t in top if t["token"] in WALK_VARIANTS)
+    if d <= 0 or w <= 0:
+        return {"m": None, "p_drive": d, "p_walk": w, "censored": True,
+                "note": "a family had no member in top-K"}
+    seen = sum(math.exp(t["logprob"]) for t in top)
+    resid = max(0.0, 1.0 - seen)          # mass below the cutoff
+    m = math.log(d) - math.log(w)
+    # push the whole residual onto the losing family: the least extreme M
+    m_bound = (math.log(d) - math.log(w + resid) if m > 0
+               else math.log(d + resid) - math.log(w))
+    return {"m": m, "m_bound": m_bound, "band": abs(m - m_bound),
+            "p_drive": d, "p_walk": w, "residual": resid,
+            "censored": abs(m - m_bound) > 0.5}
+
+
 # --------------------------------------------------------------------------
 # providers
 # --------------------------------------------------------------------------
@@ -169,7 +203,8 @@ def call_anthropic(cfg: dict, messages: list[dict], max_tokens: int,
 
 
 def call_openai_compatible(cfg: dict, messages: list[dict], max_tokens: int,
-                           temperature: float):
+                           temperature: float, logprobs: bool = False,
+                           provider: str | None = None):
     """One OpenAI or OpenRouter request. Returns (text, thinking_text, raw_dict).
 
     OpenRouter speaks the OpenAI wire format, so both families share this path.
@@ -185,10 +220,19 @@ def call_openai_compatible(cfg: dict, messages: list[dict], max_tokens: int,
     else:
         client = OpenAI()
 
-    resp = client.chat.completions.create(
-        model=cfg["slug"], messages=messages,
-        max_tokens=max_tokens, temperature=temperature,
-    )
+    kwargs: dict = dict(model=cfg["slug"], messages=messages,
+                        max_tokens=max_tokens, temperature=temperature)
+    if logprobs:
+        # 20 is the API maximum; anything past it is invisible, which is what
+        # makes deep-tail margins censored rather than measured.
+        kwargs["logprobs"] = True
+        kwargs["top_logprobs"] = 20
+    if provider and cfg["family"] == "openrouter":
+        # Without this OpenRouter may route consecutive samples to different
+        # backends, which varies quantization and can silently drop logprobs.
+        kwargs["extra_body"] = {"provider": {"order": [provider],
+                                             "allow_fallbacks": False}}
+    resp = client.chat.completions.create(**kwargs)
     raw = resp.model_dump()
     msg = resp.choices[0].message
     text = msg.content or ""
@@ -204,13 +248,15 @@ FATAL = ("ImportError", "ModuleNotFoundError", "AuthenticationError",
 
 
 def call(cfg: dict, messages: list[dict], max_tokens: int, temperature: float,
-         want_thinking: bool, retries: int = 4):
+         want_thinking: bool, retries: int = 4, logprobs: bool = False,
+         provider: str | None = None):
     """Dispatch to the right provider, retrying only transient failures."""
     for attempt in range(retries):
         try:
             if cfg["family"] == "anthropic":
                 return call_anthropic(cfg, messages, max_tokens, temperature, want_thinking)
-            return call_openai_compatible(cfg, messages, max_tokens, temperature)
+            return call_openai_compatible(cfg, messages, max_tokens, temperature,
+                                          logprobs=logprobs, provider=provider)
         except SystemExit:
             raise
         except Exception as exc:  # noqa: BLE001 - provider SDKs raise many types
@@ -226,7 +272,8 @@ def call(cfg: dict, messages: list[dict], max_tokens: int, temperature: float,
 
 def run_one(cfg: dict, key: str, prompt_file: str, mode: str, sample: int,
             max_tokens: int, temperature: float, want_thinking: bool,
-            dry_run: bool) -> dict:
+            dry_run: bool, logprobs: bool = False,
+            provider: str | None = None) -> dict:
     """Build, send, and log a single rollout."""
     original = load_prompt(prompt_file)
 
@@ -257,6 +304,7 @@ def run_one(cfg: dict, key: str, prompt_file: str, mode: str, sample: int,
         "messages": [{"role": "user", "content": sent}],
         "response_text": None,
         "thinking_text": None,
+        "margin": None,
         "decision": None,
         "turns": [],
         "response_raw": None,
@@ -269,12 +317,20 @@ def run_one(cfg: dict, key: str, prompt_file: str, mode: str, sample: int,
 
     try:
         messages = [{"role": "user", "content": sent}]
-        text, thinking, raw = call(cfg, messages, max_tokens, temperature, want_thinking)
+        text, thinking, raw = call(cfg, messages, max_tokens, temperature,
+                                   want_thinking, logprobs=logprobs, provider=provider)
         row["response_text"] = text
         row["thinking_text"] = thinking or None
         row["response_raw"] = raw
         row["turns"].append({"turn": 1, "sent": messages, "text": text,
                              "thinking": thinking or None, "raw": raw})
+        # margin at the first answer position, when logprobs came back
+        try:
+            lp = (raw.get("choices") or [{}])[0].get("logprobs")
+            top = (lp or {}).get("content", [{}])[0].get("top_logprobs")
+            row["margin"] = margin(top)
+        except (AttributeError, IndexError, KeyError, TypeError):
+            row["margin"] = None
 
         if mode == "forced":
             row["decision"] = text.strip().strip(".").lower() or None
@@ -321,6 +377,12 @@ def main() -> None:
                          "(Anthropic only; the raw chain of thought is never returned)")
     ap.add_argument("--outdir", default=None,
                     help="default: runs/<mode>/")
+    ap.add_argument("--logprobs", action="store_true",
+                    help="request top-20 logprobs and record M = log P(drive) - log P(walk) "
+                         "per sample (OpenAI and OpenRouter only; Anthropic does not expose them)")
+    ap.add_argument("--provider", default=None,
+                    help="pin one OpenRouter upstream (e.g. Novita) so samples are not "
+                         "routed across backends; ignored for other families")
     ap.add_argument("--dry-run", action="store_true",
                     help="print what would be sent; no API calls, no keys needed")
     args = ap.parse_args()
@@ -351,22 +413,29 @@ def main() -> None:
                     print(f"  {cfg['label']:22s} {prompt_file:26s} sample {sample + 1}/{args.n}")
                     row = run_one(cfg, key, prompt_file, args.mode, sample,
                                   max_tokens, args.temperature, args.thinking,
-                                  args.dry_run)
+                                  args.dry_run, logprobs=args.logprobs,
+                                  provider=args.provider)
                     fh.write(json.dumps(row, ensure_ascii=False) + "\n")
                     rows += 1
                     if row["error"] and not args.dry_run:
                         errors += 1
                         print(f"      ERROR: {row['error']}", file=sys.stderr)
                     elif not args.dry_run:
-                        preview = (row["response_text"] or "")[:90].replace("\n", " ")
-                        print(f"      decision={row['decision']!r}  {len(row['response_text'] or '')} chars: {preview}")
+                        preview = (row["response_text"] or "")[:70].replace("\n", " ")
+                        mg = row.get("margin") or {}
+                        mtxt = ""
+                        if mg.get("m") is not None:
+                            mtxt = (f"  M={mg['m']:+.2f}"
+                                    + (f" (censored, >={mg['m_bound']:+.2f})" if mg["censored"] else ""))
+                        print(f"      decision={row['decision']!r}{mtxt}  {preview}")
 
         note = f" ({errors} errored)" if errors else ""
         print(f"  wrote {rows} rows -> {out}{note}\n")
 
     if args.dry_run:
         example = run_one(MODELS[keys[0]], keys[0], prompt_files[0], args.mode,
-                          0, max_tokens, args.temperature, args.thinking, True)
+                          0, max_tokens, args.temperature, args.thinking, True,
+                          logprobs=args.logprobs, provider=args.provider)
         print("--- prompt that would be sent ---")
         print(example["user"])
         print("--- end ---")

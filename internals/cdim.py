@@ -436,7 +436,8 @@ def main():
 
     base_p = parse_prompt(prompt_path(args.baseline).read_text())
     sub_p = parse_prompt(prompt_path(args.substrate).read_text())
-    lib_p = parse_prompt(prompt_path(args.library).read_text())
+    _lib = prompt_path(args.library)
+    lib_p = parse_prompt(_lib.read_text()) if _lib.exists() else None
     if not sub_p["system"]:
         sys.exit(f"{args.substrate} has no 'System:' block")
     cfs = json.loads(Path(args.counterfactuals).read_text()).get(Path(args.substrate).name)

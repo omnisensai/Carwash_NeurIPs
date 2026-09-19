@@ -23,6 +23,41 @@ We prompted 19 frontier LLMs across 7 vendors (Anthropic, OpenAI, Meta, Alibaba,
 
 Of all prompt-level interventions tested, **only `substrate.txt` flipped model output** from the incorrect baseline argmax (`walk`) to the correct answer (`drive`) with reproducibility across models and vendors. Standard prompt-engineering tricks (chain of thought, role-play, threats, urgency) did not flip the models. Chain of thought actively regressed the model.
 
+## Results
+
+17 models × 9 conditions × 10 samples at temperature 1.0. Per-condition detail
+is in `runs/<condition>/summary.md`; the fleet table is `models.md`.
+
+### The flip
+
+| | |
+|---|---|
+| Samples answering drive | **163 / 170 (95.9%)**, up from 13/170 |
+| Models unanimous for drive (10/10) | **14 of 17** |
+| Models that moved toward drive | **17 of 17** |
+| Models that moved away, or didn't move | **0** |
+| Fisher two-sided | **p = 9.0e-13** |
+
+### All conditions, by correct-answer rate
+
+| Condition | drive (correct) | p vs baseline |
+|---|---:|---:|
+| **substrate** | **95.9%** | **9.0e-13** |
+| expert role | 36.5% | 9.4e-11 |
+| objective emphasis | 19.4% | 0.0023 |
+| chain of thought | 14.4% | 0.056 |
+| anti-hallucination | 11.8% | 0.27 |
+| threat | 10.0% | 0.57 |
+| encouragement | 9.5% | 0.57 |
+| error-avoidance | 8.9% | 0.70 |
+| baseline | 7.6% | — |
+
+The five interventions that describe *how to answer* — think step by step,
+believe in yourself, do not hallucinate, make no mistakes, or I will shut you
+down — are all null at the fleet level. The two that carry *task content* (the
+expert role and the objective restatement) move the fleet significantly. Only
+the substrate solves the task.
+
 ## M-margin
 
 For models exposing token-level logprobs, we compute:

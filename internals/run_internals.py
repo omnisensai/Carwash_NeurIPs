@@ -585,7 +585,9 @@ def main():
     if not args.no_benchmarks:
         print("benchmarks ...", flush=True)
         bm = {}
-        library_p = parse_prompt((PROMPTS / "benchmark_library.txt").read_text())
+        # anti-test control; optional, skipped when the prompt file is absent
+        _lib = PROMPTS / "benchmark_library.txt"
+        library_p = parse_prompt(_lib.read_text()) if _lib.exists() else None
         for f in sorted(PROMPTS.glob("*.txt")):
             p = parse_prompt(f.read_text())
             if p["user"] is None or (f.stem.startswith("substrate") and not args.keep_substrate_question):
@@ -604,7 +606,7 @@ def main():
         res["benchmarks"] = bm
         # anti-test: each substrate system prompt with the library question (expected: walk)
         anti = {}
-        for f in sorted(PROMPTS.glob("substrate*.txt")):
+        for f in (sorted(PROMPTS.glob("substrate*.txt")) if library_p else []):
             p = parse_prompt(f.read_text())
             if not p["system"]:
                 continue

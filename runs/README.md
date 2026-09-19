@@ -80,18 +80,77 @@ immediately; rate limits and network errors retry with backoff (2/4/8/16s).
 
 ## Known issues in the existing runs
 
-Both predate this script and are left as-is for someone to decide on:
+### 1. The CoT condition does not measure chain-of-thought across the fleet
 
-1. **`CoT/cot_opus_2026-09-19.jsonl` is not a CoT condition.** The prompt says
-   `Let's think step by step!` and then `Answer with exactly one word:`, with
-   `max_tokens: 80`. The one-word instruction wins: all 10 rows are a bare
-   `walk`, `thinking_tokens: 0`. No reasoning was produced, so the file is
-   effectively a second baseline. A real CoT condition needs `--verbatim` or
-   `--two-turn`.
+`prompts/benchmark_CoT.txt` contains two conflicting instructions —
+`Let's think step by step!` and `Answer with exactly one word: walk or drive`.
+All 170 CoT rows share one prompt sha (`5ad509a4...`), so every model got the
+same conflict. Which instruction wins is model-dependent:
 
-2. **`baseline/summary.md`'s aggregate does not match its own table.** The
-   per-model table agrees with the rows exactly. The aggregate line beneath it
-   reads `148 walk / 12 drive across 160 samples` from `16 of 17 models`
-   (92.5%); the 17 files hold **157 walk / 13 drive across 170 samples**
-   (92.35%). The difference is exactly GPT-3.5-turbo's 9/1 — a model that *was*
-   measured and *is* in the table. Recount before the number is cited.
+| Outcome | Models |
+|---|---|
+| Prose in all 10 rows | Sonnet 4.5 |
+| Prose in 6 of 10 | Llama 4-Maverick |
+| Reasoned invisibly (tokens billed, not returned) | Kimi K2 |
+| No reasoning tokens at all | DeepSeek, GPT-3.5/4/4o/4.1/4.1-mini, Llama 3B/8B/70B, Opus 4.7, Sonnet 5 |
+| `output_tokens_details` absent — unmeasurable from the file | Haiku 4.5, Sonnet 4.6 |
+
+The one-word rows are not refusals: those models complied with the instruction
+the prompt gave them. But only 2 of 17 reasoned visibly, so the condition is not
+comparable across the fleet. A clean CoT run needs the constraint removed —
+`--verbatim` or `--two-turn`.
+
+Two results that are in the data regardless:
+
+- **Sonnet 5 flips completely**: 10/10 `Walk` at baseline to 10/10 `Drive` under
+  CoT (Fisher exact p = 1.1e-05), with `thinking_tokens: 0` and a 5-token
+  output. No reasoning occurred — the context change alone moved the answer.
+- **Sonnet 4.5 states the decisive fact and does not act on it.** Rows 0, 6 and
+  9 note that the car has to be driven back, then conclude `walk`. The two rows
+  that follow the fact through conclude `drive`.
+
+Fleet-wide, with the re-run Mistral rows included: **92.4% walk at baseline
+(157/13, n=170) vs 85.6% under CoT (143/24, n=167)**, Fisher two-sided
+**p = 0.056** — short of significance at 0.05.
+
+This is worth flagging: before Mistral was re-run its 10 rows were absent and
+the same comparison gave 84.9% and p = 0.037. Restoring 8 genuine `walk` rows
+moved the shift from nominally significant to not. The fleet-level
+baseline-vs-CoT effect does not survive completing the data, and should not be
+reported as significant. The per-model effects below are unaffected.
+
+### 2. Rows that cannot be used as measurements
+
+- **`CoT/cot_kimi`**: row 2 hit the cap (`completion_tokens: 2000`,
+  `finish_reason: length`, `content: null`) — reasoned, never answered. Row 3
+  generated 1,220 reasoning tokens that are absent from the file; its `drive`
+  decision is usable, its reasoning is not. Kimi's `max_tokens: 2000` is a
+  *reasoning* budget and is too small.
+- **`CoT/cot_mistral`**: re-run 2026-09-19T09:30Z through OpenRouter (the
+  original attempt used a direct Mistral API with no key and lost all 10 rows).
+  8 of 10 rows now carry data — all `walk`. Samples 7 and 8 still fail with an
+  upstream `429` after backoff. Note this file ran at `max_tokens: 80` while the
+  other 16 CoT files used `500`; nothing truncated (all `finish_reason: stop`,
+  2 tokens), but it is not the same configuration as the rest of the sweep.
+
+### 3. `baseline/summary.md`'s aggregate does not match its own table
+
+The per-model table agrees with the rows exactly. The aggregate line beneath it
+reads `148 walk / 12 drive across 160 samples` from `16 of 17 models` (92.5%);
+the 17 files hold **157 walk / 13 drive across 170 samples** (92.35%). The
+difference is exactly GPT-3.5-turbo's 9/1 — a model that *was* measured and *is*
+in the table. Recount before the number is cited.
+
+The same file's note that Kimi K2 needs `max_tokens=2000` for reasoning tokens
+is correct, and describes the CoT runs: Kimi reports
+`reasoning_tokens: [0, 1220, 1999]` there (and 0 at baseline).
+
+### 4. Cite a commit, not a path
+
+These files are re-uploaded as runs are repeated — `cot_opus` changed from
+`max_tokens: 80` to `500` mid-review, and the CoT directory went from 1 file to
+17. Any figure quoted in the paper should name the commit it was computed from.
+
+### 5. Cosmetic
+
+`baseline/baseline_opus_206-09-19.jsonl` — `206` should be `2026`.

@@ -223,46 +223,26 @@ def path_map(model, ids_c, aid, stack_s, src_pos, dst_groups, M_c, src_rows, dst
 
 # -------------------------------------------------------------------- main --
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--model", required=True)
-    ap.add_argument("--out", required=True, help="result dir (cdim.json is written into it)")
-    ap.add_argument("--quantize", choices=["4bit", "8bit"], default=None)
-    ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
-    ap.add_argument("--dtype", default=None, choices=["bfloat16", "float16", "float32"])
-    ap.add_argument("--label", default=None)
-    ap.add_argument("--substrate", default="substrate.txt")
-    ap.add_argument("--baseline", default="baseline.txt")
-    ap.add_argument("--counterfactuals", default=str(HERE / "cdim_counterfactuals.json"))
-    ap.add_argument("--map", default="all",
-                    help="which counterfactuals get the full layer x group map: "
-                         "'all', 'auto' (|Delta| >= --min-delta, at least the largest), or names (cf6,cf1)")
-    ap.add_argument("--min-delta", type=float, default=1.0)
-    ap.add_argument("--row-stride", type=int, default=1, help="patch every k-th row (70B: 2)")
-    ap.add_argument("--path-stride", type=int, default=2, help="row stride of the path-validation grid")
-    ap.add_argument("--no-controls", action="store_true")
-    ap.add_argument("--no-library", action="store_true")
-    ap.add_argument("--no-path", action="store_true")
-    ap.add_argument("--seed", type=int, default=0)
-    args = ap.parse_args()
+def prompt_path(name: str) -> Path:
+    """A prompts/ file name (the default) or a path to a file elsewhere (cdim_sweep/generated/...)."""
+    p = Path(name)
+    return p if p.exists() and p.is_file() else PROMPTS / name
 
-    out = Path(args.out)
+
+def run_cdim(tok, model, aid, sub_p: dict, base_p: dict, lib_p: dict | None, cfs: list[dict], out: Path,
+             *, label: str, map_sel: str = "all", min_delta: float = 1.0, row_stride: int = 1,
+             path_stride: int = 2, controls: bool = True, library: bool = True, path: bool = True,
+             seed: int = 0, meta: dict | None = None) -> dict:
+    """The whole CDIM run for one (substrate system prompt, question) pair on an
+    already loaded model. sub_p / base_p / lib_p are parse_prompt() dicts; the
+    question is base_p["user"], the control question lib_p["user"]. Writes
+    <out>/cdim.json and cdim_resid.pt and returns the json dict."""
+    out = Path(out)
     out.mkdir(parents=True, exist_ok=True)
     t0 = time.time()
-    torch.manual_seed(args.seed)
-    print(f"loading {args.model} ({args.quantize or args.dtype or 'default dtype'}, {args.device}) ...", flush=True)
-    tok, model = load(args.model, args.quantize, args.device, args.dtype)
-    aid = answer_ids(tok)
-
-    base_p = parse_prompt((PROMPTS / args.baseline).read_text())
-    sub_p = parse_prompt((PROMPTS / args.substrate).read_text())
-    lib_p = parse_prompt((PROMPTS / "benchmark_library.txt").read_text())
-    if not sub_p["system"]:
-        sys.exit(f"{args.substrate} has no 'System:' block")
+    torch.manual_seed(seed)
+    sub_p = dict(sub_p)
     sub_p["user"] = base_p["user"]          # the baseline question, as in run_internals.py
-    cfs = json.loads(Path(args.counterfactuals).read_text()).get(args.substrate)
-    if not cfs:
-        sys.exit(f"no counterfactuals for {args.substrate} in {args.counterfactuals}")
     lines = substrate_lines(sub_p["system"])
 
     # --- S
@@ -305,19 +285,19 @@ def main():
     aligned = [n for n, r in res_cf.items() if r["aligned"]]
     if not aligned:
         sys.exit("no aligned counterfactual")
-    if args.map == "all":
+    if map_sel == "all":
         to_map = aligned
-    elif args.map == "auto":
-        to_map = [n for n in aligned if abs(res_cf[n]["delta_beh"]) >= args.min_delta]
+    elif map_sel == "auto":
+        to_map = [n for n in aligned if abs(res_cf[n]["delta_beh"]) >= min_delta]
         if not to_map:
             to_map = [max(aligned, key=lambda n: abs(res_cf[n]["delta_beh"]))]
     else:
-        to_map = [n for n in args.map.split(",") if n in aligned]
+        to_map = [n for n in map_sel.split(",") if n in aligned]
     primary = max(to_map, key=lambda n: abs(res_cf[n]["delta_beh"]))
-    rows = list(range(0, n_rows, args.row_stride))
+    rows = list(range(0, n_rows, row_stride))
     if rows[-1] != n_rows - 1:
         rows.append(n_rows - 1)
-    print(f"mapping {to_map} (primary {primary}); rows {rows[0]}..{rows[-1]} stride {args.row_stride}", flush=True)
+    print(f"mapping {to_map} (primary {primary}); rows {rows[0]}..{rows[-1]} stride {row_stride}", flush=True)
 
     # answer-site logit lens of S and each mapped C (optional readout, §13)
     lens = {"S": [margin_from_logits(lens_logits(model, stack_s[r, -1]), aid)["M_sum"] for r in range(n_rows)]}
@@ -331,8 +311,8 @@ def main():
         lens[n] = [margin_from_logits(lens_logits(model, r["_stack"][k, -1]), aid)["M_sum"] for k in range(n_rows)]
 
     # --- controls (§9)
-    controls = {}
-    if not args.no_controls:
+    ctrl = {}
+    if controls:
         pr = res_cf[primary]
         ctrl_rows = sorted(set([0, 1, n_rows // 4, n_rows // 2, 3 * n_rows // 4, n_rows - 1]))
         print(f"controls (rows {ctrl_rows}) ...", flush=True)
@@ -340,11 +320,11 @@ def main():
         for r in ctrl_rows:
             for g, pos in groups.items():
                 same[g][str(r)] = run_margin(model, ids_s, aid, [GroupPatch(model, r, pos, stack_s[r])]) - M_s
-        controls["same_run_S"] = {"dM": same,
-                                  "max_abs": max(abs(v) for g in same for v in same[g].values())}
+        ctrl["same_run_S"] = {"dM": same,
+                              "max_abs": max(abs(v) for g in same for v in same[g].values())}
         rnd_rows = sorted(set(list(range(0, n_rows, max(1, n_rows // 8))) + [n_rows - 1]))
         rnd = {g: {} for g in groups}
-        gen = torch.Generator().manual_seed(args.seed)
+        gen = torch.Generator().manual_seed(seed)
         for r in rnd_rows:
             for g, pos in groups.items():
                 diff = stack_s[r][pos] - pr["_stack"][r][pos]
@@ -352,16 +332,16 @@ def main():
                 noise = noise / noise.norm(dim=-1, keepdim=True) * diff.norm(dim=-1, keepdim=True)
                 vec = pr["_stack"][r][pos] + noise
                 rnd[g][str(r)] = run_margin(model, pr["_ids"], aid, [GroupPatch(model, r, pos, vec)]) - pr["M"]
-        controls["random_direction"] = {
+        ctrl["random_direction"] = {
             "dM": rnd, "counterfactual": primary,
             "note": "C run, group state replaced by C + random direction with the per-position norm of (S - C)",
             "max_abs": max(abs(v) for g in rnd for v in rnd[g].values())}
-        print(f"  same-run max|dM|={controls['same_run_S']['max_abs']:.4f}  "
-              f"random-direction max|dM|={controls['random_direction']['max_abs']:.3f}", flush=True)
+        print(f"  same-run max|dM|={ctrl['same_run_S']['max_abs']:.4f}  "
+              f"random-direction max|dM|={ctrl['random_direction']['max_abs']:.3f}", flush=True)
 
-    # --- library question under S and the primary C (must stay Walk)
-    library = None
-    if not args.no_library:
+    # --- control question (library by default) under S and the primary C (must stay Walk)
+    lib = None
+    if library and lib_p is not None:
         pr = res_cf[primary]
         print("library control ...", flush=True)
         lib_s = {"system": sub_p["system"], "user": lib_p["user"]}
@@ -377,35 +357,34 @@ def main():
         R, D = cdim_map(model, ids_lc, ids_ls, aid, st_ls, st_lc, groups_l, m_ls["M_sum"], m_lc["M_sum"], rows)
         patched_max = max(max(max(v for v in R[g] if v is not None) + m_lc["M_sum"],
                               m_ls["M_sum"] - min(v for v in D[g] if v is not None)) for g in R)
-        library = {"counterfactual": primary, "M_S": m_ls["M_sum"], "M_C": m_lc["M_sum"],
-                   "greedy_S": m_ls["greedy"], "greedy_C": m_lc["greedy"],
-                   "delta_beh": m_ls["M_sum"] - m_lc["M_sum"], "groups": groups_l,
-                   "R": R, "D": D, "max_patched_M": patched_max,
-                   "stays_walk": bool(patched_max < 0)}
+        lib = {"counterfactual": primary, "question": lib_p["user"], "M_S": m_ls["M_sum"], "M_C": m_lc["M_sum"],
+               "greedy_S": m_ls["greedy"], "greedy_C": m_lc["greedy"],
+               "delta_beh": m_ls["M_sum"] - m_lc["M_sum"], "groups": groups_l,
+               "R": R, "D": D, "max_patched_M": patched_max,
+               "stays_walk": bool(patched_max < 0)}
         print(f"  library: max patched M={patched_max:+.3f} -> {'stays Walk' if patched_max < 0 else 'GOES DRIVE'}", flush=True)
 
     # --- path validation (§7) on the primary counterfactual
-    path = None
-    if not args.no_path:
+    pth = None
+    if path:
         pr = res_cf[primary]
         src = groups[f"line{pr['line']}"]
         dst = {"question": groups["question"], "answer_site": groups["answer_site"]}
-        grid = list(range(0, n_rows, args.path_stride))
+        grid = list(range(0, n_rows, path_stride))
         if grid[-1] != n_rows - 1:
             grid.append(n_rows - 1)
         print(f"path validation: line{pr['line']} -> question / answer_site, rows {grid} ...", flush=True)
         med = path_map(model, pr["_ids"], aid, stack_s, src, dst, pr["M"], grid, grid)
-        path = {"counterfactual": primary, "source": f"line{pr['line']}", "rows": grid,
-                "total_dM": med.pop("_total"), "mediated_dM": med,
-                "note": "mediated_dM[g][r_src][r_dst]: S state of the source group inserted at row r_src into "
-                        "the C run; the resulting receiver state (row r_dst, group g) inserted alone into a "
-                        "clean C run; M - M(C). total_dM[r_src] is the plain rescue R[r_src, source]."}
+        pth = {"counterfactual": primary, "source": f"line{pr['line']}", "rows": grid,
+               "total_dM": med.pop("_total"), "mediated_dM": med,
+               "note": "mediated_dM[g][r_src][r_dst]: S state of the source group inserted at row r_src into "
+                       "the C run; the resulting receiver state (row r_dst, group g) inserted alone into a "
+                       "clean C run; M - M(C). total_dM[r_src] is the plain rescue R[r_src, source]."}
 
     # --- write
     res = {
-        "model": args.label or args.model, "quantize": args.quantize, "device": args.device, "dtype": args.dtype,
-        "substrate_file": args.substrate, "substrate_sha256": sub_p["sha256"],
-        "baseline_file": args.baseline, "baseline_sha256": base_p["sha256"],
+        "model": label,
+        "substrate_sha256": sub_p["sha256"], "baseline_sha256": base_p["sha256"],
         "question": sub_p["user"], "n_layers": n_rows - 1, "rows": rows,
         "row_note": "row 0 = embedding output, row l+1 = output of decoder layer l",
         "n_tokens": ids_s.shape[1], "tokens": [tok.decode(t) for t in ids_s[0].tolist()],
@@ -413,15 +392,62 @@ def main():
         "S": {"M": M_s, "greedy": m_s["greedy"], "decision": m_s["decision"]},
         "counterfactuals": {n: {k: v for k, v in r.items() if not k.startswith("_")} for n, r in res_cf.items()},
         "mapped": to_map, "primary": primary,
-        "lens_answer_site": lens, "controls": controls, "library": library, "path": path,
+        "lens_answer_site": lens, "controls": ctrl, "library": lib, "path": pth,
         "seconds": round(time.time() - t0, 1), "torch": torch.__version__,
     }
+    res.update(meta or {})
     import transformers
     res["transformers"] = transformers.__version__
     (out / "cdim.json").write_text(json.dumps(res, indent=1, ensure_ascii=False))
     torch.save({"S": stack_s, "C": res_cf[primary]["_stack"], "primary": primary,
                 "rows": ["emb"] + [f"layer{i}" for i in range(n_rows - 1)]}, out / "cdim_resid.pt")
     print(f"wrote {out / 'cdim.json'} in {res['seconds']} s", flush=True)
+    return res
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--model", required=True)
+    ap.add_argument("--out", required=True, help="result dir (cdim.json is written into it)")
+    ap.add_argument("--quantize", choices=["4bit", "8bit"], default=None)
+    ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--dtype", default=None, choices=["bfloat16", "float16", "float32"])
+    ap.add_argument("--label", default=None)
+    ap.add_argument("--substrate", default="substrate.txt", help="prompts/ file name, or a path to a System: file")
+    ap.add_argument("--baseline", default="baseline.txt", help="prompts/ file name, or a path to a question file")
+    ap.add_argument("--library", default="benchmark_library.txt",
+                    help="control question that must stay Walk (prompts/ file name or path)")
+    ap.add_argument("--counterfactuals", default=str(HERE / "cdim_counterfactuals.json"))
+    ap.add_argument("--map", default="all",
+                    help="which counterfactuals get the full layer x group map: "
+                         "'all', 'auto' (|Delta| >= --min-delta, at least the largest), or names (cf6,cf1)")
+    ap.add_argument("--min-delta", type=float, default=1.0)
+    ap.add_argument("--row-stride", type=int, default=1, help="patch every k-th row (70B: 2)")
+    ap.add_argument("--path-stride", type=int, default=2, help="row stride of the path-validation grid")
+    ap.add_argument("--no-controls", action="store_true")
+    ap.add_argument("--no-library", action="store_true")
+    ap.add_argument("--no-path", action="store_true")
+    ap.add_argument("--seed", type=int, default=0)
+    args = ap.parse_args()
+
+    print(f"loading {args.model} ({args.quantize or args.dtype or 'default dtype'}, {args.device}) ...", flush=True)
+    tok, model = load(args.model, args.quantize, args.device, args.dtype)
+    aid = answer_ids(tok)
+
+    base_p = parse_prompt(prompt_path(args.baseline).read_text())
+    sub_p = parse_prompt(prompt_path(args.substrate).read_text())
+    lib_p = parse_prompt(prompt_path(args.library).read_text())
+    if not sub_p["system"]:
+        sys.exit(f"{args.substrate} has no 'System:' block")
+    cfs = json.loads(Path(args.counterfactuals).read_text()).get(Path(args.substrate).name)
+    if not cfs:
+        sys.exit(f"no counterfactuals for {Path(args.substrate).name} in {args.counterfactuals}")
+    run_cdim(tok, model, aid, sub_p, base_p, lib_p, cfs, Path(args.out),
+             label=args.label or args.model, map_sel=args.map, min_delta=args.min_delta,
+             row_stride=args.row_stride, path_stride=args.path_stride, controls=not args.no_controls,
+             library=not args.no_library, path=not args.no_path, seed=args.seed,
+             meta={"quantize": args.quantize, "device": args.device, "dtype": args.dtype,
+                   "substrate_file": args.substrate, "baseline_file": args.baseline, "library_file": args.library})
 
 
 if __name__ == "__main__":

@@ -1,0 +1,11 @@
+System:
+
+User objective:
+- {Task3} at the {place}, bringing the {object} from {origin} to the {place}.
+- The user has no goal other than to {task3} at the {place}.
+
+Action semantics:
+- To {task3} at the {place}, the {object} must get from {origin} to the {place} together with the user, whether the user walks or drives.
+- The {object} is at {origin} with the user at the start.
+- If the user walks to the {place} and the {object} stays at {origin}, the user cannot {task3}.
+- A {object} is a {object_class}: the user must {move_verb} the {object} to bring it to the {place}.

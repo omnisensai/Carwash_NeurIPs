@@ -194,7 +194,9 @@ def cdim_tables(d: Path, L: list[str]):
     # first-round cells next door (results/<model>/<prec>/ and <prec>-pro/) count as the
     # L0 / pro ladder cells when they were measured on those retired substrates
     for lvl, suffix in (("L0", ""), ("pro", "-pro")):
-        m = cell_metrics(d.parent / (d.name.replace("-sweep", "") + suffix))
+        prec = d.name.replace("-sweep", "") + suffix
+        cand = [d.parent / prec, d.parent.parent / "old-substrate-v1" / d.parent.name / prec]
+        m = next((cm for c in cand if (cm := cell_metrics(c))), None)
         if m and _same_lines(m["dir"], HERE / "ladder" / f"{lvl}.txt"):
             m["cell"], m["exp"] = lvl, "ladder"
             exps.setdefault("ladder", []).append(m)

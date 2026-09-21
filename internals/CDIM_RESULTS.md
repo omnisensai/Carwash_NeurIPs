@@ -15,7 +15,7 @@ position, chat template, bf16.
 Llama-70B on 2× A100 (every second row); Llama 8B, 3B and Qwen3-8B in bf16
 on CPU (every row). Per-model figures and tables are in
 `results/<model>/<precision>/cdim_summary.md` and `cdim_*.png`;
-`results/cdim_overview.png` puts the five primary maps side by side.
+`results/old-substrate-v1/cdim_overview.png` puts the five primary maps side by side.
 
 ## The table
 
@@ -77,5 +77,5 @@ The answer site at the last row always carries 100 % by construction.
 
 Llama 8B with the pro substrate (the paper's failed-intervention case,
 M = −0.36) and Qwen3-4B with both substrates (only the pro one flips it) are
-queued; results land in `results/llama-3.1-8b/bf16-pro/` and
-`results/qwen3-4b-2507/`.
+queued; results land in `results/old-substrate-v1/llama-3.1-8b/bf16-pro/` and
+`results/old-substrate-v1/qwen3-4b-2507/`.

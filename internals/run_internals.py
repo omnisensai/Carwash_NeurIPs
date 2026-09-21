@@ -123,10 +123,15 @@ def token_spans(tok, text: str, ids: list[int], p: dict) -> dict[str, list[int]]
             s = span(ln)
             if s:
                 spans[f"line{k}"] = s
-        for hdr in ("User objective:", "Action semantics:"):
+        for hdr in ("User objective:", "Action semantics:", "User goals:", "Definitions:", "Constraints:"):
             s = span(hdr)
             if s:
-                spans["hdr_" + hdr.split()[0].lower()] = s
+                spans["hdr_" + hdr.split()[0].lower().rstrip(":")] = s
+        # 'Object = car' style definition lines (nine-line substrate of 19 Sep 2026)
+        for k, ln in enumerate([ln for ln in p["system"].splitlines() if " = " in ln and not ln.lstrip().startswith("-")], 1):
+            s = span(ln.strip())
+            if s:
+                spans[f"def{k}"] = s
     q_start = text.find(p["user"])
     q = p["user"].split("\n")[0]
     s = span(q, q_start)

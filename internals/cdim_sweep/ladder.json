@@ -1,18 +1,94 @@
 {
- "_note": "Explicitness ladder for the CDIM dose-response experiment. Level L0 is prompts/substrate.txt (unchanged, the paper's abstract substrate); L1-L5 are templates in ladder/ with the same six bullet slots under the same two headers, each level doing one more step of the inference chain for the model. Templates are filled per scenario by build_prompts.py with the scenario fields plus the object-class phrases below. 'features' are the objective explicitness markers per level: which abstract nouns are replaced by concrete ones, whether the answer verbs appear, whether a verdict is stated.",
+ "_note": "Explicitness ladder for the CDIM dose-response experiment. L0 = the six-line abstract substrate of 17 Sep 2026 (retired from prompts/ on 19 Sep, kept here as ladder/L0.txt; the first-round results were measured on it); L1-L5 are templates with the same six bullet slots, each doing one more step of the inference chain for the model. S = the official prompts/substrate.txt (nine lines, Definitions block, read live, never edited here); pro = the retired substrate_pro.txt (ladder/pro.txt). Templated levels are filled per scenario by build_prompts.py with the scenario fields plus the object-class phrases below; the others are used verbatim. 'features' are objective explicitness markers per level. 'order' is the x-axis of the dose-response figure.",
  "levels": {
-  "L0": {"file": "../../prompts/substrate.txt", "step": "abstract: object / location A / location B / activity / vehicle / operate",
-         "features": {"concrete_nouns": false, "answer_verbs": false, "consequences": false, "verdict": false}},
-  "L1": {"file": "ladder/L1.txt", "step": "L0 + the answer verbs named where the rule bears on them (walks / drives / drive it)",
-         "features": {"concrete_nouns": false, "answer_verbs": true, "consequences": false, "verdict": false}},
-  "L2": {"file": "ladder/L2.txt", "step": "L1 + concrete nouns as parenthetical examples (for example a car / the car wash / home)",
-         "features": {"concrete_nouns": "examples", "answer_verbs": true, "consequences": false, "verdict": false}},
-  "L3": {"file": "ladder/L3.txt", "step": "concrete nouns replace every abstraction (the car, home, the car wash, wash the car)",
-         "features": {"concrete_nouns": true, "answer_verbs": true, "consequences": false, "verdict": false}},
-  "L4": {"file": "ladder/L4.txt", "step": "L3 + every line states its consequence for the walk/drive decision",
-         "features": {"concrete_nouns": true, "answer_verbs": true, "consequences": true, "verdict": false}},
-  "L5": {"file": "ladder/L5.txt", "step": "L4 + line 6 states the verdict (the correct answer is drive, not walk)",
-         "features": {"concrete_nouns": true, "answer_verbs": true, "consequences": true, "verdict": true}}
+  "L0": {
+   "file": "ladder/L0.txt",
+   "step": "abstract: object / location A / location B / activity / vehicle / operate",
+   "features": {
+    "concrete_nouns": false,
+    "answer_verbs": false,
+    "consequences": false,
+    "verdict": false
+   },
+   "templated": false
+  },
+  "L1": {
+   "file": "ladder/L1.txt",
+   "step": "L0 + the answer verbs named where the rule bears on them (walks / drives / drive it)",
+   "features": {
+    "concrete_nouns": false,
+    "answer_verbs": true,
+    "consequences": false,
+    "verdict": false
+   },
+   "templated": true
+  },
+  "L2": {
+   "file": "ladder/L2.txt",
+   "step": "L1 + concrete nouns as parenthetical examples (for example a car / the car wash / home)",
+   "features": {
+    "concrete_nouns": "examples",
+    "answer_verbs": true,
+    "consequences": false,
+    "verdict": false
+   },
+   "templated": true
+  },
+  "L3": {
+   "file": "ladder/L3.txt",
+   "step": "concrete nouns replace every abstraction (the car, home, the car wash, wash the car)",
+   "features": {
+    "concrete_nouns": true,
+    "answer_verbs": true,
+    "consequences": false,
+    "verdict": false
+   },
+   "templated": true
+  },
+  "L4": {
+   "file": "ladder/L4.txt",
+   "step": "L3 + every line states its consequence for the walk/drive decision",
+   "features": {
+    "concrete_nouns": true,
+    "answer_verbs": true,
+    "consequences": true,
+    "verdict": false
+   },
+   "templated": true
+  },
+  "L5": {
+   "file": "ladder/L5.txt",
+   "step": "L4 + line 6 states the verdict (the correct answer is drive, not walk)",
+   "features": {
+    "concrete_nouns": true,
+    "answer_verbs": true,
+    "consequences": true,
+    "verdict": true
+   },
+   "templated": true
+  },
+  "S": {
+   "file": "../../prompts/substrate.txt",
+   "templated": false,
+   "step": "the official substrate: abstract rules plus a Definitions block that names object = car, service location = car wash; consequences of walking stated (leaves a vehicle behind), no verdict",
+   "features": {
+    "concrete_nouns": "definitions",
+    "answer_verbs": true,
+    "consequences": true,
+    "verdict": false
+   }
+  },
+  "pro": {
+   "file": "ladder/pro.txt",
+   "templated": false,
+   "step": "retired substrate_pro: definitions with alternatives (car, book; car wash, library, gas station), consequences stated, no verdict",
+   "features": {
+    "concrete_nouns": "definitions",
+    "answer_verbs": true,
+    "consequences": true,
+    "verdict": false
+   }
+  }
  },
  "class_phrases": {
   "vehicle": {
@@ -31,5 +107,15 @@
    "line6_L4": "A {object} is a portable item: the user can carry the {object} to the {place} on foot; walking succeeds.",
    "line6_L5": "A {object} is a portable item: the user can carry the {object} to the {place} on foot. The correct answer is walk, not drive."
   }
- }
+ },
+ "order": [
+  "L0",
+  "L1",
+  "L2",
+  "L3",
+  "L4",
+  "L5",
+  "S",
+  "pro"
+ ]
 }

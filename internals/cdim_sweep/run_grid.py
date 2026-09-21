@@ -5,8 +5,8 @@
     python run_grid.py --model Qwen/Qwen3-8B --out results/qwen3-8b/bf16-sweep --cells A
 
 Cells come from build_prompts.cells(): every scenario x paraphrase body x tail
-under none / pro / L0..L5 filled for the question's own scenario (grid A), and
-every question under the carwash-filled L2..L5 at P0 x T1 (grid B, selectivity).
+under none / L0..L5 / S / pro filled for the question's own scenario (grid A), and
+every question under the carwash-filled L2..L5 and S at P0 x T1 (grid B, leak test).
 One forward pass per cell (chat template, logits at the answer position only);
 M = log P(drive) - log P(walk) summed over surface forms, as everywhere else.
 Resumable: existing cells in <out>/grid.json are skipped. No model is ever run
@@ -24,15 +24,13 @@ import torch
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
-from build_prompts import GEN, PROMPTS, cells, load as load_prompts, write_generated   # noqa: E402
+from build_prompts import GEN, cells, load as load_prompts, write_generated   # noqa: E402
 from run_internals import answer_ids, load, margin_from_logits, parse_prompt, render   # noqa: E402
 
 
 def system_text(D, substrate: str, fill: str) -> str | None:
     if substrate == "none":
         return None
-    if substrate == "pro":
-        return parse_prompt((PROMPTS / "substrate_pro.txt").read_text())["system"]
     return parse_prompt((GEN / "substrates" / fill / f"{substrate}.txt").read_text())["system"]
 
 
@@ -49,7 +47,7 @@ def main():
     ap.add_argument("--device", default="cuda")
     ap.add_argument("--dtype", default=None, choices=["bfloat16", "float16", "float32"])
     ap.add_argument("--label", default=None)
-    ap.add_argument("--cells", default="all", help="'all', 'A', 'B', or a comma list of substrates (none,pro,L0..L5)")
+    ap.add_argument("--cells", default="all", help="'all', 'A', 'B', or a comma list of substrates (none,L0..L5,S,pro)")
     ap.add_argument("--flush-every", type=int, default=100)
     args = ap.parse_args()
 

@@ -46,7 +46,10 @@ QARG=""; PREC=bf16
 if [ "$QUANT" != none ]; then QARG="--quantize $QUANT"; PREC=$QUANT; [ "$QUANT" = 4bit ] && PREC=nf4; fi
 VARIANT="$PREC"
 [ "$SUBSTRATE" != substrate.txt ] && VARIANT="$PREC-$(basename "$SUBSTRATE" .txt | sed s/^substrate_//)"
-OUT="results/$NAME/$VARIANT"                     # e.g. results/llama-3.3-70b/bf16-pro
+OUT="${OUT:-results/$NAME/$VARIANT}"             # e.g. results/llama-3.3-70b/bf16-pro; OUT=... overrides
+# NOTE: results/<model>/bf16[-pro]/ of 17-18 Sep were measured on the six-line substrate that
+# prompts/substrate.txt held then (now internals/cdim_sweep/ladder/L0.txt). prompts/substrate.txt
+# is the nine-line substrate since 19 Sep; write reruns of the old models elsewhere (OUT=...).
 LABEL="$(basename "$MODEL") ($PREC)"
 echo "model=$MODEL  gpu_total=${TOTAL_MB} MiB  quant=$QUANT  -> $OUT"
 

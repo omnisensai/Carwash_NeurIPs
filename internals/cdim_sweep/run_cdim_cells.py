@@ -7,12 +7,13 @@
 
 Plans (all use the carwash question P0 + T1 unless stated; control question =
 the paired walk scenario under the same substrate, as cdim.py does with the library):
-  ladder      L1..L5 filled for carwash (L0 = the existing results/<model>/<prec>/cdim.json)
+  ladder      --levels (default L1..L5 and S) filled for carwash; L0 / pro are the first-round
+              results/<model>/<prec>/ and <prec>-pro/ cdim.json when those were measured on them
               -> <out>/ladder/<level>/
-  paraphrase  L0 with bodies P1..P11 (tail T1) plus P0+T0 and P0+T2
+  paraphrase  --level (default S, the official substrate) with bodies P1..P11 (tail T1) plus P0+T0 and P0+T2
               -> <out>/paraphrase/<body>_<tail>/
-  scenario    L0 with every drive scenario except carwash (P0 + T1)
-              -> <out>/scenario/<scenario>/      (--with-pro: also substrate_pro -> <out>/scenario-pro/<scenario>/)
+  scenario    --level with every drive scenario except carwash (P0 + T1)
+              -> <out>/scenario/<scenario>/      (--with-pro: the same under pro -> <out>/scenario-pro/<scenario>/)
 Every cell dir gets cdim.json + cdim_resid.pt (+ the plot_cdim figures at the end).
 Resumable: cells with a cdim.json are skipped. --map auto maps only lines with
 |Delta| >= --min-delta (at least the largest), which is what the analysis needs.
@@ -29,38 +30,43 @@ import torch
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent))
-from build_prompts import GEN, PROMPTS, load as load_prompts, question_text, write_generated   # noqa: E402
+from build_prompts import GEN, load as load_prompts, question_text, write_generated   # noqa: E402
 from cdim import run_cdim                                                                     # noqa: E402
 from run_internals import answer_ids, load, parse_prompt                                       # noqa: E402
 
 
+def sub_of(fill: str, level: str):
+    """(substrate file, counterfactuals) of a ladder level filled for a scenario, from generated/."""
+    cfj = json.loads((GEN / "substrates" / fill / "counterfactuals.json").read_text())
+    return str(GEN / "substrates" / fill / f"{level}.txt"), cfj[f"{level}.txt"]
+
+
 def plan_cells(D, args) -> list[dict]:
-    cf0 = json.loads((HERE.parent / "cdim_counterfactuals.json").read_text())
     out = []
     plans = args.plan.split(",")
     if "ladder" in plans:
-        cfj = json.loads((GEN / "substrates" / "carwash" / "counterfactuals.json").read_text())
         for lvl in args.levels.split(","):
-            out.append({"exp": "ladder", "cell": lvl, "substrate": str(GEN / "substrates" / "carwash" / f"{lvl}.txt"),
-                        "cfs": cfj[f"{lvl}.txt"], "q": "carwash", "body": "P0", "tail": "T1", "control": "library",
-                        "level": lvl})
+            f, cfs = sub_of("carwash", lvl)
+            out.append({"exp": "ladder", "cell": lvl, "substrate": f, "cfs": cfs, "q": "carwash", "body": "P0",
+                        "tail": "T1", "control": "library", "level": lvl})
     if "paraphrase" in plans:
         combos = [(b, "T1") for b in args.bodies.split(",")] + [("P0", "T0"), ("P0", "T2")]
+        f, cfs = sub_of("carwash", args.level)
         for b, t in combos:
-            out.append({"exp": "paraphrase", "cell": f"{b}_{t}", "substrate": str(PROMPTS / "substrate.txt"),
-                        "cfs": cf0["substrate.txt"], "q": "carwash", "body": b, "tail": t, "control": "library",
-                        "level": "L0"})
+            out.append({"exp": "paraphrase", "cell": f"{b}_{t}", "substrate": f, "cfs": cfs, "q": "carwash",
+                        "body": b, "tail": t, "control": "library", "level": args.level})
     if "scenario" in plans:
         scen = args.scenarios.split(",") if args.scenarios else \
             [s for s, v in D["scenarios"].items() if v["kind"] == "vehicle" and s != "carwash"]
         for s in scen:
             ctrl = D["scenarios"][s]["control"] or "library"
-            out.append({"exp": "scenario", "cell": s, "substrate": str(PROMPTS / "substrate.txt"),
-                        "cfs": cf0["substrate.txt"], "q": s, "body": "P0", "tail": "T1", "control": ctrl, "level": "L0"})
+            f, cfs = sub_of(s, args.level)
+            out.append({"exp": "scenario", "cell": s, "substrate": f, "cfs": cfs, "q": s, "body": "P0", "tail": "T1",
+                        "control": ctrl, "level": args.level})
             if args.with_pro:
-                out.append({"exp": "scenario-pro", "cell": s, "substrate": str(PROMPTS / "substrate_pro.txt"),
-                            "cfs": cf0["substrate_pro.txt"], "q": s, "body": "P0", "tail": "T1", "control": ctrl,
-                            "level": "pro"})
+                f, cfs = sub_of(s, "pro")
+                out.append({"exp": "scenario-pro", "cell": s, "substrate": f, "cfs": cfs, "q": s, "body": "P0",
+                            "tail": "T1", "control": ctrl, "level": "pro"})
     return out
 
 
@@ -74,7 +80,8 @@ def main():
     ap.add_argument("--dtype", default=None, choices=["bfloat16", "float16", "float32"])
     ap.add_argument("--label", default=None)
     ap.add_argument("--plan", default="ladder,paraphrase,scenario")
-    ap.add_argument("--levels", default="L1,L2,L3,L4,L5")
+    ap.add_argument("--levels", default="L1,L2,L3,L4,L5,S", help="ladder cells")
+    ap.add_argument("--level", default="S", help="substrate level of the paraphrase / scenario cells")
     ap.add_argument("--bodies", default="P1,P2,P3,P4,P5,P6,P7,P8,P9,P10,P11")
     ap.add_argument("--scenarios", default=None, help="comma list; default: every drive scenario but carwash")
     ap.add_argument("--with-pro", action="store_true")

@@ -1,5 +1,7 @@
 # What the substrate changes inside open-weight models
 
+> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`.
+
 Measured 17 Sep 2026 with `run_internals.py`. All readouts at the position
 that predicts the first answer token, teacher-forced, chat template, bf16
 weights. M = log P(drive) − log P(walk) in nats, summed over the surface

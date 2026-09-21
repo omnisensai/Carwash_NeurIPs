@@ -70,8 +70,8 @@ def replace_line(system: str, k: int, new_line: str) -> str:
 
 def groups_from_spans(spans: dict[str, list[int]], n_tokens: int) -> dict[str, list[int]]:
     """Semantic position groups (§4): every substrate line, the headers, the
-    whole system block, the question, the answer instruction, the assistant
-    header (without the last position) and the answer site."""
+    definition lines (if any), the whole system block, the question, the answer
+    instruction, the assistant header (without the last position) and the answer site."""
     g: dict[str, list[int]] = {}
     lines = sorted(k for k in spans if k.startswith("line"))
     for k in lines:
@@ -80,7 +80,10 @@ def groups_from_spans(spans: dict[str, list[int]], n_tokens: int) -> dict[str, l
     hdr = [p for k in spans if k.startswith("hdr_") for p in range(*spans[k])]
     if hdr:
         g["headers"] = sorted(hdr)
-    sysblock = sorted(set(hdr) | {p for k in lines for p in g[k]})
+    defs = [p for k in spans if k.startswith("def") for p in range(*spans[k])]
+    if defs:
+        g["definitions"] = sorted(defs)
+    sysblock = sorted(set(hdr) | set(defs) | {p for k in lines for p in g[k]})
     if sysblock:
         g["system"] = sysblock
     if "question" in spans:

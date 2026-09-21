@@ -1,6 +1,6 @@
 # CDIM results — where a substrate line takes effect
 
-> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`.
+> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`; the 21 Sep results on it are in `SWEEP_RESULTS.md`.
 
 Measured 18 Sep 2026 with `cdim.py` (Mechanistic_paper.md §2–§9). For each
 model: the substrate S (system prompt + baseline question) against a

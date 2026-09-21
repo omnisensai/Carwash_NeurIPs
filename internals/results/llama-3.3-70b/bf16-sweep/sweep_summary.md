@@ -175,12 +175,14 @@ Drive tasks = scenarios whose rules imply drive; walk tasks = portable-object co
 
 | cell | M(S) | greedy | primary line | Δ | flips | line carries ≥½Δ until (row / depth) | answer site from (row / depth) | share via question | random ctrl | control stays walk |
 |---|---|---|---|---|---|---|---|---|---|---|
+| L0 | +6.07 | 'Drive<|eot_id|>' | cf5 (line 5) | +9.52 | yes | 24 / 0.30 | 36 / 0.45 | 18% | 1.85 | True |
 | L1 | +5.18 | 'Drive<|eot_id|>' | cf6s (line 6) | +10.33 | yes | 28 / 0.35 | 40 / 0.50 | 38% | 2.37 | True |
 | L2 | -0.71 | 'walk<|eot_id|>' | cf1 (line 1) | -11.13 | yes | 16 / 0.20 | 40 / 0.50 | 63% | 1.40 | True |
 | L3 | +11.45 | 'Drive<|eot_id|>' | cf6 (line 6) | +19.43 | yes | 26 / 0.33 | 40 / 0.50 | 20% | 1.46 | True |
 | L4 | +21.56 | 'Drive<|eot_id|>' | cf5 (line 5) | +28.12 | yes | 28 / 0.35 | 34 / 0.42 | 15% | 6.81 | True |
 | L5 | +23.15 | 'Drive<|eot_id|>' | cf6 (line 6) | +38.40 | yes | 30 / 0.38 | 36 / 0.45 | 7% | 6.67 | True |
 | S | +15.01 | 'Drive<|eot_id|>' | cf9s (line 9) | +1.90 | no | 28 / 0.35 | 36 / 0.45 | 63% | 0.87 | True |
+| pro | +17.00 | 'Drive<|eot_id|>' | p9s (line 9) | +6.45 | no | 30 / 0.38 | 36 / 0.45 | 64% | 1.46 | True |
 
 ## CDIM: paraphrase
 

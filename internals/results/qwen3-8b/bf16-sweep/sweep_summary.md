@@ -175,6 +175,7 @@ Drive tasks = scenarios whose rules imply drive; walk tasks = portable-object co
 
 | cell | M(S) | greedy | primary line | Δ | flips | line carries ≥½Δ until (row / depth) | answer site from (row / depth) | share via question | random ctrl | control stays walk |
 |---|---|---|---|---|---|---|---|---|---|---|
+| L0 | +10.75 | 'drive<|im_end|>' | cf6s (line 6) | +7.75 | no | 18 / 0.50 | 24 / 0.67 | 27% | 2.75 | True |
 | L1 | +7.25 | 'drive<|im_end|>' | cf6s (line 6) | +8.75 | yes | 18 / 0.50 | 25 / 0.69 | 26% | 3.00 | True |
 | L2 | +7.50 | 'drive<|im_end|>' | cf6s (line 6) | +11.50 | yes | 19 / 0.53 | 25 / 0.69 | 25% | 3.25 | True |
 | L3 | +23.25 | 'drive<|im_end|>' | cf6s (line 6) | +31.50 | yes | 19 / 0.53 | 24 / 0.67 | 12% | 9.50 | True |

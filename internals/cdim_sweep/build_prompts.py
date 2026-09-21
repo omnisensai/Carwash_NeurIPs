@@ -9,7 +9,7 @@ there and used as is.
     python build_prompts.py --list     # print every cell id
 
 generated/
-  substrates/<scenario>/<level>.txt        System: block, level filled for that scenario (L0/L1 identical for all)
+  substrates/<scenario>/<level>.txt        the substrate system prompt, level filled for that scenario (L0, L1, S, pro identical for all)
   substrates/<scenario>/counterfactuals.json   {"<level>.txt": [...]} for cdim.py --counterfactuals
   questions/<scenario>_<P>_<T>.txt          user message (body + blank line + tail), format of prompts/baseline.txt
 
@@ -36,9 +36,10 @@ def load() -> dict:
     par = json.loads((HERE / "paraphrases.json").read_text())
     lad = json.loads((HERE / "ladder.json").read_text())
     cfs = json.loads((HERE / "ladder_counterfactuals.json").read_text())
-    cf0 = json.loads((HERE.parent / "cdim_counterfactuals.json").read_text())["substrate.txt"]
+    plain = json.loads((HERE.parent / "cdim_counterfactuals.json").read_text())   # non-templated, keyed by file basename
     return {"scenarios": {s["id"]: s for s in sc}, "bodies": par["bodies"], "tails": par["tails"],
-            "levels": lad["levels"], "class_phrases": lad["class_phrases"], "cfs": cfs, "cf0": cf0}
+            "levels": lad["levels"], "order": lad["order"], "class_phrases": lad["class_phrases"],
+            "cfs": cfs, "plain_cfs": plain}
 
 
 def fields(D: dict, scenario: str) -> dict:
@@ -56,10 +57,8 @@ def substrate_text(D: dict, level: str, scenario: str) -> str:
     """Full 'System:' file text for a level filled for a scenario (as cdim.py reads it)."""
     path = (HERE / D["levels"][level]["file"]).resolve()
     text = _strip_sha(path.read_text())
-    if level == "L0":
-        # prompts/substrate.txt embeds the carwash question; cdim.py / run_internals.py replace it
-        # by the baseline's question, so only the System: block matters. Keep the file verbatim.
-        return text
+    if not D["levels"][level].get("templated"):
+        return text          # verbatim (L0 embeds the old carwash question; the runners replace it by the cell's question)
     return text.format_map(fields(D, scenario))
 
 
@@ -70,24 +69,26 @@ def question_text(D: dict, scenario: str, body: str, tail: str) -> str:
 
 
 def counterfactuals(D: dict, level: str, scenario: str) -> list[dict]:
-    if level == "L0":
-        return [dict(c) for c in D["cf0"]]
+    if not D["levels"][level].get("templated"):
+        key = Path(D["levels"][level]["file"]).name
+        return [dict(c) for c in D["plain_cfs"][key]]
     f = fields(D, scenario)
     return [{**c, "text": c["text"].format_map(f)} for c in D["cfs"][level]]
 
 
 def cells(D: dict) -> list[dict]:
     """The behavioural grid: every question (scenario x body x tail) under
-    none / pro / L0..L5 filled for the question's own scenario (grid A), plus
-    every question under the carwash-filled L2..L5, P0 x T1 only (grid B, selectivity)."""
+    none and every ladder level (L0..L5, S, pro) filled for the question's own
+    scenario (grid A), plus every question under the carwash-filled concrete
+    levels L2..L5 and S, P0 x T1 only (grid B, selectivity / leak test)."""
     out = []
     for q in D["scenarios"]:
         for b in D["bodies"]:
             for t in D["tails"]:
-                for sub in ["none", "pro"] + list(D["levels"]):
+                for sub in ["none"] + list(D["order"]):
                     out.append({"grid": "A", "q": q, "body": b, "tail": t, "substrate": sub, "fill": q})
     for q in D["scenarios"]:
-        for lvl in ("L2", "L3", "L4", "L5"):
+        for lvl in ("L2", "L3", "L4", "L5", "S"):
             if q != "carwash":
                 out.append({"grid": "B", "q": q, "body": "P0", "tail": "T1", "substrate": lvl, "fill": "carwash"})
     return out

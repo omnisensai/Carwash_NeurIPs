@@ -30,13 +30,15 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
 from plot_cdim import _first_row_above, _last_row_above, mat   # noqa: E402
+ORDER = json.loads((HERE / "ladder.json").read_text())["order"]
 
 BLUE, RED, INK, MUTED, LIGHT = "#2c5aa0", "#b03a2e", "#222222", "#777777", "#d9d9d9"
 plt.rcParams.update({"font.size": 8, "axes.edgecolor": MUTED, "axes.labelcolor": INK, "xtick.color": INK,
                      "ytick.color": INK, "axes.titlesize": 9, "axes.spines.top": False, "axes.spines.right": False})
-SUBS = ["none", "L0", "L1", "L2", "L3", "L4", "L5", "pro"]
+SUBS = ["none", "L0", "L1", "L2", "L3", "L4", "L5", "S", "pro"]
 
 
 # ---------------------------------------------------------------- CDIM cells --
@@ -138,11 +140,11 @@ def grid_tables(cells: dict, L: list[str], d: Path):
 
     if B:
         L.append("## Grid B: walk questions under the carwash-filled concrete substrates (leak test)\n")
-        L.append("| question | " + " | ".join(s for s in ("L2", "L3", "L4", "L5")) + " |")
-        L.append("|---|---|---|---|---|")
+        L.append("| question | " + " | ".join(s for s in ("L2", "L3", "L4", "L5", "S")) + " |")
+        L.append("|---|---|---|---|---|---|")
         for q in sorted({c["q"] for c in B}):
             row = []
-            for s in ("L2", "L3", "L4", "L5"):
+            for s in ("L2", "L3", "L4", "L5", "S"):
                 cs = [c for c in B if c["q"] == q and c["substrate"] == s]
                 row.append(f"{cs[0]['M']:+.2f} {cs[0]['answer']}" if cs else "–")
             L.append(f"| {q} ({cells_correct(cells.values(), q)}) | " + " | ".join(row) + " |")
@@ -167,6 +169,13 @@ def grid_tables(cells: dict, L: list[str], d: Path):
     plt.close(fig)
 
 
+def _same_lines(cell_dir: str, substrate_file) -> bool:
+    """Was this cdim.json measured on the bullet lines of that substrate file?"""
+    r = json.loads((Path(cell_dir) / "cdim.json").read_text())
+    want = [ln for ln in substrate_file.read_text().splitlines() if ln.lstrip().startswith("-")]
+    return [ln.strip() for ln in r["substrate_lines"]] == [ln.strip() for ln in want]
+
+
 def cells_correct(cs, q):
     for c in cs:
         if c["q"] == q:
@@ -182,11 +191,15 @@ def cdim_tables(d: Path, L: list[str]):
         cs = [m for p in sorted((d / exp).glob("*/")) if (m := cell_metrics(p))]
         if cs:
             exps[exp] = cs
-    # the existing L0 carwash cell lives next door: results/<model>/<prec>/cdim.json
-    l0 = cell_metrics(d.parent / d.name.replace("-sweep", ""))
-    if l0:
-        l0["cell"], l0["exp"] = "L0", "ladder"
-        exps.setdefault("ladder", []).insert(0, l0)
+    # first-round cells next door (results/<model>/<prec>/ and <prec>-pro/) count as the
+    # L0 / pro ladder cells when they were measured on those retired substrates
+    for lvl, suffix in (("L0", ""), ("pro", "-pro")):
+        m = cell_metrics(d.parent / (d.name.replace("-sweep", "") + suffix))
+        if m and _same_lines(m["dir"], HERE / "ladder" / f"{lvl}.txt"):
+            m["cell"], m["exp"] = lvl, "ladder"
+            exps.setdefault("ladder", []).append(m)
+    if "ladder" in exps:
+        exps["ladder"].sort(key=lambda m: ORDER.index(m["cell"]) if m["cell"] in ORDER else 99)
     if not exps:
         return
     hdr = ("| cell | M(S) | greedy | primary line | Δ | flips | line carries ≥½Δ until (row / depth) | "

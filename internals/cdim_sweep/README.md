@@ -1,6 +1,6 @@
 # cdim_sweep — three controlled extensions of the CDIM experiment
 
-Prepared 19 Sep 2026, nothing run yet on a real model (the pipeline was
+Prepared 19 Sep 2026, re-anchored 21 Sep after `prompts/substrate.txt` became the nine-line substrate; nothing run yet on a real model (the pipeline was
 smoke-tested end to end on SmolLM2-135M only; those numbers mean nothing).
 Everything lives in this folder; `prompts/`, the paper files and the sweep
 scripts of the first round are untouched except for `cdim.py`, whose `main()`
@@ -27,18 +27,18 @@ with the same grid.
 
 | file | what |
 |---|---|
-| `ladder.json`, `ladder/L1..L5.txt` | the explicitness ladder. L0 = `prompts/substrate.txt` (abstract). Each level does one more step of the inference chain for the model, keeping six bullet slots under the same two headers: L1 names the answer verbs; L2 adds concrete nouns as examples; L3 replaces every abstraction by the concrete noun; L4 states each line's consequence for the decision; L5 states the verdict. Templates over the scenario fields, so every level exists for every scenario. |
-| `ladder_counterfactuals.json` | one reversal per line per level (+ a strong reversal of line 6), token-aligned under the Llama-3 and Qwen3 tokenizers for every drive scenario (`check_align.py` verifies without a model; all 245 rows pass). |
+| `ladder.json`, `ladder/L0.txt`, `ladder/L1..L5.txt`, `ladder/pro.txt` | the explicitness ladder. L0 = the six-line abstract substrate of 17 Sep (retired from `prompts/` on 19 Sep, kept here verbatim; the first-round results were measured on it). L1–L5 do one more step of the inference chain each, same six bullet slots: L1 names the answer verbs; L2 adds concrete nouns as examples; L3 replaces every abstraction; L4 states each line's consequence; L5 states the verdict. Templated over the scenario fields, so every level exists for every scenario. **S = the official `prompts/substrate.txt`** (nine lines with a Definitions block, read live). pro = the retired `substrate_pro.txt`. On explicitness, S sits between L2 and L4: definitions name the car and the car wash, consequences are stated, no verdict. |
+| `ladder_counterfactuals.json`, `../cdim_counterfactuals.json` | one reversal per line per level (+ a strong reversal of the decisive line), token-aligned under the Llama-3 and Qwen3 tokenizers for every drive scenario. Templated levels here; S / L0 / pro in `../cdim_counterfactuals.json` keyed by file name. `check_align.py` verifies without a model; all rows pass. |
 | `scenarios.json` | 13 tasks: 7 where the object is the vehicle (carwash, fuel, tyres, inspection, oil, parking, van → drive) and 6 portable-object controls (library, post, pharmacy, bakery, dry cleaner, keys → walk). |
-| `paraphrases.json` | 12 question bodies × 3 answer tails (T0 = old wording, T1 = current, T2 = "drive or walk"). carwash × P0 × T1 is `prompts/baseline.txt` byte for byte. |
+| `paraphrases.json` | 12 question bodies × 3 answer tails (T0 = old wording, T1 = current, T2 = "drive or walk"). carwash × P0 × T1 is `prompts/baseline.txt` byte for byte. The control question per cell is the paired walk scenario, so the deleted `benchmark_library.txt` is not needed. |
 | `build_prompts.py` | renders everything into `generated/` (git-ignored, rebuilt by the runners). |
-| `run_grid.py` | behavioural grid: 3744 cells (13 scenarios × 36 questions × {none, pro, L0–L5}) + 48 leak-test cells (walk questions under the carwash-filled L2–L5). One pass each. |
-| `run_cdim_cells.py` | CDIM maps on the cells that matter, one model load: ladder L1–L5 (carwash), 13 paraphrase cells (L0), 6 scenario cells (L0). Control question per cell = the paired walk scenario under the same substrate. |
+| `run_grid.py` | behavioural grid: 4212 cells (13 scenarios × 36 questions × {none, L0–L5, S, pro}) + 60 leak-test cells (walk questions under the carwash-filled L2–L5 and S). One pass each. |
+| `run_cdim_cells.py` | CDIM maps on the cells that matter, one model load: ladder L1–L5 and S (carwash), 13 paraphrase cells and 6 scenario cells on S (`--level` picks another). Control question per cell = the paired walk scenario under the same substrate. |
 | `analyse.py` | `sweep_summary.md` + three figures per result dir. |
 | `runpod_sweep.sh` | all of it on a pod; resumable. |
 
 Result folders: `results/<model>/<precision>-sweep/{grid.json, ladder/<L>/, paraphrase/<P>_<T>/, scenario/<s>/}`.
-The L0 carwash cell is the existing `results/<model>/<precision>/cdim.json`.
+The L0 and pro carwash cells are the first-round `results/<model>/<precision>/` and `<precision>-pro/` cdim.json files; `analyse.py` uses them only when their bullet lines match the retired files. `runpod.sh` reruns on the old models must set `OUT=` so those folders are not overwritten with the new substrate.
 
 ## Predictions, written before running
 

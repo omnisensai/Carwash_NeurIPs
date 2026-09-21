@@ -9,9 +9,10 @@
 #   ROSTER="unsloth/Llama-3.1-8B-Instruct NousResearch/Hermes-3-Llama-3.1-8B" bash run_family_8b.sh
 #
 # Per model: (1) runpod.sh — baseline vs substrate internals (lens, answer-site
-# patching, DLA, line ablations, benchmarks) + the CDIM map (CDIM=1), i.e. the
-# "before / after" of the first round; (2) runpod_sweep.sh — the behavioural grid
-# and the chosen CDIM cells. Everything bf16 on one 80 GB card; an 8B pass is
+# patching, DLA, line ablations, benchmarks), the "before / after"; (2) a gate:
+# the substrate must move M by >= MIN_DELTA nats (default 3) and land on Drive,
+# otherwise the subject gets the behavioural grid only; (3) for subjects that
+# pass, the CDIM map and runpod_sweep.sh (grid + chosen CDIM cells). Everything bf16 on one 80 GB card; an 8B pass is
 # ~30 ms, so one model is ~15-30 min. Results: results/<model>/bf16/ and bf16-sweep/.
 #
 # Same layer count in every subject, so hand-off rows, patch-flip layers and
@@ -41,12 +42,31 @@ SUBSTRATE="${SUBSTRATE:-substrate.txt}"
 PLAN="${PLAN:-scenario}"
 export HF_HUB_ENABLE_HF_TRANSFER=1
 
+MIN_DELTA="${MIN_DELTA:-3}"     # nats: the substrate must move M by at least this much, and the answer must be Drive
 for m in $ROSTER; do
   name="$(basename "$m" | tr '[:upper:]' '[:lower:]' | sed -E 's/-instruct$//; s/^meta-//')"
   echo "=============== $m  ($name)"
-  MODEL="$m" NAME="$name" QUANT=none SUBSTRATE="$SUBSTRATE" CDIM=1 bash ../runpod.sh 2>&1 | tail -3
-  MODEL="$m" NAME="$name" QUANT=none PLAN="$PLAN" bash runpod_sweep.sh 2>&1 | tail -3
+  # 1. cheap before/after first (baseline + every prompts/*.txt + substrate, lens, patching, DLA, ablations)
+  MODEL="$m" NAME="$name" QUANT=none SUBSTRATE="$SUBSTRATE" CDIM=0 bash ../runpod.sh 2>&1 | tail -3
+  # 2. gate: does the substrate actually work on this subject?
+  verdict=$(python - "$name" "$MIN_DELTA" <<'PY'
+import json, sys
+name, mind = sys.argv[1], float(sys.argv[2])
+r = json.load(open(f"../results/{name}/bf16/internals.json"))
+b, s = r["prompts"]["baseline"]["final"]["M_sum"], r["prompts"]["substrate"]["final"]["M_sum"]
+ok = (s - b) >= mind and s > 0
+print(f"{'PASS' if ok else 'FAIL'} baseline M={b:+.2f} substrate M={s:+.2f} delta={s-b:+.2f} greedy={r['prompts']['substrate']['final']['greedy']!r}")
+PY
+)
+  echo "gate: $verdict" | tee -a ../results/family_gate.log
+  case "$verdict" in
+    PASS*) MODEL="$m" NAME="$name" QUANT=none SUBSTRATE="$SUBSTRATE" CDIM=only bash ../runpod.sh 2>&1 | tail -3
+           MODEL="$m" NAME="$name" QUANT=none PLAN="$PLAN" bash runpod_sweep.sh 2>&1 | tail -3 ;;
+    *)     echo "  substrate does not flip $name (or moves it < $MIN_DELTA nats): no maps, grid only"
+           MODEL="$m" NAME="$name" QUANT=none PLAN=none GRID=1 bash runpod_sweep.sh 2>&1 | tail -3 ;;
+  esac
 done
+echo "gate summary:"; cat ../results/family_gate.log
 python ../plot_internals.py ../results/*/bf16/ > /dev/null && echo "overview.png updated"
 python ../plot_cdim.py $(for m in $ROSTER; do n="$(basename "$m" | tr '[:upper:]' '[:lower:]' | sed -E 's/-instruct$//; s/^meta-//')"; [ -f "../results/$n/bf16/cdim.json" ] && echo "../results/$n/bf16"; done) > /dev/null && echo "cdim_overview.png updated"
 echo "done — the family table: python analyse.py ../results/*/bf16-sweep; per-model summary.md and cdim_summary.md in results/<model>/bf16/"

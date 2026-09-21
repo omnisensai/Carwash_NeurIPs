@@ -1,0 +1,81 @@
+model=allenai/Llama-3.1-Tulu-3-8B  gpu_total=163118 MiB  quant=none  -> results/llama-3.1-tulu-3-8b/bf16
+loading allenai/Llama-3.1-Tulu-3-8B (default dtype, cuda) ...
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:301: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files:  25%|██▌       | 1/4 [00:19<00:57, 19.10s/it]Fetching 4 files:  50%|█████     | 2/4 [00:56<01:00, 30.00s/it]Fetching 4 files:  75%|███████▌  | 3/4 [00:59<00:17, 17.73s/it]Fetching 4 files: 100%|██████████| 4/4 [01:07<00:00, 13.66s/it]Fetching 4 files: 100%|██████████| 4/4 [01:07<00:00, 16.82s/it]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:   1%|▏         | 4/291 [00:00<00:11, 25.84it/s]Loading weights:   7%|▋         | 20/291 [00:00<00:03, 89.99it/s]Loading weights:  11%|█         | 31/291 [00:00<00:03, 82.01it/s]Loading weights:  14%|█▍        | 41/291 [00:00<00:03, 72.57it/s]Loading weights:  17%|█▋        | 49/291 [00:00<00:03, 73.69it/s]Loading weights:  20%|█▉        | 57/291 [00:00<00:03, 74.90it/s]Loading weights:  22%|██▏       | 65/291 [00:00<00:03, 68.61it/s]Loading weights:  25%|██▌       | 73/291 [00:01<00:03, 66.13it/s]Loading weights:  27%|██▋       | 80/291 [00:01<00:03, 64.99it/s]Loading weights:  30%|██▉       | 87/291 [00:01<00:03, 59.87it/s]Loading weights:  33%|███▎      | 95/291 [00:01<00:03, 64.40it/s]Loading weights:  36%|███▌      | 104/291 [00:01<00:02, 66.06it/s]Loading weights:  39%|███▉      | 113/291 [00:01<00:02, 67.08it/s]Loading weights:  42%|████▏     | 122/291 [00:01<00:02, 65.36it/s]Loading weights:  45%|████▌     | 131/291 [00:01<00:02, 70.03it/s]Loading weights:  48%|████▊     | 140/291 [00:02<00:02, 69.68it/s]Loading weights:  51%|█████     | 149/291 [00:02<00:02, 68.71it/s]Loading weights:  54%|█████▍    | 158/291 [00:02<00:01, 68.74it/s]Loading weights:  57%|█████▋    | 166/291 [00:02<00:01, 71.39it/s]Loading weights:  60%|█████▉    | 174/291 [00:02<00:01, 73.46it/s]Loading weights:  63%|██████▎   | 182/291 [00:02<00:01, 68.42it/s]Loading weights:  65%|██████▍   | 189/291 [00:02<00:01, 64.37it/s]Loading weights:  67%|██████▋   | 196/291 [00:02<00:01, 60.92it/s]Loading weights:  70%|███████   | 204/291 [00:03<00:01, 60.88it/s]Loading weights:  73%|███████▎  | 213/291 [00:03<00:01, 63.47it/s]Loading weights:  76%|███████▋  | 222/291 [00:03<00:01, 65.28it/s]Loading weights:  81%|████████  | 235/291 [00:03<00:00, 80.33it/s]Loading weights:  85%|████████▍ | 247/291 [00:03<00:00, 90.27it/s]Loading weights:  88%|████████▊ | 257/291 [00:03<00:00, 85.40it/s]Loading weights:  91%|█████████▏| 266/291 [00:03<00:00, 85.61it/s]Loading weights:  95%|█████████▍| 275/291 [00:03<00:00, 80.95it/s]Loading weights:  98%|█████████▊| 284/291 [00:03<00:00, 79.07it/s]Loading weights: 100%|██████████| 291/291 [00:04<00:00, 71.59it/s]
+answer token ids: {'drive': [6678, 33067, 16542, 33557, 96887], 'walk': [4321, 19599, 12839, 49949]}
+baseline ...
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+substrate ...
+note: baseline picked different answer surface forms; re-attributing baseline with the substrate's drive/walk tokens
+  baseline   M_sum=-4.786  M_first=-4.875 p(drive)=0.008 p(walk)=0.991 greedy='Walk<|end_of_text|>'
+  substrate  M_sum=+0.888  M_first=+1.000 p(drive)=0.707 p(walk)=0.291 greedy='drive<|end_of_text|>'
+patching ...
+  patch L00: M_sum=-4.786
+  patch L01: M_sum=-4.786
+  patch L02: M_sum=-4.795
+  patch L03: M_sum=-4.795
+  patch L04: M_sum=-4.786
+  patch L05: M_sum=-4.911
+  patch L06: M_sum=-4.875
+  patch L07: M_sum=-5.000
+  patch L08: M_sum=-5.026
+  patch L09: M_sum=-4.925
+  patch L10: M_sum=-4.537
+  patch L11: M_sum=-4.662
+  patch L12: M_sum=-4.563
+  patch L13: M_sum=-4.037
+  patch L14: M_sum=-2.113
+  patch L15: M_sum=-0.488
+  patch L16: M_sum=-0.318
+  patch L17: M_sum=+0.352
+  patch L18: M_sum=+0.170
+  patch L19: M_sum=+0.443
+  patch L20: M_sum=+0.580
+  patch L21: M_sum=+0.818
+  patch L22: M_sum=+0.898
+  patch L23: M_sum=+0.947
+  patch L24: M_sum=+0.766
+  patch L25: M_sum=+0.773
+  patch L26: M_sum=+0.749
+  patch L27: M_sum=+0.865
+  patch L28: M_sum=+0.964
+  patch L29: M_sum=+0.904
+  patch L30: M_sum=+1.037
+  patch L31: M_sum=+0.888
+ablations ...
+  loo_line1      M_sum=+1.448
+  loo_line2      M_sum=+1.352
+  loo_line3      M_sum=+0.287
+  loo_line4      M_sum=+1.752
+  loo_line5      M_sum=+0.037
+  loo_line6      M_sum=+1.252
+  loo_line7      M_sum=+1.127
+  loo_line8      M_sum=+0.029
+  loo_line9      M_sum=-1.800
+  only_line1     M_sum=-3.330
+  only_line2     M_sum=-3.917
+  only_line3     M_sum=-3.219
+  only_line4     M_sum=-4.022
+  only_line5     M_sum=-2.897
+  only_line6     M_sum=-3.556
+  only_line7     M_sum=-1.011
+  only_line8     M_sum=+1.281
+  only_line9     M_sum=-1.814
+  headers_only   M_sum=-4.356
+benchmarks ...
+  baseline                 M_sum=-4.786 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-4.786
+  benchmark_CoT            M_sum=-4.707 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-4.707
+  benchmark_encourage      M_sum=-6.283 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-6.283
+  benchmark_expert         M_sum=-5.659 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-5.659
+  benchmark_goaloriented   M_sum=-4.421 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-4.421
+  benchmark_hallucination  M_sum=-4.888 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-4.888
+  benchmark_nomistakes     M_sum=-4.795 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-4.795
+  benchmark_threat         M_sum=-5.499 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-5.499
+  benchmark_urgency        M_sum=-4.736 argmax='Walk' greedy='Walk<|end_of_text|>'  decision@0: M=-4.736
+  substrate                M_sum=+0.888 argmax='drive' greedy='drive<|end_of_text|>'  decision@0: M=0.888
+wrote results/llama-3.1-tulu-3-8b/bf16/internals.json in 96.7 s
+figures in results/llama-3.1-tulu-3-8b/bf16/
+done — send back the whole results/llama-3.1-tulu-3-8b/bf16/ folder (json + png + summary.md + run.log)

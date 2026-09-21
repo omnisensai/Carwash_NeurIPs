@@ -1,0 +1,85 @@
+loading unsloth/Llama-3.2-3B-Instruct (default dtype, cuda) ...
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:301: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [00:13<00:13, 13.96s/it]Fetching 2 files: 100%|██████████| 2/2 [00:22<00:00, 10.62s/it]Fetching 2 files: 100%|██████████| 2/2 [00:22<00:00, 11.12s/it]
+Loading weights:   0%|          | 0/254 [00:00<?, ?it/s]Loading weights:   3%|▎         | 7/254 [00:00<00:03, 65.35it/s]Loading weights:   9%|▉         | 23/254 [00:00<00:01, 117.37it/s]Loading weights:  16%|█▌        | 40/254 [00:00<00:01, 133.94it/s]Loading weights:  22%|██▏       | 55/254 [00:00<00:01, 138.59it/s]Loading weights:  27%|██▋       | 69/254 [00:00<00:01, 129.82it/s]Loading weights:  33%|███▎      | 84/254 [00:00<00:01, 135.36it/s]Loading weights:  39%|███▊      | 98/254 [00:00<00:01, 125.33it/s]Loading weights:  44%|████▍     | 113/254 [00:00<00:01, 126.93it/s]Loading weights:  51%|█████     | 129/254 [00:00<00:00, 135.18it/s]Loading weights:  56%|█████▋    | 143/254 [00:01<00:00, 132.24it/s]Loading weights:  62%|██████▏   | 157/254 [00:01<00:00, 130.78it/s]Loading weights:  67%|██████▋   | 171/254 [00:01<00:00, 132.89it/s]Loading weights:  73%|███████▎  | 185/254 [00:01<00:00, 128.91it/s]Loading weights:  80%|███████▉  | 202/254 [00:01<00:00, 134.93it/s]Loading weights:  85%|████████▌ | 216/254 [00:01<00:00, 136.15it/s]Loading weights:  91%|█████████ | 230/254 [00:01<00:00, 127.17it/s]Loading weights:  97%|█████████▋| 247/254 [00:01<00:00, 133.77it/s]Loading weights: 100%|██████████| 254/254 [00:01<00:00, 131.80it/s]
+answer token ids: {'drive': [6678, 33067, 16542, 33557, 96887], 'walk': [4321, 19599, 12839, 49949]}
+baseline ...
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+substrate ...
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  baseline   M_sum=-0.502  M_first=-0.625 p(drive)=0.370 p(walk)=0.612 greedy='walk<|eot_id|>'
+  substrate  M_sum=+0.177  M_first=+0.125 p(drive)=0.536 p(walk)=0.449 greedy='drive<|eot_id|>'
+patching ...
+  patch L00: M_sum=-0.473
+  patch L01: M_sum=-0.502
+  patch L02: M_sum=-0.515
+  patch L03: M_sum=-0.390
+  patch L04: M_sum=-0.515
+  patch L05: M_sum=-0.519
+  patch L06: M_sum=-0.531
+  patch L07: M_sum=-0.531
+  patch L08: M_sum=-0.411
+  patch L09: M_sum=-0.433
+  patch L10: M_sum=-0.429
+  patch L11: M_sum=-0.323
+  patch L12: M_sum=-0.569
+  patch L13: M_sum=+0.032
+  patch L14: M_sum=+0.400
+  patch L15: M_sum=+0.662
+  patch L16: M_sum=+0.781
+  patch L17: M_sum=+0.900
+  patch L18: M_sum=+0.784
+  patch L19: M_sum=+0.784
+  patch L20: M_sum=+0.784
+  patch L21: M_sum=+0.417
+  patch L22: M_sum=+0.537
+  patch L23: M_sum=+0.542
+  patch L24: M_sum=+0.417
+  patch L25: M_sum=+0.425
+  patch L26: M_sum=+0.297
+  patch L27: M_sum=+0.177
+ablations ...
+  loo_line1      M_sum=+0.296
+  loo_line2      M_sum=+0.306
+  loo_line3      M_sum=+0.066
+  loo_line4      M_sum=+0.297
+  loo_line5      M_sum=+0.050
+  loo_line6      M_sum=+0.169
+  loo_line7      M_sum=+0.803
+  loo_line8      M_sum=+0.428
+  loo_line9      M_sum=-0.437
+  only_line1     M_sum=-0.610
+  only_line2     M_sum=-1.038
+  only_line3     M_sum=+0.049
+  only_line4     M_sum=-0.671
+  only_line5     M_sum=-0.425
+  only_line6     M_sum=-0.175
+  only_line7     M_sum=-0.207
+  only_line8     M_sum=-0.439
+  only_line9     M_sum=-0.041
+  headers_only   M_sum=-0.758
+benchmarks ...
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  baseline                 M_sum=-0.502 argmax='walk' greedy='walk<|eot_id|>'  decision@0: M=-0.502
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_CoT            M_sum=-0.275 argmax='walk' greedy='walk<|eot_id|>'  decision@0: M=-0.275
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_encourage      M_sum=-1.119 argmax='walk' greedy='walk.<|eot_id|>'  decision@0: M=-1.119
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_expert         M_sum=+0.035 argmax='walk' greedy='walk.<|eot_id|>'  decision@0: M=0.035
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_goaloriented   M_sum=-1.031 argmax='walk' greedy='walk<|eot_id|>'  decision@0: M=-1.031
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_hallucination  M_sum=-0.187 argmax='walk' greedy='walk<|eot_id|>'  decision@0: M=-0.187
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_nomistakes     M_sum=-0.579 argmax='walk' greedy='walk.<|eot_id|>'  decision@0: M=-0.579
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_threat         M_sum=-0.614 argmax='walk' greedy='walk<|eot_id|>'  decision@0: M=-0.614
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  benchmark_urgency        M_sum=-1.035 argmax='walk' greedy='walk.<|eot_id|>'  decision@0: M=-1.035
+[transformers] Both `max_new_tokens` (=4) and `max_length`(=131072) seem to have been set. `max_new_tokens` will take precedence. Please refer to the documentation for more information. (https://huggingface.co/docs/transformers/main/en/main_classes/text_generation)
+  substrate                M_sum=+0.177 argmax='drive' greedy='drive<|eot_id|>'  decision@0: M=0.177
+wrote results/llama-3.2-3b/bf16/internals.json in 41.9 s

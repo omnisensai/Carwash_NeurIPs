@@ -40,6 +40,9 @@ temperature 1.0, 10 samples per model.
 - **Every model that resisted all seven prompt interventions saturates here.** GPT-4o, GPT-4.1, GPT-4.1-mini, Llama 3.3-70B, Llama 4-Maverick, Mistral Large and Sonnet 4.5 were 10/0 walk under every previous condition; all are 10/10 drive under the substrate.
 - **The three partial models are the smallest open-weight ones plus DeepSeek**: Llama 3.1-8B 7/10, Llama 3.2-3B 8/10, DeepSeek V3.2 8/10. Every other model is unanimous.
 - **Sonnet 5 explains itself in the substrate's own vocabulary.** Three rows break the one-word instruction: *"Since the car must be at the car wash for the activity to be performed, and walking would leave the vehicle behind..."* — it restates the constraint lines rather than producing an independent argument.
+- **Three Sonnet 5 responses were truncated** at the 80-token cap (samples 3, 8, 9,
+  `stop_reason: max_tokens`). All three emit `**Drive**` before the cut, so the
+  decisions are intact and scored; what was lost is the justification that follows.
 - **Clean sweep**: 170/170 rows verify on prompt hash, message echo, text-vs-raw reconstruction and response-id uniqueness. One system sha and one prompt sha across all rows; the system text matches `prompts/substrate.txt` byte for byte and the user text matches `prompts/baseline.txt`.
 
 ## Caveats

@@ -1,0 +1,1 @@
+{"timestamp": "2026-09-23T12:47:05.187982+00:00", "intervention": "error_avoidance", "sample_index": 3, "model_label": "Mistral Large", "model_slug": "mistralai/mistral-large", "response_text": "walk", "targeted_rerun": true, "reason": "transport_failure_reissue"}

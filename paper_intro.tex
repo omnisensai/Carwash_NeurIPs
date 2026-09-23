@@ -1,31 +1,78 @@
-\subsection{From Interpretation Drift to Substrate Engineering}
-\label{sec:substrate-engineering}
+\section{Introduction}
+\label{sec:intro}
 
-Prior work introduced \emph{interpretation drift} to describe the production of
-incompatible operational meanings for the same task input, and proposed Substrate
-Engineering as an approach to externally specifying the task requirements that
-govern model decisions \citep{nguyen2026substrates}. In the classification experiment
-reported there, four frontier models agreed on 30\% of cases and produced 40 distinct
-output hashes under the untreated task; with an explicit semantic specification, the
-same task produced complete agreement and a single output hash across 40 runs.
+Large language models are increasingly used as decision modules: a model reads a
+case and emits an action that determines what a system does next. Under stochastic
+decoding that action is a random variable, and repeated executions of the same input
+can produce different actions
+\citep{Ouyang_2025,atil2025nondeterminismdeterministicllmsettings}. What matters
+operationally is not average accuracy over a benchmark but a joint property of the
+individual decision: whether it is correct, and whether it recurs.
 
-We extend that work from structured classification to operational action selection.
-This is not a study of model capability but of input specification: the question is
-not whether a model can infer the correct action from an underspecified input, but
-what must be specified for a frozen model to produce the intended action reproducibly
-under stochastic inference.
+Consider an accounts-payable system in which a model decides whether an invoice
+satisfies an approval policy. An invoice labelled \texttt{approve} on one execution
+and \texttt{reject} on the next is not a reproducible decision. An invoice labelled
+\texttt{reject} on all ten executions, wrongly, is not a usable one. In agentic
+systems the decision selects a tool, a workflow branch, or the information passed
+downstream, so both failure modes propagate. Operational reliability requires
+correctness and reproducibility together, and aggregate accuracy reports neither.
 
-Here we use the widely circulated car-wash
-prompt\footnote{``I need to wash my car, the car wash is only 50 metres away, should
-I walk or drive there?'' \url{https://claude.ai/share/03402365-011a-475e-8ef7-9ee81ada4516}}
-as a controlled test of operational decision-making. Untreated, no model is
-reproducibly correct: models are either confidently wrong or alternate between
-correct and incorrect across repeated executions. We then engineer cross-model
-convergence, showing that a single semantic specification establishes reproducible
-correctness in 14 of 17 models. The three that do not reach it define the
-engineering question: what is the minimum semantic structure required for a model to
-produce consistent correctness?
+Existing levers act on different parts of the stack. Batch-invariant kernels remove
+numerical sources of run-to-run variation \citep{he2025nondeterminism}; fine-tuning
+changes learned behaviour \citep{tian2023finetuninglanguagemodelsfactuality};
+constrained and semantically guided decoding alter the generation procedure
+\citep{loula2025syntactic,ahmed2025semanticprobabilisticcontrollanguage}; prompt
+search reshapes the output distribution toward target tokens
+\citep{bhargava2024whatsmagicwordcontrol}, and stability-guided refinement improves
+consistency alongside task performance \citep{chen2025stability}. Each modifies
+weights, numerics, the sampler, or the response after the fact. None answers what the
+input must contain for a frozen model, under unmodified decoding and without retries,
+to emit the intended action across independent samples. Sensitivity to phrasing is
+well documented as a phenomenon
+\citep{mizrahi-etal-2024-state,srikanth2024errorsnaturallanguagereasoning}; we treat
+the task specification as the object of study rather than as a nuisance variable.
+Earlier work named this \emph{interpretation drift} and showed that an explicit
+specification brought four frontier models from $30\%$ agreement and 40 distinct
+output hashes to a single hash across 40 runs on a classification task
+\citep{nguyen2026substrates}.
 
-We further show that substrate-conditioned computations differ internally. In
-open-weight models, transplanting a substrate-conditioned activation into the
-untreated computation can reverse its final \texttt{DRIVE}--\texttt{WALK} preference.
+We hold weights, decoding and retry policy fixed and vary only the specification
+supplied before inference. The test case is a minimal operational decision: the
+widely circulated car-wash prompt,\footnote{``I need to wash my car, the car wash is
+only 50 metres away, should I walk or drive there?''} in which the destination is
+within walking distance but completing the objective requires transporting the car,
+so the intended action is \texttt{DRIVE}. Each model--condition cell is executed ten
+times at temperature $1.0$ and classified by unanimity: \emph{reproducibly correct}
+(the intended action in ten of ten samples), \emph{reproducibly incorrect} (zero of
+ten), or \emph{non-reproducible} (anything between). We evaluate the untreated task,
+seven conventional prompt interventions, and one shared task specification across 17
+models.
+
+No model is reproducibly correct on the untreated task: 13 of 17 are reproducibly
+incorrect and four are non-reproducible. The seven conventional interventions raise
+the aggregate rate from $7.6\%$ to at most $36.5\%$, and across all seven conditions
+convert exactly one reproducibly incorrect model. The shared specification makes 14
+of 17 reproducibly correct, $95.9\%$ of responses; the remaining three improve but do
+not reach unanimity, so specification sufficiency is established per model--condition
+rather than assumed. In open-weight models, transplanting a substrate-conditioned
+activation into the untreated computation reverses its final
+\texttt{DRIVE}--\texttt{WALK} preference; these traces use an earlier specification
+than the fleet-wide experiment and are not claimed as the mechanism of the $14/17$
+result.
+
+\paragraph{Contributions.}
+\begin{itemize}\itemsep2pt
+\item An operational evaluation protocol that separates reproducibly correct,
+reproducibly incorrect and non-reproducible decisions, and the finding that a single
+shared task specification converts 11 reproducibly incorrect models to reproducibly
+correct without weight updates, decoder changes, retries, majority voting or
+post-generation correction.
+\item Evidence that the structure of the supplied semantics is what matters:
+instructions to reason step by step, adopt an expert role, avoid error, or apply
+pressure convert one reproducibly incorrect model between them, while specifying the
+task relations converts fourteen.
+\item A causal measurement of the engineered transition: in open-weight models,
+activation transplantation identifies internal states whose replacement reverses the
+final action preference, without identifying the individual constraints or pathways
+responsible.
+\end{itemize}

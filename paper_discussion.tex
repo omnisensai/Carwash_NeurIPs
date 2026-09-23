@@ -1,0 +1,108 @@
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+\paragraph{The operational failure mode is reproducible incorrectness.}
+At baseline, no model in the fleet is reproducibly correct. Thirteen of seventeen
+are reproducibly \emph{incorrect}: ten identical wrong answers out of ten, at
+temperature $1.0$. This is the state that matters for a deployed system, and it is
+worse than instability. A model that answers inconsistently is visible --- it fails
+a repeated-execution check, and the system around it can be built to expect that.
+A model that returns the same wrong action ten times in a row passes every such
+check. The behaviour is stable, the test suite is green, and the specification
+defect is invisible until the action is taken in production. Framing this task as
+an accuracy problem understates it: the issue is not that models are wrong at some
+rate, but that their wrongness is reproducible, and reproducibility is the property
+systems are built to trust.
+
+\paragraph{Instruction and specification are different levers, and only one moves the fleet.}
+The seven conventional interventions are the standard toolkit: reasoning
+elicitation, role assignment, encouragement, urgency, threat, error avoidance,
+anti-hallucination. Applied to the same task, they move the fleet-wide rate from
+$7.6\%$ to at most $36.5\%$. More tellingly, across all seven conditions and all
+seventeen models, exactly one reproducibly incorrect model is ever converted to
+reproducibly correct, and it is the same model each time. Expert framing
+additionally stabilises a model that was non-reproducible at baseline, which is a
+different and lesser achievement. The specification moves the same fleet to
+$95.9\%$, with fourteen of seventeen models unanimous, eleven of them converted
+directly from reproducible incorrectness. Every model moves toward the correct
+action; none moves away.
+
+The distinction is not that one prompt is longer or better written. Conventional
+interventions address the model's disposition --- how carefully it should think, who
+it should imagine itself to be, what it should avoid. They leave the task's
+underdetermination untouched. The specification addresses the task: it states which
+entities are involved, what condition satisfies the objective, and which actions are
+feasible. The task is underdetermined, so the intervention that resolves the
+underdetermination is the one that works.
+
+\paragraph{What the internal measurements contribute, and what they do not.}
+Section~\ref{sec:internal-measurement} is evidence that the behavioural change
+corresponds to a change in the computation rather than to output formatting,
+sampling variation, or a token-level coincidence at the answer position. The
+substrate-conditioned state differs from the untreated state, and transplanting it
+into the untreated computation reverses that computation's final preference. That is
+the whole of the claim. These measurements do not identify a mechanism, do not
+establish which constraints are internally represented, and are made on open-weight
+models only --- the closed models in the behavioural fleet cannot be assumed to
+realise the effect the same way.
+
+\paragraph{The useful property is that the fix is a file.}
+The intervention is a text artifact. It can be version-controlled, hashed,
+diffed and reviewed like any other configuration; it applies to models whose weights
+are inaccessible; it requires no training run, no labelled data and no evaluation
+loop to fit. In this fleet it transferred across six vendors without per-model
+adjustment. The cost is authoring: the constraints have to be identified and written
+down correctly, which is human work and is not automated here. Fine-tuning can also
+repair a task like this one, but it produces a new artifact per model, requires
+weight access, and must be redone when the underlying model is replaced. For a
+defect that originates in an underspecified input, specifying the input is the
+proportionate repair.
+
+\subsection{Limitations}
+
+\paragraph{One task, one decision.}
+All results are for a single binary operational decision with one correct answer.
+We do not show that specification repairs multi-step tasks, tasks with several
+interacting constraints, or tasks whose correct action is contested. The task was
+chosen because it is small enough to verify exhaustively, not because it is
+representative.
+
+\paragraph{The specification is task-instantiated.}
+The substrate names the entities of this task. It is not a general-purpose prefix,
+and we make no claim that a specification written for one task helps on another.
+Whether the effect survives abstraction is a separate question and is untested here.
+
+\paragraph{Reproducibility is evaluated at $R=10$.}
+Ten samples per model per condition establishes unanimity over ten draws, not over
+the model's output distribution. A model recorded as reproducibly correct here could
+produce a different action on the eleventh sample. The criterion is a practical bar,
+not a probabilistic guarantee.
+
+\paragraph{Closed models expose only their outputs.}
+For the closed-weight majority of the fleet we observe the emitted text. Margins are
+available only for the open-weight models, so the fleet-wide results and the
+internal results are measured on overlapping but different populations, by different
+instruments.
+
+\paragraph{Three models were not repaired.}
+The substrate leaves DeepSeek V3.2 at $8/10$, Llama 3.1-8B at $7/10$ and
+Llama 3.2-3B at $8/10$. Two of these were reproducibly incorrect at baseline and
+became non-reproducible rather than correct. The intervention improves every model
+in the fleet and makes most of them reproducible; it does not make all of them
+reproducible.
+
+\paragraph{Routing.}
+Fleet executions were issued through a single routing provider, so served snapshots
+and backends are recorded but not controlled. Served model identifiers are reported
+in Appendix~\ref{app:models}.
+
+\subsection{Next}
+
+The measurements reported here establish that the transition exists, that ordinary
+prompting does not produce it, and that it has an internal counterpart. They do not
+explain it. Which constraints carry the effect, whether the same constraints carry it
+across model families, and how it depends on specification structure require
+ablations across many specifications and models, together with attribution and
+pathway analysis. That is the subject of separate work.

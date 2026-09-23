@@ -1,4 +1,4 @@
-# CoT results — 2026-09-19
+# CoT results — 2026-09-19 (Kimi K2 re-run 2026-09-23)
 
 Fleet under prompt benchmark_CoT.txt
 temperature 1.0, 10 samples per model.
@@ -23,13 +23,16 @@ temperature 1.0, 10 samples per model.
 | Llama 4-Maverick | 8 | 2 | prose in 6 of 10 rows |
 | Mistral Large | 8 | 0 | 2 samples lost to upstream 429; re-run via OpenRouter |
 | DeepSeek V3.2 | 10 | 0 | saturated |
-| Kimi K2 | 6 | 3 | 1 sample truncated at max_tokens, no answer emitted |
+| Kimi K2 | 7 | 3 | re-run 2026-09-23 at max_tokens 6000; all 10 complete |
 
 ## Aggregate (17 of 17 models measured)
 
-- **143 walk / 24 drive** across 167 samples = **85.6% confidently wrong**
+- **144 walk / 24 drive** across 168 samples = **85.7% confidently wrong**
 - **9 models** saturate walk (10/0)
-- 3 samples unusable: 2 Mistral rate-limited, 1 Kimi truncated
+- 2 samples unusable: both Mistral, upstream 429 (pending re-run)
+- Kimi K2's cell was re-run in full on 2026-09-23 at max_tokens 6000 after one
+  sample truncated at 2000 without emitting an answer. Decisions 7/3, against 6/3
+  over nine usable samples before; the raised budget applies to this cell only
 - Baseline for comparison: 157 walk / 13 drive across 170 = 92.4%
 
 

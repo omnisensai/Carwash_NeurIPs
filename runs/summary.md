@@ -6,9 +6,9 @@ requested slugs, served snapshots and upstream providers is `models.md`.
 
 The task has one correct answer, **drive**: the car has to be at the car wash.
 
-Rates are over usable executions. Two are outstanding, both Mistral Large hitting
-an upstream 429 (chain of thought ×2, error-avoidance ×1), so those two conditions
-stand at n=168 and n=169; every other condition is complete at n=170.
+Rates are over usable executions. One is outstanding — Mistral Large hit an upstream
+429 in error-avoidance, which stands at n=169; every other condition is complete at
+n=170.
 
 ## All conditions
 
@@ -17,7 +17,7 @@ stand at n=168 and n=169; every other condition is complete at n=170.
 | **substrate** | **95.9%** | **9.0e-13** | **14 / 17** |
 | expert role | 36.5% | 9.4e-11 | 2 / 17 |
 | objective emphasis | 19.4% | 0.0023 | 1 / 17 |
-| chain of thought | 14.3% | 0.056 | 1 / 17 |
+| chain of thought | 14.1% | 0.058 | 1 / 17 |
 | anti-hallucination | 11.8% | 0.27 | 1 / 17 |
 | threat | 10.0% | 0.57 | 0 / 17 |
 | encouragement | 9.5% | 0.57 | 1 / 17 |

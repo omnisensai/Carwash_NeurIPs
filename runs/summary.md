@@ -6,9 +6,9 @@ requested slugs, served snapshots and upstream providers is `models.md`.
 
 The task has one correct answer, **drive**: the car has to be at the car wash.
 
-Rates are over usable executions. One is outstanding — Mistral Large hit an upstream
-429 in error-avoidance, which stands at n=169; every other condition is complete at
-n=170.
+Rates are over usable executions. Eight of nine conditions are complete at n=170;
+encouragement stands at n=169, where one Llama 3.1-8B response (`Walker`) contains no
+action token and is recorded as invalid.
 
 ## All conditions
 
@@ -21,7 +21,7 @@ n=170.
 | anti-hallucination | 11.8% | 0.27 | 1 / 17 |
 | threat | 10.0% | 0.57 | 0 / 17 |
 | encouragement | 9.5% | 0.57 | 1 / 17 |
-| error-avoidance | 8.9% | 0.70 | 0 / 17 |
+| error-avoidance | 8.8% | 0.84 | 0 / 17 |
 | baseline | 7.6% | — | 0 / 17 |
 
 ## The flip

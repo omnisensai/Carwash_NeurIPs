@@ -120,10 +120,8 @@ Neither substrate specification contains the word \texttt{drive}. Both name
 the objective: the nine-line specification does so twice, in
 \texttt{Walking leaves a vehicle behind} and
 \texttt{Walking does not transport a vehicle}. Both actions appear in the question
-itself, identically in every condition. This is a fact about the surface form of the
-prompt, not a claim that the specification is independent of the answer: the
-constraints are written so as to determine it. What it establishes is that the
-determination is not lexical.
+itself, identically in every condition. The specification determines the answer, as
+any constraint set is meant to; it does not supply it.
 
 \subsection{Internal Effects of Engineered Behavioral Change}
 
@@ -176,12 +174,31 @@ bare question. The substrate-conditioned residual at the same position, in the s
 model, is produced by the same forward pass over a different context. The two states
 differ in what the computation was given.
 
+\paragraph{One constraint carries most of the effect.}
+Removing each line of the six-line specification in turn and re-measuring gives one
+result worth recording here. On the three models whose preference the substrate
+reverses, removing line~6 --- \texttt{If the object is a vehicle, the user must
+operate the object in order to perform the activity at location B} --- is the only
+removal that returns all three to the incorrect action: Llama-3.1-8B from $+1.01$ to
+$-0.60$, Llama-3.3-70B from $+6.07$ to $-1.79$, Qwen3-8B from $+10.75$ to $-3.75$.
+Every other single removal leaves all three positive, with one exception: on
+Llama-3.3-70B, removing line~1 also reverts the preference, to $-5.22$. Line~6 is
+not sufficient on its own --- presented alone it leaves Llama-3.1-8B at $-1.83$ ---
+so the effect is not carried by that sentence in isolation.
+
+We report this as a single observation and do not build on it. Establishing which
+constraints carry the effect, whether the dependency is the same across
+specifications, and how it interacts with model scale requires leave-one-out and
+subset ablations across many specifications and models, which is the subject of
+separate work.
+
 \paragraph{Scope.}
 These measurements establish that the substrate condition changes the model's
 internal output preference, and that transplanting the substrate-conditioned state
 into the untreated computation can causally reverse its final preference. They do
-not identify which individual constraints in the specification are internally
-represented, which heads or MLPs write them, where in the network the decision is
-formed, or whether the representation transfers to other tasks. Those questions
-require line ablations, direct logit attribution and attention analysis at scale,
-and are the subject of separate work.
+not establish how individual constraints are internally represented, which heads or
+MLPs write them, where in the network the decision is formed, or whether the
+representation transfers to other tasks. The single ablation reported above
+identifies a constraint the measured effect depends on; it does not identify a
+mechanism. Those questions require ablations at scale, direct logit attribution and
+attention analysis, and are the subject of separate work.

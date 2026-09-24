@@ -15,6 +15,15 @@ The usual way around this is to select cases on which the models already agree. 
 substitutes a selection bias for the confound: the comparison is then restricted to
 whatever the models happen to find easy, which is not a controlled choice of task.
 
+The untreated condition is equally unsuitable as a reference. Which models look
+anomalous under an untreated task is a function of the task and of which models were
+tested: the same model is an outlier in one fleet and unremarkable in another. Nor is
+untreated variance attributable within a fixed fleet --- the difference between a
+model that selects the intended action on three of ten samples and one that selects
+it on none has no fixed standard against which either is measured, and cannot be
+separated from sampling, routing or tokenisation. A reference condition has to be
+established rather than observed.
+
 We take the other route. Rather than selecting models that behave consistently, we
 engineer consistency, and then measure. The specification establishes a common,
 reproducible operational decision across otherwise divergent frozen models

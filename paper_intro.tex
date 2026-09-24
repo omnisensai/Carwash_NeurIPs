@@ -48,8 +48,9 @@ so the intended action is \texttt{DRIVE}. Each model--condition cell is executed
 times at temperature $1.0$ and classified by unanimity: \emph{reproducibly correct}
 (the intended action in ten of ten samples), \emph{reproducibly incorrect} (zero of
 ten), or \emph{non-reproducible} (anything between). We evaluate the untreated task,
-seven conventional prompt interventions, and one shared task specification across 17
-models.
+seven conventional prompt interventions --- reasoning elicitation, expert role
+assignment, encouragement, objective emphasis, threat, error avoidance and
+anti-hallucination --- and one shared task specification across 17 models.
 
 No model is reproducibly correct on the untreated task: 13 of 17 are reproducibly
 incorrect and four are non-reproducible. The seven conventional interventions raise
@@ -75,37 +76,33 @@ which is otherwise confounded becomes available once it is.
 
 \paragraph{Contributions.}
 \begin{itemize}\itemsep2pt
-\item \textbf{A model that is reproducibly wrong can be made reproducibly correct with
-natural language alone.} Thirteen of seventeen models return the same incorrect action
-in ten of ten samples on the untreated task; a single shared task specification
-converts eleven of them to the correct action in ten of ten, with no weight updates,
-decoder changes, retries, majority voting or post-generation correction. Seven
-conventional interventions applied to the same models convert one. The engineering
-question this supports is not which model is most capable, but what must be supplied
-for a chosen model to become capable of the task at hand.
+\item \textbf{From better prompting to reproducibly correct operational decisions.}
+We establish natural-language task specification as an engineering control surface and
+define a strict model--condition-level criterion distinguishing reproducibly correct,
+reproducibly incorrect, and non-reproducible behaviour. This gives prompt improvement
+an explicit operational threshold: an intervention is not sufficient because it raises
+aggregate correctness, but only if it produces the intended action in every sampled
+single-pass execution. The threshold discriminates. Expert framing raises the
+fleet-wide rate from $7.6\%$ to $36.5\%$ and converts one reproducibly incorrect model;
+across all seven conventional interventions it is the same single model. Thirteen of
+seventeen models are reproducibly incorrect on the untreated task, and one shared task
+specification converts eleven of them, with no weight updates, decoder changes,
+retries, majority voting, or post-generation correction. The engineering question this
+supports is not which model is most capable, but what must be supplied for a chosen
+model to become capable of the task at hand.
 
-\item \textbf{An evaluation criterion that separates a better prompt from an
-established behaviour.} We evaluate at the level of the individual model--condition
-rather than in aggregate: an intervention succeeds only when the model produces the
-intended action in every sampled single-pass execution, with no retries, majority
-voting, decoder changes or post-generation correction. The criterion discriminates
-where aggregate correctness does not. Expert framing raises the fleet-wide rate from
-$7.6\%$ to $36.5\%$ and yet produces reproducibly correct behaviour in two models, only
-one of which was reproducibly incorrect to begin with; across all seven conventional
-interventions those same two models are the only ones that ever reach it. The
-specification produces it in fourteen.
-
-\item \textbf{Freezing the behaviour makes the transition the object of measurement.}
-With a reproducible reference established, what is measured internally is the change
-between two verified behavioural states rather than an internal quantity at one of
-them --- a margin can move by nats without the emitted action changing, and in this
-fleet it does. The same transition, from divergent to convergent under an identical
-input, emitted action and correctness criterion, is available in every converged
-model, so internal differences are attributable to the models rather than to divergent
-task behaviour. Under this design, activation transplantation reverses the emitted
+\item \textbf{Engineered behavioural convergence as a reference for internal causal
+measurement.} Internal measurement is interpretable only against a controlled
+behavioural state, and untreated behaviour cannot supply one: which models appear
+anomalous depends on the task chosen and on which models were tested, and a margin can
+move substantially while the emitted action does not. We therefore engineer the
+reference rather than observing it. Convergence is verified per model--condition before
+any activation is inspected, holding the input, the emitted action and the correctness
+criterion fixed, so what is measured is the transition between two verified behavioural
+states and internal differences are attributable to the models rather than to divergent
+task behaviour. Under this reference, activation transplantation reverses the emitted
 action in the models the specification converts, and one constraint that reverses the
 decision in one converged model moves the margin below measurement resolution in
-another: behavioural agreement does not imply that the same specification content
+another --- behavioural agreement does not imply that the same specification content
 carries the decision.
-
 \end{itemize}

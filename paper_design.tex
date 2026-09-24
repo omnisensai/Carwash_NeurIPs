@@ -1,0 +1,32 @@
+\subsection{Why the internal measurement is designed this way}
+\label{sec:design-rationale}
+
+Causal analysis of language models is normally conducted within a single model. A
+task is fixed, a minimally corrupted variant of the input is constructed, and
+internal states are transplanted between the two runs to locate where the corrupted
+information is recoverable \citep{vig2020causal,meng2022locating}. Extending this
+across models is not a matter of repeating the procedure. When two models produce
+different outputs on the same input, any internal difference between them admits two
+explanations that the measurement cannot separate: the models differ
+architecturally, or the models are effectively performing different tasks. Comparing
+their internals under that condition compares an unknown to an unknown.
+
+The usual way around this is to select cases on which the models already agree. That
+substitutes a selection bias for the confound: the comparison is then restricted to
+whatever the models happen to find easy, which is not a controlled choice of task.
+
+We take the other route. Rather than selecting models that behave consistently, we
+engineer consistency, and then measure. The specification establishes a common,
+reproducible operational decision across otherwise divergent frozen models
+(Section~\ref{sec:results}); that convergence is verified per model--condition before
+any activation is inspected. It then serves as a controlled reference: the input, the
+emitted action and the decision criterion are held fixed across the compared models
+by construction, so remaining internal differences are attributable to the models
+rather than to divergent task behaviour.
+
+This design is available only because the behavioural result precedes the internal
+one. It carries two conditions. The perturbations applied to the specification must
+be identical across the compared models, which we ensure with token-aligned rewrites
+of individual lines. And only models that reach the reference condition enter the
+comparison; a model that does not converge under the specification is not a missing
+data point but a separate outcome of the same procedure, and we report it as one.

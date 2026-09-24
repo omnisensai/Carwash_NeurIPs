@@ -1,64 +1,69 @@
 % ============================================================
-\section{Internal Measurement}
-\label{sec:internal-measurement}
+\section{Internal Causal Measurement}
+\label{sec:internal-experiments}
 % ============================================================
 
-This section reports internal measurements on the ten open-weight models of the
-fleet. They are reported because they bear on the reproducibility claim: they
-establish that the behavioural transition of Section~\ref{sec:results} corresponds to
-a change in the computation, and that the state carrying it can be transplanted. They
-are not a mechanistic account, and none is claimed.
+This section reports the second stage of the study on the ten open-weight models of
+the fleet. The measurements establish that the behavioural transition of
+Section~\ref{sec:results} corresponds to a change in the computation, and that the
+state carrying it can be transplanted. They are not a mechanistic account, and none
+is claimed.
 
-\subsection{Measurement design}
+\subsection{Experimental Setup}
+\label{sec:internal-setup}
 
-\paragraph{The standard instrument, and what we change about it.}
-Causal analysis of language models transplants hidden states between two runs of the
-same model and measures the effect on the output
-\citep{vig2020causal,meng2022locating}, commonly read out as a logit difference
-between two candidate answer tokens \citep{wang2023interpretability}; we follow the
-methodological recommendations of \citet{zhang2024towards}. The standard contrast is a
-clean prompt against a minimally corrupted one --- one token replaced, or noise added
-to one span --- and the outcome variable is the internal quantity itself. Two
-properties of that protocol do not transfer to the question asked here.
+\paragraph{Cohort and provenance.}
+Ten instruction-tuned open-weight models spanning $0.5$B to $70$B parameters and $24$
+to $80$ layers are run in \texttt{bf16} with each model's own chat template. The
+internal measurements were run on an earlier substrate specification
+(\texttt{sha256:6f89be2b}) than the behavioural sweep (\texttt{sha256:5b56feb3}). The
+untreated task prompt is identical across both experiments
+(\texttt{sha256:f9ac23fb}), as are the conventional intervention prompts. This
+section therefore reports a related but distinct substrate condition, and its
+margins should not be read as internal measurements of the specification responsible
+for the behavioural result of Section~\ref{sec:results}. Both specifications are in
+the repository.
 
-First, the outcome variable. A logit difference can move substantially while the
-emitted token does not change: in this fleet, the seven conventional interventions
-shift the margin by up to $2.2$ nats on Llama-3.1-8B without altering the emitted
-word. Taking the internal quantity as the outcome would count those as effects. We
-take the outcome to be a change in the emitted action, and admit a model--condition to
-the causal analysis only when the specification changes it.
+\paragraph{Decision margin.}
+For each prompt we take a single forward pass and read the decision margin $M$ of
+Equation~(\ref{eq:decision-margin}) at the first answer-token prediction position.
+$M > 0$ means the \textsc{drive} family carries more total probability than the
+\textsc{walk} family. It does not guarantee that the model emits a \textsc{drive}
+token: across the margin matrix of Tables~\ref{tab:internal-margins}
+and~\ref{tab:conventional-margins}, the sign of $M$ and the greedy token disagree in
+three of ninety cells. The margin is supplementary evidence about output preference,
+not a substitute for the behavioural classification of Section~\ref{sec:results}.
 
-Second, the reference. Comparing internal states across models requires that the
-models be doing the same thing, and on an untreated task they are not: which models
-appear anomalous depends on the task chosen and on which models were tested, and the
-difference between a model that selects the intended action on three of ten samples
-and one that selects it on none has no fixed standard against which either is
-measured. The behavioural convergence established in Section~\ref{sec:results}
-supplies that standard. It is verified per model--condition before any activation is
-inspected, and it holds the input, the emitted action and the correctness criterion
-fixed across the compared models by construction.
+\paragraph{Transplantation.}
+We use activation transplantation to test whether internal states induced by the
+substrate can causally change the final action preference. The technique is the
+standard causal-mediation instrument for language models
+\citep{vig2020causal,meng2022locating}, read out as a difference between two
+candidate answer tokens \citep{wang2023interpretability}; we follow the
+methodological recommendations of \citet{zhang2024towards}. For each model we first
+measure the margin under the untreated task and under the substrate-conditioned
+task. We then capture the substrate-conditioned residual stream at the first
+answer-token prediction position after each layer $\ell$ and, in models with a
+negative untreated margin, replace the corresponding vector in the untreated
+computation with it. All other positions are unchanged and the remaining layers of
+the untreated computation run normally. We repeat the intervention at each layer and
+record the resulting final margin.
 
-\paragraph{Protocol.}
-Ten instruction-tuned models spanning $0.5$B to $70$B parameters and $24$ to $80$
-layers are run in \texttt{bf16} with each model's own chat template. For each prompt
-we take a single forward pass and read, at the first answer token,
-\[
-M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t),
-\]
-where $\mathcal{D}$ and $\mathcal{W}$ are the measured surface-form token families for
-the two actions (Section~\ref{sec:measurement}). $M$ is a log-ratio between two token
-families and is reported as such; in three of the $90$ cells of
-Table~\ref{tab:internal-margins} its sign and the greedy token disagree, and we report
-the disagreement rather than resolving it in favour of the margin.
+Two departures from the usual protocol follow from the question being asked. Causal
+tracing normally contrasts a clean prompt with a minimally corrupted one, so that a
+restored answer localises to the damaged position; our two conditions differ by the
+whole specification, so no positional attribution follows. Consequently we sweep
+depth at the answer position rather than the layer $\times$ position grid: the
+experiment resolves depth, not sequence position. A position-resolved variant using
+token-aligned single-line counterfactuals was run on a subset of these models; we
+draw only its controls and one comparison here, and reserve its maps for separate
+work.
 
-For the causal readout we run the specification prompt, capture its residual stream at
-the answer position after each layer $\ell$, and write that vector into the
-corresponding position of the untreated forward pass, leaving every other position
-untouched. The remaining $L-\ell$ layers of the untreated computation then run
-normally over the patched state. Because our two conditions differ by the whole
-specification rather than by one token, no positional attribution follows, and we
-sweep depth at the answer position rather than the layer $\times$ position grid. The
-experiment resolves depth, not sequence position.
+\paragraph{Inclusion.}
+Only model--conditions in which the specification changes the emitted action enter
+the causal analysis, following \S\ref{sec:experimental-design}. Models whose margin
+remains on the incorrect side under the specification are reported in
+Table~\ref{tab:internal-margins} and excluded from it.
 
 \paragraph{Controls.}
 Patching a run into itself changes the margin by exactly zero at every layer.
@@ -70,69 +75,85 @@ and $-0.48$, so those two models are at their own noise floor at line resolution
 no line-level conclusion is drawn from them. A control question whose correct action
 is \texttt{walk} remains \texttt{walk} under every patch on every model.
 
-\paragraph{Provenance.}
-The internal measurements were run on an earlier specification
-(\texttt{sha256:6f89be2b}) than the behavioural sweep (\texttt{sha256:5b56feb3}). The
-untreated prompt is identical across both (\texttt{sha256:f9ac23fb}), as are the
-conventional intervention prompts. This section therefore reports a related
-specification condition, not the internal counterpart of the $163/170$ result.
-
-\subsection{Results}
+\subsection{Internal Effects of Task Specification}
+\label{sec:internal-results}
 
 \begin{table}[t]
-\centering\footnotesize
-\caption{Margin $M$ at the first answer token; negative favours the incorrect action.
-\textsc{sub} is the specification condition. Bold marks $M>0$. Three cells disagree
-with the greedy token: Qwen2.5-1.5B emits \texttt{walk} at $+0.19$ and \texttt{Drive}
-at $-0.22$; Qwen3-0.6B emits \texttt{wash} at $+3.01$.}
+\centering
+\caption{Decision margins at the first answer-token prediction position.
+\textsc{Sub} denotes the earlier substrate specification
+(\texttt{sha256:6f89be2b}); \textsc{TP} is the maximum final margin over tested
+transplantation layers, reported only for models with a negative untreated margin.
+Bold indicates $M>0$, favouring \texttt{DRIVE} over \texttt{WALK}. Dashes indicate
+models with a positive untreated margin, for which transplantation results are not
+reported.}
 \label{tab:internal-margins}
-\begin{tabular}{lrrrrrrrrr}
+\vspace{4pt}
+\small
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrrr@{}}
 \toprule
-Model & $L$ & untr. & n/mist & encour & threat & halluc & CoT & urg. \\
+Model & $L$ & Untreated & \textsc{Sub} & \textsc{TP} \\
 \midrule
-Llama-3.2-3B  & 28 & $-0.48$  & $-2.50$  & $-3.25$  & $-3.13$  & $-2.13$  & $-3.13$  & $-2.63$ \\
-Llama-3.1-8B  & 32 & $-3.69$  & $-4.74$  & $-5.87$  & $-5.74$  & $-3.62$  & $-1.75$  & $-1.00$ \\
-Llama-3.3-70B & 80 & $-13.78$ & $-12.50$ & $-14.50$ & $-14.25$ & $-12.00$ & $-15.75$ & $-11.87$ \\
-Qwen2.5-0.5B  & 24 & $\mathbf{0.63}$ & $-2.37$ & $-3.63$ & $-2.62$ & $-1.50$ & $-1.25$ & $-1.25$ \\
-Qwen2.5-1.5B  & 28 & $\mathbf{1.65}$ & $\mathbf{0.19}$ & $\mathbf{0.09}$ & $-0.22$ & $-0.29$ & $-0.50$ & $\mathbf{1.27}$ \\
-Qwen2.5-3B    & 36 & $\mathbf{4.25}$ & $\mathbf{7.10}$ & $\mathbf{9.86}$ & $\mathbf{9.48}$ & $\mathbf{9.51}$ & $\mathbf{8.75}$ & $\mathbf{8.04}$ \\
-Qwen2.5-7B    & 28 & $-10.87$ & $-9.03$ & $-8.51$ & $-8.73$ & $-9.07$ & $-8.64$ & $-5.25$ \\
-Qwen3-0.6B    & 28 & $\mathbf{2.12}$ & $\mathbf{2.48}$ & $\mathbf{2.73}$ & $\mathbf{2.83}$ & $\mathbf{2.32}$ & $\mathbf{2.37}$ & $\mathbf{3.01}$ \\
-Qwen3-4B-2507 & 36 & $-22.12$ & $-3.44$ & $-4.00$ & $-3.74$ & $-6.55$ & $-4.51$ & $\mathbf{6.25}$ \\
-Qwen3-8B      & 36 & $-14.40$ & $-13.50$ & $-10.00$ & $-7.50$ & $-14.00$ & $-9.50$ & $-3.25$ \\
-\midrule
-\multicolumn{2}{l}{} & exp. & \textsc{sub} & transplant \\
-\cmidrule(lr){3-5}
-\multicolumn{2}{l}{Llama-3.2-3B}  & $-2.63$ & $-0.01$ & $\mathbf{0.47}$ \\
-\multicolumn{2}{l}{Llama-3.1-8B}  & $-1.25$ & $\mathbf{1.01}$ & $\mathbf{1.01}$ \\
-\multicolumn{2}{l}{Llama-3.3-70B} & $-3.50$ & $\mathbf{6.07}$ & $\mathbf{6.07}$ \\
-\multicolumn{2}{l}{Qwen2.5-0.5B}  & $-0.50$ & $-1.11$ & --- \\
-\multicolumn{2}{l}{Qwen2.5-1.5B}  & $\mathbf{1.58}$ & $\mathbf{3.53}$ & --- \\
-\multicolumn{2}{l}{Qwen2.5-3B}    & $\mathbf{10.25}$ & $\mathbf{9.75}$ & --- \\
-\multicolumn{2}{l}{Qwen2.5-7B}    & $-8.25$ & $-3.62$ & $-3.62$ \\
-\multicolumn{2}{l}{Qwen3-0.6B}    & $\mathbf{3.04}$ & $\mathbf{3.87}$ & --- \\
-\multicolumn{2}{l}{Qwen3-4B-2507} & $-0.50$ & $-9.75$ & $-8.75$ \\
-\multicolumn{2}{l}{Qwen3-8B}      & $-8.00$ & $\mathbf{10.75}$ & $\mathbf{10.75}$ \\
+Llama-3.2-3B   & 28 & $-0.48$  & $-0.01$ & $\mathbf{0.47}$ \\
+Llama-3.1-8B   & 32 & $-3.69$  & $\mathbf{1.01}$ & $\mathbf{1.01}$ \\
+Llama-3.3-70B  & 80 & $-13.78$ & $\mathbf{6.07}$ & $\mathbf{6.07}$ \\
+Qwen2.5-0.5B   & 24 & $\mathbf{0.63}$ & $-1.11$ & --- \\
+Qwen2.5-1.5B   & 28 & $\mathbf{1.65}$ & $\mathbf{3.53}$ & --- \\
+Qwen2.5-3B     & 36 & $\mathbf{4.25}$ & $\mathbf{9.75}$ & --- \\
+Qwen2.5-7B     & 28 & $-10.87$ & $-3.62$ & $-3.62$ \\
+Qwen3-0.6B     & 28 & $\mathbf{2.12}$ & $\mathbf{3.87}$ & --- \\
+Qwen3-4B-2507  & 36 & $-22.12$ & $-9.75$ & $-8.75$ \\
+Qwen3-8B       & 36 & $-14.40$ & $\mathbf{10.75}$ & $\mathbf{10.75}$ \\
 \bottomrule
-\end{tabular}
+\end{tabular*}
 \end{table}
 
-\paragraph{The incorrect action can carry nearly all of the measured probability.}
-Six of the ten models prefer the incorrect action untreated. On four of them the
-\textsc{walk} family carries essentially the entire measured distribution:
-$P(\mathcal{W}) = 1.000$ to three decimals on Llama-3.3-70B, Qwen2.5-7B, Qwen3-4B-2507
-and Qwen3-8B, and $0.975$ on Llama-3.1-8B. Llama-3.2-3B is the one near-indifferent
-case, at $0.606$ against $0.375$.
+\begin{table}[t]
+\centering
+\caption{Decision margins under the seven conventional interventions. Bold indicates
+$M>0$. In three cells the sign of $M$ and the greedy token disagree: Qwen2.5-1.5B
+emits \texttt{walk} at $+0.19$ and \texttt{Drive} at $-0.22$, and Qwen3-0.6B emits
+\texttt{wash} --- neither action --- at $+3.01$.}
+\label{tab:conventional-margins}
+\vspace{4pt}
+\footnotesize
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}lrrrrrrrr@{}}
+\toprule
+Model & Untr. & Err.av. & Encour. & Threat & Anti-hal. & CoT & Obj.emph. & Expert \\
+\midrule
+Llama-3.2-3B  & $-0.48$  & $-2.50$  & $-3.25$  & $-3.13$  & $-2.13$  & $-3.13$  & $-2.63$ & $-2.63$ \\
+Llama-3.1-8B  & $-3.69$  & $-4.74$  & $-5.87$  & $-5.74$  & $-3.62$  & $-1.75$  & $-1.00$ & $-1.25$ \\
+Llama-3.3-70B & $-13.78$ & $-12.50$ & $-14.50$ & $-14.25$ & $-12.00$ & $-15.75$ & $-11.87$ & $-3.50$ \\
+Qwen2.5-0.5B  & $\mathbf{0.63}$ & $-2.37$ & $-3.63$ & $-2.62$ & $-1.50$ & $-1.25$ & $-1.25$ & $-0.50$ \\
+Qwen2.5-1.5B  & $\mathbf{1.65}$ & $\mathbf{0.19}$ & $\mathbf{0.09}$ & $-0.22$ & $-0.29$ & $-0.50$ & $\mathbf{1.27}$ & $\mathbf{1.58}$ \\
+Qwen2.5-3B    & $\mathbf{4.25}$ & $\mathbf{7.10}$ & $\mathbf{9.86}$ & $\mathbf{9.48}$ & $\mathbf{9.51}$ & $\mathbf{8.75}$ & $\mathbf{8.04}$ & $\mathbf{10.25}$ \\
+Qwen2.5-7B    & $-10.87$ & $-9.03$ & $-8.51$ & $-8.73$ & $-9.07$ & $-8.64$ & $-5.25$ & $-8.25$ \\
+Qwen3-0.6B    & $\mathbf{2.12}$ & $\mathbf{2.48}$ & $\mathbf{2.73}$ & $\mathbf{2.83}$ & $\mathbf{2.32}$ & $\mathbf{2.37}$ & $\mathbf{3.01}$ & $\mathbf{3.04}$ \\
+Qwen3-4B-2507 & $-22.12$ & $-3.44$ & $-4.00$ & $-3.74$ & $-6.55$ & $-4.51$ & $\mathbf{6.25}$ & $-0.50$ \\
+Qwen3-8B      & $-14.40$ & $-13.50$ & $-10.00$ & $-7.50$ & $-14.00$ & $-9.50$ & $-3.25$ & $-8.00$ \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\paragraph{The incorrect action can receive nearly all next-token probability mass.}
+Six of the ten models favour the incorrect action on the untreated task. On four of
+them the \textsc{walk} token family receives nearly all next-token probability mass:
+$P(\mathcal{W})$ rounds to $1.000$ on Llama-3.3-70B, Qwen2.5-7B, Qwen3-4B-2507 and
+Qwen3-8B. It receives $0.975$ on Llama-3.1-8B. Llama-3.2-3B exhibits a less
+concentrated preference, with $P(\mathcal{W})=0.606$ and $P(\mathcal{D})=0.375$. In
+five of the six models favouring the incorrect action, the first-token distribution
+assigns very little probability mass to the correct action.
 
 \paragraph{Conventional interventions move the margin, often away from the correct action.}
-Across ten models and seven conventional conditions, $27$ of $70$ leave the margin
-further from the correct action than the untreated task does. On Llama-3.2-3B all
-seven do. On Llama-3.1-8B, error avoidance, encouragement and threat take a model at
-$-3.69$ to $-4.74$, $-5.87$ and $-5.74$. The behavioural sweep records these
-conditions as unchanged, because the emitted word is unchanged. Of the six models that
-prefer the incorrect action untreated, one conventional condition on one model
-produces a positive margin: objective emphasis on Qwen3-4B-2507, at $+6.25$. On the
-remaining five the best conventional margin is $1.00$ to $5.25$ nats short of zero.
+Across ten models and seven conventional conditions
+(Table~\ref{tab:conventional-margins}), $27$ of $70$ leave the margin further from
+the correct action than the untreated task does. On Llama-3.2-3B all seven do. On
+Llama-3.1-8B, error avoidance, encouragement and threat take a model at $-3.69$ to
+$-4.74$, $-5.87$ and $-5.74$; the behavioural sweep records these conditions as
+unchanged, because the emitted word is unchanged. Of the six models favouring the
+incorrect action untreated, one conventional condition on one model produces a
+positive margin: objective emphasis on Qwen3-4B-2507, at $+6.25$. On the remaining
+five the best conventional margin is $1.00$ to $5.25$ nats short of zero.
 
 \paragraph{The specification does not name the action it produces.}
 Neither specification contains the word \texttt{drive}. Both name \emph{walking} ---
@@ -143,59 +164,55 @@ supply it.
 
 \paragraph{Transplantation reverses the emitted action on three models.}
 On Llama-3.1-8B, Llama-3.3-70B and Qwen3-8B --- the three models where the
-specification changes the emitted action, and therefore the three admitted to the
-causal analysis --- writing the specification-conditioned residual into the untreated
-forward pass at a sufficiently deep layer moves the final margin from $-3.69$,
-$-13.78$ and $-14.40$ to $+1.01$, $+6.07$ and $+10.75$, in each case equal to the
-specification prompt's own margin to two decimals. Two further models are reported for
-completeness and excluded from the analysis: on Qwen2.5-7B and Qwen3-4B-2507 the
-specification does not change the emitted action, and no transplantation layer does
-either. Llama-3.2-3B is also excluded: the specification leaves it at $-0.01$, so
-there is no behavioural transition to study, and its transplantation result of $+0.47$
-is a change in a patched computation with no corresponding prompt-level state.
+specification changes the emitted action --- transplanting the
+specification-conditioned residual at a sufficiently deep layer moves the final
+margin from $-3.69$, $-13.78$ and $-14.40$ to $+1.01$, $+6.07$ and $+10.75$, in each
+case equal to the specification prompt's own margin to two decimals. On Qwen2.5-7B
+and Qwen3-4B-2507 the specification does not change the emitted action, and no
+transplantation layer does either. Llama-3.2-3B is likewise excluded: the
+specification leaves it at $-0.01$, so there is no behavioural transition to study,
+and its transplantation result of $+0.47$ is a change in a patched computation with
+no corresponding prompt-level state.
 
 \paragraph{The layer at which transplantation becomes sufficient is consistent across scale.}
 Transplanting at early layers leaves the final margin unchanged. On Llama-3.1-8B the
 patched margin sits at $\approx-3.58$ for layers $0$ through $12$, then moves through
 $-3.07$, $-1.72$ and $-0.11$ at layers $13$ to $15$, becomes positive at layer $16$,
-and does not increase further. The first positive layer is $16/32$ on Llama-3.1-8B and
-$41/80$ on Llama-3.3-70B --- relative depths of $0.50$ and $0.51$ across a $9\times$
-range in parameter count --- and $23/36$, or $0.64$, on Qwen3-8B. This is a property
-of the transplantation experiment and not a localisation: a patch at layer $8$ leaves
-$24$ subsequent layers of untreated computation to act on the state, and its failure
-to change the final margin does not establish that the relevant information is absent
-there. What the sweep measures is the depth at which the specification-conditioned
-state becomes sufficient to reverse the final preference under the remaining
-computation. Over the same layers, cosine similarity between the untreated and
-specification-conditioned residuals at this position on Llama-3.1-8B falls from
-$0.96$--$0.98$ through layer $14$ to $0.91$ at layer $16$, reaching its minimum of
-$0.90$ at layers $18$--$19$.
+and does not increase further. The first positive layer is $16/32$ on Llama-3.1-8B
+and $41/80$ on Llama-3.3-70B --- relative depths of $0.50$ and $0.51$ across a
+$9\times$ range in parameter count --- and $23/36$, or $0.64$, on Qwen3-8B. This is a
+property of the transplantation experiment and not a localisation: a patch at layer
+$8$ leaves $24$ subsequent layers of untreated computation to act on the state, and
+its failure to change the final margin does not establish that the relevant
+information is absent there. What the sweep measures is the depth at which the
+specification-conditioned state becomes sufficient to reverse the final preference
+under the remaining computation. Over the same layers, cosine similarity between the
+untreated and specification-conditioned residuals at this position on Llama-3.1-8B
+falls from $0.96$--$0.98$ through layer $14$ to $0.91$ at layer $16$, reaching its
+minimum of $0.90$ at layers $18$--$19$.
 
 \paragraph{Behavioural agreement does not imply that the same content carries the decision.}
-A position-resolved variant of the experiment replaces one line of the specification
-at a time with a rewrite of identical token count that neutralises or reverses its
-semantics. Two results follow. Reversing the objective line --- from
-\texttt{while transporting the object from location A to B} to
-\texttt{without transporting the object from location A to B} --- does not weaken the
-correct preference on Llama-3.3-70B; it strengthens it, from $+6.07$ to $+9.04$. And
-the constraint that carries the effect is not a property of the specification:
-reversing line~5 moves Llama-3.3-70B by $9.51$ nats and reverses its decision, while
-on Qwen3-8B the same rewrite of the same line moves the margin below the measurement
-resolution of that run. Both models reach the same reproducible action from the same
-specification. Behavioural convergence therefore does not entail that the same
-specification content is doing the work inside them, and neither the direction of a
-constraint's contribution nor its identity can be read off the text.
+The position-resolved runs replace one line of the specification at a time with a
+rewrite of identical token count that neutralises or reverses its semantics. Two
+results follow. Reversing the objective line --- from \texttt{while transporting the
+object from location A to B} to \texttt{without transporting the object from location
+A to B} --- does not weaken the correct preference on Llama-3.3-70B; it strengthens
+it, from $+6.07$ to $+9.04$. And the constraint that carries the effect is not a
+property of the specification: reversing line~5 moves Llama-3.3-70B by $9.51$ nats
+and reverses its decision, while on Qwen3-8B the same rewrite of the same line moves
+the margin below the measurement resolution of that run. Both models reach the same
+reproducible action from the same specification. Behavioural convergence therefore
+does not entail that the same specification content is doing the work inside them,
+and neither the direction of a constraint's contribution nor its identity can be read
+off the text.
 
-\subsection{Scope}
-
+\paragraph{Scope.}
 These measurements establish that the specification changes the models' internal
-output preference, and that transplanting the specification-conditioned state into the
-untreated computation can reverse its emitted action. They do not establish how
+output preference, and that transplanting the specification-conditioned state into
+the untreated computation can reverse the emitted action. They do not establish how
 individual constraints are represented, which components write them, where in the
-network any decision is formed, or whether the effect transfers to other tasks. The
-line-level results identify constraints the measured effect depends on under a
-declared counterfactual; deletion and reversal disagree --- deleting line~6 reverses
-Llama-3.1-8B's decision while rewriting it to the opposite does not --- so which line
-appears to carry the effect depends on which intervention is used. Establishing the
-dependence structure itself requires ablations across many specifications and models,
-together with attribution and pathway analysis, and is the subject of separate work.
+network any decision is formed, or whether the effect transfers to other tasks.
+Deletion and reversal disagree --- deleting line~6 reverses Llama-3.1-8B's decision
+while rewriting it to the opposite does not --- so which line appears to carry the
+effect depends on which intervention is used. Individual constraint ablations, direct
+logit attribution, and attention analyses are outside the scope of this paper.

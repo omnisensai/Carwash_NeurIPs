@@ -1,6 +1,13 @@
 \subsection{Operational Reproducibility and Correctness}
 \label{sec:operational-reproducibility}
 
+Deciding whether a model can be relied on for a specific operational decision requires
+a statement about that decision, not about a distribution of them. Aggregate accuracy
+does not provide one: a model that is always correct on one input and always wrong on
+another scores the same as a model that is inconsistent on both, although the two fail
+in different ways and only one of them fails visibly. We therefore define a criterion
+that is evaluated where the decision is made.
+
 We define reproducibility over a test matrix of models, inputs, and
 interventions declared before evaluation, and assess it within each condition
 over its $R$ executions rather than averaging across the matrix. Correctness is

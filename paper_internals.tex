@@ -50,16 +50,28 @@ forward pass, leaving every other position untouched. The remaining $L - \ell$ l
 of the untreated computation then run normally over the patched state. We sweep
 $\ell$ over all layers and record the resulting final margin.
 
-Two departures from the usual protocol should be stated. First, causal tracing
-normally contrasts a clean prompt with a minimally corrupted one --- a single token
-replaced, or noise added to one span --- so that a restored answer localises to the
-damaged position. Our two conditions differ by the entire specification, so the
-contrast is semantically meaningful but not minimal, and no positional attribution
-follows from it. Second, and consequently, we patch at the answer position only
-rather than sweeping the layer $\times$ position grid. The experiment therefore
-resolves depth and not sequence position: it can establish at which layer the
-substrate-conditioned state becomes sufficient, and cannot establish which tokens of
-the specification carry the effect.
+Causal tracing normally contrasts a clean prompt with a minimally corrupted one ---
+a single token replaced, or noise added to one span --- so that a restored answer
+localises to the damaged position. The contrast used here is the whole specification
+against its absence, which is the behaviourally meaningful comparison but not a
+minimal one, and we sweep depth at the answer position rather than the full layer
+$\times$ position grid. This section therefore resolves depth and not sequence
+position: it establishes at which layer the substrate-conditioned state becomes
+sufficient, and not which tokens of the specification carry the effect. A
+position-resolved variant of the experiment, using token-aligned single-line
+counterfactuals, was run on a subset of these models; we draw only its controls here
+and reserve its maps for separate work.
+
+\paragraph{Controls.}
+Three checks accompany the transplantation. Patching a run into itself changes the
+margin by exactly zero at every layer. Replacing the transplanted vector with a
+random direction of the same norm as the difference between the two conditions moves
+the margin by $1.8$ nats on Llama-3.3-70B and $2.75$ on Qwen3-8B, against line-level
+effects of $9.5$ and $7.75$ in the same runs; on Llama-3.1-8B and Llama-3.2-3B the
+random-direction control reaches $0.50$ and $0.34$ against effects of $0.74$ and
+$-0.48$, so at line resolution those two models are at their own noise floor and we
+do not draw line-level conclusions from them. A control question whose correct action
+is \texttt{walk} remains \texttt{walk} under every patch on every model.
 
 \begin{table}[t]
 \centering\footnotesize
@@ -198,7 +210,11 @@ $-0.60$, Llama-3.3-70B from $+6.07$ to $-1.79$, Qwen3-8B from $+10.75$ to $-3.75
 Every other single removal leaves all three positive, with one exception: on
 Llama-3.3-70B, removing line~1 also reverts the preference, to $-5.22$. Line~6 is
 not sufficient on its own --- presented alone it leaves Llama-3.1-8B at $-1.83$ ---
-so the effect is not carried by that sentence in isolation.
+so the effect is not carried by that sentence in isolation. The result is also
+specific to deletion: rewriting line~6 to the opposite constraint, with the token
+count held fixed, leaves Llama-3.1-8B at $+0.27$ rather than reversing it. Removing a
+constraint and contradicting it are different interventions, and which line appears
+to carry the effect depends on which is used.
 
 We report this as a single observation and do not build on it. Establishing which
 constraints carry the effect, whether the dependency is the same across

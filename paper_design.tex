@@ -39,3 +39,34 @@ be identical across the compared models, which we ensure with token-aligned rewr
 of individual lines. And only models that reach the reference condition enter the
 comparison; a model that does not converge under the specification is not a missing
 data point but a separate outcome of the same procedure, and we report it as one.
+
+\subsection{What is measured, and what is named}
+\label{sec:design-naming}
+
+Internal measurements are usually reported by naming an internal quantity --- a
+direction, a head, a layer at which something is said to occur --- and supporting the
+name with an intervention whose output effect is consistent with it. Output
+consistency underdetermines the name: many internal facts produce the same change,
+and the measured quantities vary continuously across layers, inputs, models and
+numerical precision, so any point given a name is a point selected from a continuum.
+
+We name nothing internal. The outcome variable is a verified behavioural transition:
+a model that selects one action in ten of ten samples and, under the specification,
+selects the other in ten of ten. The two actions are mutually exclusive and the task
+declares which one satisfies the objective, so the meaning of the measured quantity
+is supplied by the task rather than inferred from the model. This is the shape of the
+decisions that language models are deployed to make --- approve or reject, escalate
+or not, urgent or not --- in which the semantics of the output is fixed by the system
+that consumes it.
+
+The internal measurements then describe what carries that transition and at what
+depth it becomes sufficient. They do not assert what any state represents. The margin
+$M$ is a log-ratio between two token families and is reported as such; where its sign
+and the emitted token disagree, we report the disagreement rather than resolving it
+in favour of the margin.
+
+One condition of this design should be stated. Declaring the two actions fixes their
+meaning, but it fixes \emph{correctness} only for tasks that have an unambiguous
+intended action. Where the correct action is contested, the same procedure establishes
+reproducibility against a declared criterion without establishing that the criterion
+is right.

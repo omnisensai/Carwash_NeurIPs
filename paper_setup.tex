@@ -1,0 +1,144 @@
+\subsection{Operational Reproducibility and Correctness}
+\label{sec:operational-reproducibility}
+
+We define reproducibility over a test matrix of models, inputs, and
+interventions declared before evaluation, and assess it within each condition
+over its $R$ executions rather than averaging across the matrix. Correctness is
+fixed by task ground truth established independently of model responses: the
+car-wash objective requires transporting the car, so \texttt{DRIVE} is correct.
+We use $R=10$ single-pass sampled executions per condition at temperature $1.0$,
+since greedy decoding repeats one action and conceals behavioral variation. Two
+models do not accept a temperature parameter and ran at provider default. Invalid
+or missing outputs never satisfy the criterion, which applies to the declared
+matrix alone.
+
+Evaluating within conditions rather than across them is not stricter bookkeeping.
+An accuracy figure aggregated over a matrix is a property of the inputs chosen for
+that matrix as much as of the model: in the results below, the same question under
+different surrounding text produces a correct-response rate ranging from $7.6\%$ to
+$95.9\%$. Reported per condition, each figure describes a declared input;
+aggregated, it describes a set of inputs that someone selected.
+
+Let $y_r$ denote the operational outcome of execution $r$ under
+a fixed condition, and $y^*$ the predefined correct action.
+Reproducible correctness requires
+\begin{equation}
+    y_r = y^* \quad \forall r \in \{1,\ldots,R\}.
+    \label{eq:reproducible-correctness}
+\end{equation}
+
+Ten identical incorrect decisions are reproducible but wrong;
+mixed decisions are non-reproducible. Aggregate accuracy cannot
+distinguish these states and is therefore reported separately
+from the number of conditions meeting (\ref{eq:reproducible-correctness}).
+
+\begin{table}[t]
+\centering
+\caption{Classification of outcome patterns for the car-wash task
+($R=10$; correct action: DRIVE).}
+\label{tab:operational-states}
+\vspace{6pt}
+
+\small
+\begin{tabular*}{0.75\columnwidth}{@{\extracolsep{\fill}}ll@{}}
+\toprule
+\textbf{Observed outcomes} & \textbf{Reproducibility} \\
+\midrule
+10 DRIVE / 0 WALK & Reproducibly correct \\
+10 WALK / 0 DRIVE & Reproducibly incorrect \\
+7 WALK / 3 DRIVE & Non-reproducible \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+\subsection{Semantic Interventions and Output Preference}
+\label{sec:semantic-interventions}
+
+We study a fixed operational task under different natural-language
+interventions. All modify the model's input without changing parameters,
+but differ in what they specify: conventional prompts request reasoning
+procedures, expertise, or emphasis, whereas the substrate specifies the
+relations among the task objective, the required object, and the available
+actions.
+
+Models are evaluated behaviorally: for every model and condition, we record
+the emitted output of each execution and classify it to an operational
+action. Two additional measurements are available on subsets. Where token
+log-probabilities are exposed, including for closed-weight models, we
+measure relative preference between the two actions; for open-weight
+models, we additionally access internal activations. Model identifiers,
+access levels, inference configurations, and exact intervention texts
+are given in Appendix~\ref{app:experimental-details}.
+
+Where log-probabilities are available, we measure relative preference
+at the position predicting the first answer token:
+\begin{equation}
+    M = \log \sum_{t \in \mathcal{D}} P(t)
+      - \log \sum_{t \in \mathcal{W}} P(t),
+    \label{eq:decision-margin}
+\end{equation}
+where $\mathcal{D}$ and $\mathcal{W}$ contain the distinct token IDs
+corresponding to the measured surface forms of each action, including
+case and leading-space variants. Positive $M$ favors DRIVE. An
+intervention's effect is measured relative to the untreated task under
+the same model and configuration:
+\begin{equation}
+    \Delta M(u) = M(u) - M(\emptyset).
+    \label{eq:intervention-effect}
+\end{equation}
+
+When a provider exposes only the top $K$ tokens, incomplete coverage
+of an action's surface forms prevents exact margin estimation. We
+report a one-sided bound only when its direction is established by
+the available probabilities; otherwise, the margin is recorded as
+unavailable. Behavioral correctness is measured over all $R$ declared
+executions, with invalid or missing outputs counted as failures and
+reported separately.
+
+The emitted action, not the margin, is the criterion. A margin can move
+substantially while the emitted action does not: several of the interventions
+reported below shift $M$ by nats on models whose emitted word is unchanged, and in
+a small number of conditions the sign of $M$ and the emitted token disagree
+outright. Treating the margin as the outcome would record those as effects. We
+therefore report $M$ as evidence about relative output preference and classify
+conditions by the emitted action, which does not depend on log-probability access.
+
+\subsection{Experimental Design}
+\label{sec:experimental-design}
+
+The study proceeds in two stages. First, we evaluate the untreated
+task, conventional semantic interventions, and a shared task-specific
+specification across the declared model matrix. Each condition is
+evaluated through repeated single-pass executions, without retries,
+majority voting, or post-generation correction. We measure the
+resulting operational states and determine which model--condition
+pairs satisfy the reproducible-correctness criterion of
+\S\ref{sec:operational-reproducibility}.
+
+The order of the two stages is a requirement of the second, not a convenience.
+Comparing internal states across models presumes that the models are doing the same
+thing, and under an untreated task they are not: which models appear anomalous
+depends on the task chosen and on which models were tested, and the difference
+between a model that selects the intended action on three of ten executions and one
+that selects it on none has no fixed standard against which either is measured. The
+alternative usually available --- restricting attention to cases on which the models
+already agree --- substitutes a selection bias for the confound, since the comparison
+is then limited to whatever the models happen to find easy. Establishing behavioral
+convergence first supplies the standard. It is verified per model--condition before
+any activation is inspected, and it holds the input, the emitted action, and the
+correctness criterion fixed across the compared models by construction, so remaining
+internal differences are attributable to the models rather than to divergent task
+behavior.
+
+Second, we investigate the engineered behavioral transition internally
+in open-weight models. Holding the model, task, and inference
+configuration fixed, we compare the untreated and substrate-conditioned
+computations. At selected layers, we transplant the substrate-conditioned
+activation at the final prediction position into the untreated
+computation and measure its effect on the final decision margin.
+This tests where the induced internal state becomes sufficient,
+under the remaining computation, to change the model's output
+preference. Only model--conditions in which the specification changes the emitted
+action enter this analysis; a model that does not converge under the specification
+is not a missing data point but a separate outcome of the same procedure, and is
+reported as one.

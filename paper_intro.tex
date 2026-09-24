@@ -75,14 +75,14 @@ which is otherwise confounded becomes available once it is.
 
 \paragraph{Contributions.}
 \begin{itemize}\itemsep2pt
-\item \textbf{Specification, not instruction, establishes reproducible operational
-decisions.} Under an evaluation protocol that separates reproducibly correct,
-reproducibly incorrect and non-reproducible decisions at the level of the individual
-model--condition, no model is reproducibly correct on the untreated task and thirteen
-of seventeen are reproducibly incorrect. Across seven conventional interventions and
-seventeen models, exactly one reproducibly incorrect model is ever converted; a single
-shared task specification converts eleven, without weight updates, decoder changes,
-retries, majority voting or post-generation correction.
+\item \textbf{A model that is reproducibly wrong can be made reproducibly correct with
+natural language alone.} Thirteen of seventeen models return the same incorrect action
+in ten of ten samples on the untreated task; a single shared task specification
+converts eleven of them to the correct action in ten of ten, with no weight updates,
+decoder changes, retries, majority voting or post-generation correction. Seven
+conventional interventions applied to the same models convert one. The engineering
+question this supports is not which model is most capable, but what must be supplied
+for a chosen model to become capable of the task at hand.
 
 \item \textbf{A measurement design for cross-model comparison.} Engineering
 behavioural convergence first yields a controlled reference in which the input, the

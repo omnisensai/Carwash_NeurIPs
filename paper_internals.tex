@@ -40,12 +40,26 @@ disagree. The internal margin is supplementary evidence about output preference,
 not a substitute for the behavioural classification of Section~\ref{sec:results}.
 
 \paragraph{Transplantation.}
-For the causal readout we run the substrate prompt, capture its residual stream at
-the answer position after each layer $\ell$, and write that vector into the
-corresponding position of the \emph{untreated} forward pass, leaving every other
-position untouched. The remaining $L - \ell$ layers of the untreated computation
-then run normally over the patched state. We sweep $\ell$ over all layers and
-record the resulting final margin.
+The causal readout is activation patching, the standard causal-mediation instrument
+for language models \citep{vig2020causal,meng2022locating}, read out as a logit
+difference between two candidate answer tokens \citep{wang2023interpretability};
+we follow the methodological recommendations of \citet{zhang2024towards}. We run the
+substrate prompt, capture its residual stream at the answer position after each layer
+$\ell$, and write that vector into the corresponding position of the \emph{untreated}
+forward pass, leaving every other position untouched. The remaining $L - \ell$ layers
+of the untreated computation then run normally over the patched state. We sweep
+$\ell$ over all layers and record the resulting final margin.
+
+Two departures from the usual protocol should be stated. First, causal tracing
+normally contrasts a clean prompt with a minimally corrupted one --- a single token
+replaced, or noise added to one span --- so that a restored answer localises to the
+damaged position. Our two conditions differ by the entire specification, so the
+contrast is semantically meaningful but not minimal, and no positional attribution
+follows from it. Second, and consequently, we patch at the answer position only
+rather than sweeping the layer $\times$ position grid. The experiment therefore
+resolves depth and not sequence position: it can establish at which layer the
+substrate-conditioned state becomes sufficient, and cannot establish which tokens of
+the specification carry the effect.
 
 \begin{table}[t]
 \centering\footnotesize

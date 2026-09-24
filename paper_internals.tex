@@ -149,6 +149,22 @@ the objective: the nine-line specification does so twice, in
 itself, identically in every condition. The specification determines the answer, as
 any constraint set is meant to; it does not supply it.
 
+\paragraph{Which constraints are load-bearing is not recoverable by inspection.}
+The position-resolved runs replace one line of the specification at a time with a
+rewrite of identical token count that neutralises or reverses its semantics, holding
+everything else fixed. Two results bear on how a specification should be read.
+Reversing the objective line of the six-line specification --- from
+\texttt{while transporting the object from location A to B} to
+\texttt{without transporting the object from location A to B} --- does not weaken the
+correct preference on Llama-3.3-70B; it strengthens it, from $+6.07$ to $+9.04$. And
+the constraint that carries the effect is not a property of the specification: on
+Llama-3.3-70B, reversing line~5 moves the margin by $9.51$ nats and reverses the
+decision, while on Qwen3-8B the same rewrite of the same line, in the same
+specification, moves it by $0.00$. Neither the direction of a constraint's
+contribution nor its identity can be read off the text. This is the measured basis
+for establishing specification sufficiency per model--condition rather than by
+inspection.
+
 \subsection{Internal Effects of Engineered Behavioral Change}
 
 \paragraph{Transplantation reverses the final preference on four models.}

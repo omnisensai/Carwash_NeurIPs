@@ -3,108 +3,116 @@
 
 Large language models are increasingly used as decision modules: a model reads a
 case and emits an action that determines what a system does next. Under stochastic
-decoding that action is a random variable, and repeated executions of the same input
-can produce different actions
+decoding that action is a random variable, and repeated executions of the same
+input can produce different actions
 \citep{Ouyang_2025,atil2025nondeterminismdeterministicllmsettings}. What matters
 operationally is not average accuracy over a benchmark but a joint property of the
 individual decision: whether it is correct, and whether it recurs.
 
 Consider an accounts-payable system in which a model decides whether an invoice
-satisfies an approval policy. An invoice labelled \texttt{approve} on one execution
-and \texttt{reject} on the next is not a reproducible decision. An invoice labelled
-\texttt{reject} on all ten executions, wrongly, is not a usable one. In agentic
-systems the decision selects a tool, a workflow branch, or the information passed
-downstream, so both failure modes propagate. Operational reliability requires
-correctness and reproducibility together, and aggregate accuracy reports neither.
+satisfies an approval policy. A system that yields conflicting outcomes (\texttt{approve} versus \texttt{reject}) for an identical invoice across different models and runs demonstrates instability and a lack of reproducibility. Moreover, repeatedly assigning an incorrect \texttt{reject} label across executions highlights an underlying fault in the system. In agentic systems, LLM outputs directly determine tool selection, workflow branching, and downstream context, allowing failure modes to propagate. We argue that true operational reliability demands both correctness and reproducibility, two properties that aggregate accuracy metrics alone cannot establish for a given model–task condition.
 
-Existing levers act on different parts of the stack. Batch-invariant kernels remove
-numerical sources of run-to-run variation \citep{he2025nondeterminism}; fine-tuning
-changes learned behaviour \citep{tian2023finetuninglanguagemodelsfactuality};
-constrained and semantically guided decoding alter the generation procedure
-\citep{loula2025syntactic,ahmed2025semanticprobabilisticcontrollanguage}; prompt
-search reshapes the output distribution toward target tokens
-\citep{bhargava2024whatsmagicwordcontrol}, and stability-guided refinement improves
-consistency alongside task performance \citep{chen2025stability}. Each modifies
-weights, numerics, the sampler, or the response after the fact. None answers what the
-input must contain for a frozen model, under unmodified decoding and without retries,
-to emit the intended action across independent samples. Each modifies
-weights, numerics, the sampler, or the response after the fact. None answers what the
-input must contain for a frozen model, under unmodified decoding and without retries,
-to emit the intended action across independent samples. Sensitivity to phrasing is
-well documented as a phenomenon
-\citep{mizrahi-etal-2024-state,srikanth2024errorsnaturallanguagereasoning}; we treat
-the task specification as the object of study rather than as a nuisance variable.
-Earlier work named this \emph{interpretation drift} and showed that an explicit
-specification brought four frontier models from $30\%$ agreement and 40 distinct
-output hashes to a single hash across 40 runs on a classification task
-\citep{nguyen2026substrates}.
+Existing approaches address reliability through different parts of the
+stack. Batch-invariant kernels remove numerical sources of run-to-run
+variation \citep{he2025nondeterminism}; fine-tuning changes learned
+behaviour \citep{tian2023finetuninglanguagemodelsfactuality};
+constrained and semantically guided decoding alter the generation
+procedure \citep{loula2025syntactic,ahmed2025semanticprobabilisticcontrollanguage}.
+Other approaches intervene through the input itself: prompt search
+reshapes the output distribution toward target tokens
+\citep{bhargava2024whatsmagicwordcontrol}, stability-guided refinement
+improves consistency alongside task performance
+\citep{chen2025stability}, and meaning-preserving changes in phrasing
+can alter model outputs and correctness
+\citep{mizrahi-etal-2024-state,srikanth2024errorsnaturallanguagereasoning}.
 
-We hold weights, decoding and retry policy fixed and vary only the specification
-supplied before inference. The test case is a minimal operational decision: the
-widely circulated car-wash prompt,\footnote{``I need to wash my car, the car wash is
-only 50 metres away, should I walk or drive there?''} in which the destination is
-within walking distance but completing the objective requires transporting the car,
-so the intended action is \texttt{DRIVE}. Each model--condition cell is executed ten
-times at temperature $1.0$ and classified by unanimity: \emph{reproducibly correct}
-(the intended action in ten of ten samples), \emph{reproducibly incorrect} (zero of
-ten), or \emph{non-reproducible} (anything between). We evaluate the untreated task,
-seven conventional prompt interventions --- reasoning elicitation, expert role
-assignment, encouragement, objective emphasis, threat, error avoidance and
-anti-hallucination --- and one shared task specification across 17 models.
+We take this observation further: we are not merely studying whether
+input wording affects behavior, but whether input specification can
+be systematically engineered to control operational decision variance.
+Rather than treating variation in operational decisions as an
+unpredictable consequence of model inference, we treat it as an
+engineering problem: what must the input contain for a frozen model,
+operating under unmodified decoding and without retries or
+post-generation correction, to repeatedly emit the intended
+operational action in a single pass?
 
-No model is reproducibly correct on the untreated task: 13 of 17 are reproducibly
-incorrect and four are non-reproducible. The seven conventional interventions raise
-the aggregate rate from $7.6\%$ to at most $36.5\%$, and across all seven conditions
-convert exactly one reproducibly incorrect model. The shared specification makes 14
-of 17 reproducibly correct, $95.9\%$ of responses; the remaining three improve but do
-not reach unanimity, so specification sufficiency is established per model--condition
-rather than assumed. In open-weight models, transplanting a
-specification-conditioned activation into the untreated computation reverses the
-emitted action in the models the specification converts; these traces use an earlier
-specification than the fleet-wide experiment and are not claimed as the mechanism of
-the $14/17$ result.
+Earlier work introduced \emph{interpretation drift} and showed that
+explicit task specification brought four frontier models from $30\%$
+consistency across classified users and 40 distinct output hashes
+in 40 untreated runs to byte-identical classifications across
+40 substrate-conditioned runs \citep{nguyen2026substrates}.
 
-The specification is not a general-purpose intervention. It is written for this task,
-it names this task's entities, and it leaves three of the seventeen models short of
-reproducibility. What it establishes is a reference condition --- a decision that is
-correct and reproducible across otherwise divergent frozen models, verified per
-model--condition --- and that condition is the instrument for everything that follows.
-It is what makes the conventional interventions measurable as a comparison, and what
-makes internal states comparable across models at all. The claim is not that this text
-is special, but that a reference of this kind can be engineered, and that measurement
-which is otherwise confounded becomes available once it is.
+We extend this investigation to operational action selection, varying
+only the specification while holding model weights, decoding configuration,
+and retry policy fixed within each model comparison. We use the widely
+circulated car-wash prompt,\footnote{``I need to wash my car, the car
+wash is only 50 metres away, should I walk or drive there?''}
+where completing the objective requires transporting the car, making
+\texttt{DRIVE} the intended action. Across 17 models, we evaluate the
+untreated task, seven conventional prompt interventions, and one shared
+task specification, with ten sampled executions per model--condition
+at temperature $1.0$. Each pair is classified as \emph{reproducibly
+correct} (10/10 intended actions), \emph{reproducibly incorrect}
+(10/10 identical incorrect actions), or \emph{non-reproducible}
+(mixed operational decisions).
+
+At baseline, 13 of 17 models are reproducibly incorrect and four
+are non-reproducible; none is reproducibly correct. Conventional
+interventions raise aggregate correctness from $7.6\%$ to at most
+$36.5\%$, collectively converting only one reproducibly incorrect
+model. The shared specification establishes reproducibly correct
+behaviour in 14 of 17 models, with $95.9\%$ correct responses.
+The remaining three improve without reaching unanimity, establishing
+specification sufficiency per model--condition rather than in aggregate.
+
+In a separate open-weight experiment, transplanting a
+specification-conditioned activation into the untreated computation
+can reverse the final \texttt{DRIVE}--\texttt{WALK} preference.
+These measurements use an earlier specification and are not claimed
+as the internal mechanism of the fleet-wide $14/17$ result.
+
+The specification is task-specific and leaves three models short
+of reproducible correctness. Its contribution is an engineered
+reference condition: a correct and reproducible operational outcome,
+verified per model--condition, against which conventional interventions
+and internal effects can be compared. The claim is not that this
+particular text is special, but that such a reference can be
+engineered, enabling investigation of how different models arrive
+at the same verified operational outcome.
 
 \paragraph{Contributions.}
-\begin{itemize}\itemsep2pt
-\item \textbf{A definition of reproducible correctness with an explicit pass/fail
-criterion.} We establish natural-language task specification as an engineering control
-surface and define a strict model--condition-level criterion distinguishing
-reproducibly correct, reproducibly incorrect, and non-reproducible behaviour. This
-gives prompt improvement an explicit operational threshold: an intervention is not
-sufficient because it raises aggregate correctness, but only if it produces the
-intended action in every sampled single-pass execution. The threshold discriminates.
-Expert framing raises the fleet-wide rate from $7.6\%$ to $36.5\%$ and converts one
-reproducibly incorrect model; across all seven conventional interventions it is the
-same single model. Those seven constitute a measured baseline for conventional prompt
-improvement under the criterion, against which any proposed intervention, including
-ours, can be placed. Thirteen of seventeen models are reproducibly incorrect on the
-untreated task, and one shared task specification converts eleven of them, with no
-weight updates, decoder changes, retries, majority voting, or post-generation
-correction. The engineering question this supports is not which model is most capable,
-but what must be supplied for a chosen model to become capable of the task at hand.
 
-\item \textbf{Engineered behavioural convergence as a reference for internal causal
-measurement.} Internal measurement is interpretable only against a controlled
-behavioural state, and untreated behaviour cannot supply one: which models appear
-anomalous depends on the task chosen and on which models were tested, and a margin can
-move substantially while the emitted action does not. We therefore engineer the
-reference rather than observing it. Convergence is verified per model--condition before
-any activation is inspected, holding the input, the emitted action and the correctness
-criterion fixed, so what is measured is the transition between two verified behavioural
-states and internal differences are attributable to the models rather than to divergent
-task behaviour. Under this reference, activation transplantation reverses the emitted
-action in the models the specification converts, and one constraint that reverses the
-decision in one converged model moves the margin below measurement resolution in
-another --- behavioural agreement does not imply that the same specification content
-carries the decision.
+\begin{itemize}\itemsep2pt
+
+\item \textbf{From statistical improvement to operational
+sufficiency through task specification.}
+We establish natural-language task specification as an engineering
+control surface and introduce a strict model--condition-level
+criterion for reproducibly correct operational behaviour.
+Unlike aggregate correctness, this criterion identifies whether
+an intervention establishes the intended action in every declared
+single-pass execution, distinguishing reproducibly correct,
+reproducibly incorrect, and non-reproducible outcomes.
+Thirteen of seventeen models are reproducibly incorrect on the
+untreated task; one shared specification converts eleven of them
+to reproducibly correct behaviour, compared with one converted
+by seven conventional prompt interventions. The distinction is
+therefore not merely between a worse and a better prompt, but
+between statistical improvement and an input specification that
+satisfies a declared operational requirement.
+
+\item \textbf{From behavioral observation to an engineered reference
+for internal causal measurement.}
+We establish reproducibly correct operational behaviour as an
+experimental reference before investigating internal computation.
+Rather than examining activations from an isolated model response,
+we compare untreated and specification-conditioned computations
+and measure the resulting change in action preference.
+In open-weight models, activation transplantation tests whether
+the specification-conditioned internal state can causally reverse
+the untreated preference. This connects externally engineered
+behavioural control to internal causal measurement and provides
+a reference for subsequent investigation of individual semantic
+constraints and their internal effects.
+
 \end{itemize}

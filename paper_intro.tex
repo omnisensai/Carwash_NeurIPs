@@ -76,21 +76,22 @@ which is otherwise confounded becomes available once it is.
 
 \paragraph{Contributions.}
 \begin{itemize}\itemsep2pt
-\item \textbf{A definition of reproducible correctness, and a pass/fail criterion for
-meeting it.}
-We establish natural-language task specification as an engineering control surface and
-define a strict model--condition-level criterion distinguishing reproducibly correct,
-reproducibly incorrect, and non-reproducible behaviour. This gives prompt improvement
-an explicit operational threshold: an intervention is not sufficient because it raises
-aggregate correctness, but only if it produces the intended action in every sampled
-single-pass execution. The threshold discriminates. Expert framing raises the
-fleet-wide rate from $7.6\%$ to $36.5\%$ and converts one reproducibly incorrect model;
-across all seven conventional interventions it is the same single model. Thirteen of
-seventeen models are reproducibly incorrect on the untreated task, and one shared task
-specification converts eleven of them, with no weight updates, decoder changes,
-retries, majority voting, or post-generation correction. The engineering question this
-supports is not which model is most capable, but what must be supplied for a chosen
-model to become capable of the task at hand.
+\item \textbf{A definition of reproducible correctness with an explicit pass/fail
+criterion.} We establish natural-language task specification as an engineering control
+surface and define a strict model--condition-level criterion distinguishing
+reproducibly correct, reproducibly incorrect, and non-reproducible behaviour. This
+gives prompt improvement an explicit operational threshold: an intervention is not
+sufficient because it raises aggregate correctness, but only if it produces the
+intended action in every sampled single-pass execution. The threshold discriminates.
+Expert framing raises the fleet-wide rate from $7.6\%$ to $36.5\%$ and converts one
+reproducibly incorrect model; across all seven conventional interventions it is the
+same single model. Those seven constitute a measured baseline for conventional prompt
+improvement under the criterion, against which any proposed intervention, including
+ours, can be placed. Thirteen of seventeen models are reproducibly incorrect on the
+untreated task, and one shared task specification converts eleven of them, with no
+weight updates, decoder changes, retries, majority voting, or post-generation
+correction. The engineering question this supports is not which model is most capable,
+but what must be supplied for a chosen model to become capable of the task at hand.
 
 \item \textbf{Engineered behavioural convergence as a reference for internal causal
 measurement.} Internal measurement is interpretable only against a controlled

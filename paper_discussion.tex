@@ -60,6 +60,19 @@ weight access, and must be redone when the underlying model is replaced. For a
 defect that originates in an underspecified input, specifying the input is the
 proportionate repair.
 
+\paragraph{Specification sufficiency is a joint property of the specification and the model.}
+If the specification worked by encoding the target action, compliance would be
+expected to be uniform across models that follow instructions. It is not: the same
+specification carries fourteen models to unanimity while leaving DeepSeek V3.2 at
+$8/10$ and Llama 3.1-8B at $7/10$. Together with the absence of the action word from
+the specification itself, this indicates that sufficiency is not a property of the
+text alone. Which constraints resolve a given model's ambiguity, and which leave
+residual variance, is determined jointly by the specification and the model --- which
+is why sufficiency is established per model--condition rather than inferred from a
+successful case. We do not evaluate compliance with a direct instruction on this
+fleet, so this is an inference from the observed non-uniformity rather than a
+controlled comparison; that condition is the experiment that would settle it.
+
 \paragraph{What generalises is the definition, not the specification.}
 The specification is task-instantiated, and we make no claim that it transfers. What
 transfers is the structure of the criterion: a property named so that it can fail,

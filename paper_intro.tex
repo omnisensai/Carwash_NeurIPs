@@ -84,13 +84,28 @@ conventional interventions applied to the same models convert one. The engineeri
 question this supports is not which model is most capable, but what must be supplied
 for a chosen model to become capable of the task at hand.
 
-\item \textbf{A measurement design for cross-model comparison.} Engineering
-behavioural convergence first yields a controlled reference in which the input, the
-emitted action and the correctness criterion are held fixed across models, so internal
-differences are attributable to the models rather than to divergent task behaviour.
-Under this design, activation transplantation reverses the emitted action in the
-models the specification converts, and one constraint that reverses the decision in
-one converged model moves the margin below measurement resolution in another:
-behavioural agreement does not imply that the same specification content carries the
-decision.
+\item \textbf{An evaluation criterion that separates a better prompt from an
+established behaviour.} We evaluate at the level of the individual model--condition
+rather than in aggregate: an intervention succeeds only when the model produces the
+intended action in every sampled single-pass execution, with no retries, majority
+voting, decoder changes or post-generation correction. The criterion discriminates
+where aggregate correctness does not. Expert framing raises the fleet-wide rate from
+$7.6\%$ to $36.5\%$ and yet produces reproducibly correct behaviour in two models, only
+one of which was reproducibly incorrect to begin with; across all seven conventional
+interventions those same two models are the only ones that ever reach it. The
+specification produces it in fourteen.
+
+\item \textbf{Freezing the behaviour makes the transition the object of measurement.}
+With a reproducible reference established, what is measured internally is the change
+between two verified behavioural states rather than an internal quantity at one of
+them --- a margin can move by nats without the emitted action changing, and in this
+fleet it does. The same transition, from divergent to convergent under an identical
+input, emitted action and correctness criterion, is available in every converged
+model, so internal differences are attributable to the models rather than to divergent
+task behaviour. Under this design, activation transplantation reverses the emitted
+action in the models the specification converts, and one constraint that reverses the
+decision in one converged model moves the margin below measurement resolution in
+another: behavioural agreement does not imply that the same specification content
+carries the decision.
+
 \end{itemize}

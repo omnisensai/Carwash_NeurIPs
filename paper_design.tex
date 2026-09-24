@@ -70,3 +70,34 @@ meaning, but it fixes \emph{correctness} only for tasks that have an unambiguous
 intended action. Where the correct action is contested, the same procedure establishes
 reproducibility against a declared criterion without establishing that the criterion
 is right.
+
+
+\subsection{The unit of analysis}
+\label{sec:design-unit}
+
+An accuracy figure reported for a model on a task presumes that the task, rather than
+the particular input used to pose it, is the object being measured. That presumption
+requires behaviour to be invariant across inputs that express the same task. In the
+conditions reported here it is not: one question, one model fleet, one sampling
+regime, and a correct-response rate ranging from $7.6\%$ to $95.9\%$ according to what
+accompanies the question. The text surrounding a question is not a neutral carrier
+for it.
+
+We therefore treat the exact input as part of the experimental condition rather than
+as an implementation detail of the task. Each model--condition cell is evaluated on
+one byte-identical input; that input is hashed and the hash recorded with every
+execution; and outcomes are reported per model--condition rather than aggregated
+across formulations. We make no claim about a model's accuracy on the task. We make
+claims about a model's behaviour under a declared input.
+
+The same constraint governs the internal measurement. A causal result obtained on one
+input describes the computation over that input. Where the behaviour it is credited
+with is itself input-dependent, attributing the result to the task rather than to the
+input overstates it. We therefore anchor the internal measurement to a verified
+behavioural transition between two declared inputs, and report the depth at which the
+transplanted state becomes sufficient rather than a property of the task.
+
+The scope of this observation should be stated. Our conditions differ by what is
+added to the question, not by rewording alone, so what is demonstrated here is
+sensitivity to surrounding structure rather than to paraphrase. Invariance under
+task-preserving rewording is not tested and is not claimed.

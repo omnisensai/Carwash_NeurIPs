@@ -26,15 +26,17 @@ improves consistency alongside task performance
 can alter model outputs and correctness
 \citep{mizrahi-etal-2024-state,srikanth2024errorsnaturallanguagereasoning}.
 
-We take this observation further: we are not merely studying whether
-input wording affects behavior, but whether input specification can
-be systematically engineered to control operational decision variance.
-Rather than treating variation in operational decisions as an
-unpredictable consequence of model inference, we treat it as an
-engineering problem: what must the input contain for a frozen model,
-operating under unmodified decoding and without retries or
-post-generation correction, to repeatedly emit the intended
-operational action in a single pass?
+We take this observation further. The prompt-sensitivity literature establishes that
+wording affects behaviour; we ask whether the input can be specified deliberately
+enough to control it. Treating the specification rather than the solver as the object
+of engineering is standard outside machine learning: requirements engineering, formal
+specification and contract-based design all take precision in the specification to be
+the skill, and treat a system's failure to satisfy an underspecified requirement as a
+defect in the requirement. We adopt that stance here. Rather than treating variation
+in operational decisions as an unpredictable consequence of model inference, we treat
+it as an engineering problem: what must the input contain for a frozen model,
+operating under unmodified decoding and without retries or post-generation
+correction, to repeatedly emit the intended operational action in a single pass?
 
 Earlier work introduced \emph{interpretation drift} and showed that
 explicit task specification brought four frontier models from $30\%$

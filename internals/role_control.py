@@ -36,7 +36,7 @@ def main() -> None:
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 
-    model, tok, _ = load(args.model, args.quantize, args.device, args.dtype)
+    tok, model = load(args.model, args.quantize, args.device, args.dtype)
     aid = answer_ids(tok)
 
     base = parse_prompt((PROMPTS / "baseline.txt").read_text())
@@ -54,8 +54,12 @@ def main() -> None:
     for name, p in conditions.items():
         _, lg, _ = forward(model, tok, render(tok, p, False), None, want_attn=False)
         m = margin_from_logits(lg, aid)
-        out[name] = {"M_sum": m["M_sum"], "argmax": m.get("argmax")}
-        print(f"{name:16s} M_sum={m['M_sum']:+.3f}  argmax={m.get('argmax')!r}", flush=True)
+        top = tok.decode([m["argmax"]])
+        out[name] = {"M_sum": m["M_sum"], "p_drive": m["p_drive"],
+                     "p_walk": m["p_walk"], "top_token": top}
+        print(f"{name:16s} M_sum={m['M_sum']:+.3f}  "
+              f"p_drive={m['p_drive']:.3f} p_walk={m['p_walk']:.3f}  "
+              f"top={top!r}", flush=True)
 
     d = out["A_system_role"]["M_sum"] - out["B_user_role"]["M_sum"]
     out["placement_effect"] = d

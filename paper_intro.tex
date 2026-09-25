@@ -30,9 +30,10 @@ We take this observation further. The prompt-sensitivity literature establishes 
 wording affects behaviour; we ask whether the input can be specified deliberately
 enough to control it. Treating the specification rather than the solver as the object
 of engineering is standard outside machine learning: requirements engineering, formal
-specification and contract-based design all take precision in the specification to be
-the skill, and treat a system's failure to satisfy an underspecified requirement as a
-defect in the requirement. We adopt that stance here. Rather than treating variation
+specification and contract-based design
+\citep{vanlamsweerde2009requirements,lamport2002specifying,meyer1992contract} all take
+precision in the specification to be the skill, and treat a system's failure to
+satisfy an underspecified requirement as a defect in the requirement. We adopt that stance here. Rather than treating variation
 in operational decisions as an unpredictable consequence of model inference, we treat
 it as an engineering problem: what must the input contain for a frozen model,
 operating under unmodified decoding and without retries or post-generation

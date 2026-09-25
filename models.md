@@ -126,18 +126,24 @@ them — a real risk here, since `Qwen3-4B` and `Qwen3-4B-Instruct-2507` are
 different weights.
 
 Five of the seven are too small to be served by any hosted API, so
-`runs/run_qwen_fleet.py` samples local weights by default and treats
+`runs/run_local_fleet.py` samples local weights by default and treats
 OpenRouter as a cross-check for the two that are hosted. Sampling matches the
 published sweep — temperature 1.0, 10 samples, `max_tokens` 80 (500 for chain
 of thought) — with `top_p = 1.0` and a per-sample seed recorded, which the API
 rows could not carry.
 
 ```bash
-python runs/run_qwen_fleet.py --dry-run                    # prompt check only
-python runs/run_qwen_fleet.py --models all --n 10          # -> runs/qwen/
+python runs/run_local_fleet.py --dry-run              # prompt check only
+python runs/run_local_fleet.py --models all --n 10    # -> runs/local/
 ```
 
-Seven models × nine conditions × ten samples is 630 generations of a few
-tokens each; the weights, not the sampling, dominate the wall clock.
+`--models all` covers the ten open-weight models `internals/RESULTS.md`
+measures, the three Llamas included: their rows in `runs/` came through
+OpenRouter across shifting backends, so a local run under one protocol removes
+that term. Llama-3.3-70B needs ~141 GB in bf16 and is skipped with a message
+on a smaller card; its behavioural row stays the API one.
 
-**Not yet run.** No `runs/qwen/` rows exist.
+Ten models × nine conditions × ten samples is 900 generations of a few tokens
+each; the weights, not the sampling, dominate the wall clock.
+
+**Not yet run.** No `runs/local/` rows exist.

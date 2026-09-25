@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
-"""Put the seven Qwen models through the fleet's nine conditions.
+"""Put the ten open-weight models through the fleet's nine conditions.
 
 Why this exists: `runs/` holds 17 models sampled through hosted APIs, and
-`internals/` holds ten open-weight models measured by logit margin. Seven of
-those ten are Qwens, and none of them appears in `runs/`. This script closes
-that gap so the same seven models have a behavioural row (sampled words) and a
-mechanistic row (margins, patching) measured on byte-identical prompts.
+`internals/` holds ten open-weight models measured by logit margin. The two
+sets overlap only in name -- the three Llamas in `runs/` were sampled through
+OpenRouter across shifting backends, and the seven Qwens appear in `runs/` not
+at all. This script samples all ten locally, under one protocol, on prompts
+byte-identical to the published sweep, so every model with a mechanistic row
+gets a behavioural one measured the same way.
 
-Four of the seven (Qwen2.5-0.5B/1.5B/3B, Qwen3-0.6B) are not served by any
-hosted API, so the default backend is local weights via transformers. The
-`--backend openrouter` path exists for the three that are hosted, as a check
-that local sampling and a served endpoint agree.
+The answer is the emitted word, counted over ten samples -- what the published
+fleet reports -- not the margin, which is what `internals/` already measures.
+
+Five of the ten are not served by any hosted API, so the default backend is
+local weights via transformers. The `--backend openrouter` path exists for the
+ones that are hosted, as a check that local sampling and a served endpoint
+agree.
 
 Prompts are never modified. Every condition's text is rebuilt from `prompts/`
 and its sha256 is checked against the sha the published `runs/*/ *.jsonl` rows
@@ -63,22 +68,31 @@ CHOICES = "walk or drive"
 DRIVE = (" drive", "drive", " Drive", "Drive", " DRIVE", "DRIVE")
 WALK = (" walk", "walk", " Walk", "Walk", " WALK", "WALK")
 
-# The seven Qwens measured in internals/RESULTS.md, by the checkpoint the
-# internals.json of each result folder names. `openrouter` is None where no
-# hosted endpoint serves that checkpoint.
+# The ten open-weight models measured in internals/RESULTS.md, by the
+# checkpoint the internals.json of each result folder names. `openrouter` is
+# None where no hosted endpoint serves that checkpoint.
+#
+# `gb` is the bf16 weight footprint, used only to warn before a run that will
+# not fit: Llama-3.3-70B needs ~140 GB and will not load on one card.
 #
 # Checked against the OpenRouter catalogue on 25 Sep 2026 (`check_openrouter.sh`):
 # two of the seven checkpoints are served, and both endpoints declare exactly
 # the checkpoint internals.json names. Nothing in the catalogue is a near miss
 # for the other five, so there is no lookalike to mistake for them.
 MODELS: dict[str, dict] = {
-    "qwen2.5-0.5b":  dict(hf="Qwen/Qwen2.5-0.5B-Instruct",   label="Qwen2.5-0.5B",   openrouter=None),
-    "qwen2.5-1.5b":  dict(hf="Qwen/Qwen2.5-1.5B-Instruct",   label="Qwen2.5-1.5B",   openrouter=None),
-    "qwen2.5-3b":    dict(hf="Qwen/Qwen2.5-3B-Instruct",     label="Qwen2.5-3B",     openrouter=None),
-    "qwen2.5-7b":    dict(hf="Qwen/Qwen2.5-7B-Instruct",     label="Qwen2.5-7B",     openrouter="qwen/qwen-2.5-7b-instruct"),
-    "qwen3-0.6b":    dict(hf="Qwen/Qwen3-0.6B",              label="Qwen3-0.6B",     openrouter=None),
-    "qwen3-4b-2507": dict(hf="Qwen/Qwen3-4B-Instruct-2507",  label="Qwen3-4B-2507",  openrouter=None),
-    "qwen3-8b":      dict(hf="Qwen/Qwen3-8B",                label="Qwen3-8B",       openrouter="qwen/qwen3-8b"),
+    "llama-3.2-3b":  dict(hf="unsloth/Llama-3.2-3B-Instruct", label="Llama 3.2-3B",  gb=6,
+                         openrouter="meta-llama/llama-3.2-3b-instruct"),
+    "llama-3.1-8b":  dict(hf="unsloth/Llama-3.1-8B-Instruct", label="Llama 3.1-8B",  gb=16,
+                         openrouter="meta-llama/llama-3.1-8b-instruct"),
+    "llama-3.3-70b": dict(hf="unsloth/Llama-3.3-70B-Instruct", label="Llama 3.3-70B", gb=141,
+                         openrouter="meta-llama/llama-3.3-70b-instruct"),
+    "qwen2.5-0.5b":  dict(hf="Qwen/Qwen2.5-0.5B-Instruct",   label="Qwen2.5-0.5B",   gb=1,  openrouter=None),
+    "qwen2.5-1.5b":  dict(hf="Qwen/Qwen2.5-1.5B-Instruct",   label="Qwen2.5-1.5B",   gb=3, openrouter=None),
+    "qwen2.5-3b":    dict(hf="Qwen/Qwen2.5-3B-Instruct",     label="Qwen2.5-3B",     gb=6, openrouter=None),
+    "qwen2.5-7b":    dict(hf="Qwen/Qwen2.5-7B-Instruct",     label="Qwen2.5-7B",     gb=15, openrouter="qwen/qwen-2.5-7b-instruct"),
+    "qwen3-0.6b":    dict(hf="Qwen/Qwen3-0.6B",              label="Qwen3-0.6B",     gb=2, openrouter=None),
+    "qwen3-4b-2507": dict(hf="Qwen/Qwen3-4B-Instruct-2507",  label="Qwen3-4B-2507",  gb=8, openrouter=None),
+    "qwen3-8b":      dict(hf="Qwen/Qwen3-8B",                label="Qwen3-8B",       gb=17, openrouter="qwen/qwen3-8b"),
 }
 
 # The nine conditions of the published fleet, with the `intervention` and
@@ -200,6 +214,17 @@ def decide(text: str) -> str | None:
 # backends
 # --------------------------------------------------------------------------
 
+def vram_gb() -> float | None:
+    """Total memory of card 0 in GB, or None when there is no CUDA device."""
+    try:
+        import torch
+        if not torch.cuda.is_available():
+            return None
+        return torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
+    except Exception:      # noqa: BLE001 - a cpu-only box has nothing to report
+        return None
+
+
 def load_local(hf_id: str, dtype: str, device: str):
     import torch
     from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -270,7 +295,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(
         description="Run the seven Qwen models through the fleet's nine conditions.")
     ap.add_argument("--models", default="all",
-                    help=f"comma-separated keys or 'all'. Keys: {', '.join(MODELS)}")
+                    help="comma-separated keys, 'all' (the ten), 'qwens', or 'llamas'. "
+                         f"Keys: {', '.join(MODELS)}")
     ap.add_argument("--conditions", default="all",
                     help=f"comma-separated or 'all'. Keys: {', '.join(CONDITIONS)}")
     ap.add_argument("--backend", choices=("local", "openrouter"), default="local")
@@ -288,7 +314,14 @@ def main() -> None:
                     help="check the prompts against the published shas and stop")
     args = ap.parse_args()
 
-    keys = list(MODELS) if args.models == "all" else [k.strip() for k in args.models.split(",")]
+    if args.models == "all":
+        keys = list(MODELS)
+    elif args.models == "qwens":
+        keys = [k for k in MODELS if k.startswith("qwen")]
+    elif args.models == "llamas":
+        keys = [k for k in MODELS if k.startswith("llama")]
+    else:
+        keys = [k.strip() for k in args.models.split(",")]
     conds = PUBLISHED if args.conditions == "all" else [c.strip() for c in args.conditions.split(",")]
     for k in keys:
         if k not in MODELS:
@@ -316,18 +349,26 @@ def main() -> None:
         import torch, transformers
         versions = {"torch": torch.__version__, "transformers": transformers.__version__}
 
-    outdir = Path(args.outdir) if args.outdir else REPO / "runs" / "qwen"
+    outdir = Path(args.outdir) if args.outdir else REPO / "runs" / "local"
     outdir.mkdir(parents=True, exist_ok=True)
     stamp = _dt.date.today().isoformat()
+
+    counts: dict[tuple[str, str], dict[str, int]] = {}
 
     for key in keys:
         cfg = MODELS[key]
         tok = model = None
         if args.backend == "local":
+            free = vram_gb()
+            if free and cfg.get("gb", 0) > free:
+                print(f"SKIP {cfg['label']}: needs ~{cfg['gb']} GB in {args.dtype}, "
+                      f"card has {free:.0f} GB. Run it on a bigger pod, or take "
+                      f"its row from the API fleet.", file=sys.stderr)
+                continue
             print(f"loading {cfg['hf']} ...", flush=True)
             tok, model = load_local(cfg["hf"], args.dtype, args.device)
 
-        out = outdir / f"qwen_{key}_{args.backend}_{stamp}.jsonl"
+        out = outdir / f"local_{key}_{args.backend}_{stamp}.jsonl"
         rows = errors = 0
         with out.open("w", encoding="utf-8") as fh:
             for cond in conds:
@@ -343,7 +384,7 @@ def main() -> None:
                         "condition": cond,
                         "prompt_file": c["file"],
                         "sample_index": i,
-                        "family": "qwen",
+                        "family": key.split("-")[0],
                         "backend": args.backend,
                         "model_label": cfg["label"],
                         "model_slug": cfg["openrouter"] if args.backend == "openrouter" else cfg["hf"],
@@ -390,6 +431,7 @@ def main() -> None:
                     if row["error"]:
                         errors += 1
                     tally[str(row["decision"])] = tally.get(str(row["decision"]), 0) + 1
+                counts[(key, cond)] = tally
                 summary = " ".join(f"{k}={v}" for k, v in sorted(tally.items()))
                 print(f"  {cfg['label']:14s} {cond:14s} {summary}", flush=True)
 
@@ -402,6 +444,40 @@ def main() -> None:
                 pass
         note = f" ({errors} with no action token or errored)" if errors else ""
         print(f"  wrote {rows} rows -> {out}{note}\n")
+
+    write_summary(outdir, keys, conds, counts, args)
+
+
+def write_summary(outdir: Path, keys: list[str], conds: list[str],
+                  counts: dict, args) -> None:
+    """The drive-count table, the thing the published summaries report.
+
+    Drive is the correct answer. A cell is "k/n": k samples answering Drive out
+    of n usable ones. Samples with no action token are excluded from n, which
+    is how the 17-model sweep handled its one such response.
+    """
+    lines = [f"# Local fleet -- {_dt.date.today().isoformat()}", "",
+             f"{len(keys)} models x {len(conds)} conditions x {args.n} samples, "
+             f"temperature {args.temperature}, top_p {args.top_p}, "
+             f"backend {args.backend}.", "",
+             "Drive is correct. Cells are Drive / usable samples.", "",
+             "| model | " + " | ".join(conds) + " |",
+             "|---|" + "---|" * len(conds)]
+    for key in keys:
+        row = [MODELS[key]["label"]]
+        for cond in conds:
+            t = counts.get((key, cond))
+            if not t:
+                row.append("--")
+                continue
+            drive = t.get("drive", 0)
+            usable = sum(v for k, v in t.items() if k in ("drive", "walk"))
+            row.append(f"{drive}/{usable}" if usable else "0/0")
+        lines.append("| " + " | ".join(row) + " |")
+    text = "\n".join(lines) + "\n"
+    (outdir / "summary.md").write_text(text, encoding="utf-8")
+    print(text)
+    print(f"wrote {outdir / 'summary.md'}")
 
 
 if __name__ == "__main__":

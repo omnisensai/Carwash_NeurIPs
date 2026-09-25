@@ -72,3 +72,64 @@ sampling.
 **Meta / Llama (3)** — Llama 3.1-8B, Llama 3.3-70B *(9/10 behavioural, M = +6 nats)*, Llama 4-Maverick
 
 **Other open-source (3)** — Mistral Large, DeepSeek V3.2, Kimi K2
+
+## Prompt provenance of the 17-model sweep
+
+Every row in `runs/` records the sha256 of what was sent. Recomputing those
+hashes from the files now in `prompts/` reproduces all nine conditions:
+
+| Condition | field | sha256 (first 8) | file |
+|---|---|---|---|
+| baseline | user | `f9ac23fb` | `baseline.txt` |
+| substrate | system | `5b56feb3` | `substrate.txt` |
+| expert role | user | `54b1a7d6` | `benchmark_expert.txt` |
+| objective emphasis | user | `eb7094b2` | `benchmark_urgency.txt` |
+| chain of thought | user | `5ad509a4` | `benchmark_CoT.txt` |
+| anti-hallucination | user | `7dcc78f4` | `benchmark_hallucination.txt` |
+| threat | user | `d853a7fe` | `benchmark_threat.txt` |
+| encouragement | user | `05720293` | `benchmark_encourage.txt` |
+| error avoidance | user | `be71e36b` | `benchmark_nomistakes.txt` |
+
+The substrate matches `substrate.txt` byte for byte, trailing newline
+included. The eight user-message conditions match after the trailing
+`SHA-256:` provenance line is dropped and the bare `Answer with exactly one
+word:` instruction is completed to `... : walk or drive`, which is what the
+original runner sent. `runs/run_qwen_fleet.py --dry-run` performs this check
+and refuses to run if any condition stops reproducing.
+
+The substrate was sent as the **system** message with the unmodified baseline
+question as the user message; the seven conventional prompts are single user
+messages. `prompts/benchmark_goaloriented.txt` was not part of this sweep.
+
+## Pending: the seven Qwens
+
+`internals/RESULTS.md` measures ten open-weight models by logit margin. Three
+of them (Llama 3.2-3B, 3.1-8B, 3.3-70B) are in the 17 above; the seven Qwens
+are not, so they have a mechanistic row and no behavioural one.
+
+| Model | checkpoint | hosted endpoint |
+|---|---|---|
+| Qwen2.5-0.5B | `Qwen/Qwen2.5-0.5B-Instruct` | — |
+| Qwen2.5-1.5B | `Qwen/Qwen2.5-1.5B-Instruct` | — |
+| Qwen2.5-3B | `Qwen/Qwen2.5-3B-Instruct` | — |
+| Qwen2.5-7B | `Qwen/Qwen2.5-7B-Instruct` | `qwen/qwen-2.5-7b-instruct` |
+| Qwen3-0.6B | `Qwen/Qwen3-0.6B` | — |
+| Qwen3-4B-2507 | `Qwen/Qwen3-4B-Instruct-2507` | — |
+| Qwen3-8B | `Qwen/Qwen3-8B` | `qwen/qwen3-8b` |
+
+Four of the seven are too small to be served by any hosted API, so
+`runs/run_qwen_fleet.py` samples local weights by default and treats
+OpenRouter as a cross-check for the two that are hosted. Sampling matches the
+published sweep — temperature 1.0, 10 samples, `max_tokens` 80 (500 for chain
+of thought) — with `top_p = 1.0` and a per-sample seed recorded, which the API
+rows could not carry.
+
+```bash
+python runs/run_qwen_fleet.py --dry-run                    # prompt check only
+python runs/run_qwen_fleet.py --models all --n 10          # -> runs/qwen/
+```
+
+Seven models × nine conditions × ten samples is 630 generations of a few
+tokens each; the weights, not the sampling, dominate the wall clock.
+
+**Not yet run.** No `runs/qwen/` rows exist.

@@ -8,7 +8,11 @@
 # results-sweep run; the other six have never seen the current files.
 #
 #   cd /workspace/Carwash_NeurIPs/internals
-#   nohup bash runpod_qwen.sh > qwen.log 2>&1 &
+#   bash runpod_qwen.sh qwen2.5-0.5b        # one model first: ~2 min, proves the pod
+#   nohup bash runpod_qwen.sh > qwen.log 2>&1 &     # then all seven
+#
+# Naming one or more models runs only those, and skips the final provenance
+# check over all seven, which would otherwise fail on the ones not yet redone.
 #
 # Pod: one 24 GB card is enough (Qwen3-8B is the largest at ~16 GB in bf16).
 # Volume: ~51 GB of weights across the seven, so >= 100 GB at /workspace.
@@ -65,13 +69,39 @@ run() {   # run <hf-id> <result-folder-name>
 # runpod.sh derives the folder name by lowercasing and stripping a trailing
 # "-instruct", which gives the right answer for six of the seven; Qwen3-4B's
 # checkpoint ends in "-2507", so NAME is passed explicitly for all of them.
-run Qwen/Qwen2.5-0.5B-Instruct  qwen2.5-0.5b
-run Qwen/Qwen2.5-1.5B-Instruct  qwen2.5-1.5b
-run Qwen/Qwen2.5-3B-Instruct    qwen2.5-3b
-run Qwen/Qwen2.5-7B-Instruct    qwen2.5-7b
-run Qwen/Qwen3-0.6B             qwen3-0.6b
-run Qwen/Qwen3-4B-Instruct-2507 qwen3-4b-2507
-run Qwen/Qwen3-8B               qwen3-8b
+MODELS="qwen2.5-0.5b:Qwen/Qwen2.5-0.5B-Instruct
+qwen2.5-1.5b:Qwen/Qwen2.5-1.5B-Instruct
+qwen2.5-3b:Qwen/Qwen2.5-3B-Instruct
+qwen2.5-7b:Qwen/Qwen2.5-7B-Instruct
+qwen3-0.6b:Qwen/Qwen3-0.6B
+qwen3-4b-2507:Qwen/Qwen3-4B-Instruct-2507
+qwen3-8b:Qwen/Qwen3-8B"
+
+# Smallest first, so a pod that is going to fail fails in two minutes on a
+# 1 GB download rather than twenty on a 16 GB one.
+want="$*"
+for arg in $want; do        # a typo must not look like a run that did nothing
+  case "$MODELS" in
+    *"$arg:"*) ;;
+    *) echo "unknown model: $arg" >&2
+       echo "known: $(echo "$MODELS" | cut -d: -f1 | tr '\n' ' ')" >&2
+       exit 2 ;;
+  esac
+done
+
+for entry in $MODELS; do
+  name=${entry%%:*} hf=${entry#*:}
+  case " $want " in
+    "  ") run "$hf" "$name" ;;                    # no arguments: all seven
+    *" $name "*) run "$hf" "$name" ;;
+    *) continue ;;
+  esac
+done
+
+if [ -n "$want" ]; then
+  log "ran only: $want -- skipping the all-seven provenance check"
+  exit 0
+fi
 
 log "verifying prompt provenance"
 fail=0

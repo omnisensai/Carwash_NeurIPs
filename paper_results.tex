@@ -117,9 +117,11 @@ Error avoidance & 0 & 1 & 15 \\
 \end{tabular}
 \end{table}
 
-\paragraph{Directionality and task-selectivity controls.}
-Four observations bear on whether the specification acts on the task or merely
-biases the answer token.
+\paragraph{Directionality controls.}
+Three observations bear on whether the specification acts as a task description or
+merely as a bias toward one answer token. They constrain direction, not scope: we do
+not test whether a specification written for one task transfers to another, and no
+claim of generalisation is made here.
 
 First, the effect is not unidirectional. Qwen2.5-0.5B answers correctly on 7 of 10
 untreated samples and on 3 of 10 under the specification, moving away from the
@@ -130,16 +132,7 @@ Second, the specification does not disturb a model that is already reproducibly
 correct: Qwen2.5-3B answers correctly on 10 of 10 samples untreated and under the
 specification.
 
-Third, a task-selectivity control was run in the earlier measurement round: the same
-specification paired with a question about carrying a book to a library, where the
-correct action is the opposite one. Every model of 4B parameters or more retained the
-correct action, so the specification did not transfer its answer to a question it
-does not describe. This control was measured against the earlier six-line
-specification and has \emph{not} been re-run against the current text, because the
-control prompt was removed from the prompt set; we report it as prior evidence
-rather than as a control on the present runs.
-
-Fourth, the two models measured under both protocols give a consistency check, and
+Third, the two models measured under both protocols give a consistency check, and
 one that does not fully resolve at $R=10$. Llama-3.1-8B is reproducibly incorrect
 untreated under both protocols; under the specification it answers correctly on 7 of
 10 samples through the routed API and 10 of 10 locally, which would place it in

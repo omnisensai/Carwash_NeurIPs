@@ -1,0 +1,65 @@
+loading Qwen/Qwen2.5-0.5B-Instruct (default dtype, cuda) ...
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/290 [00:00<?, ?it/s]Loading weights:  66%|██████▌   | 192/290 [00:00<00:00, 1878.57it/s]Loading weights: 100%|██████████| 290/290 [00:00<00:00, 1746.53it/s]
+answer token ids: {'drive': [6541, 31967, 16150, 32457, 95787], 'walk': [4227, 19059, 12554, 48849]}
+baseline ...
+substrate ...
+  baseline   M_sum=+0.751  M_first=+0.750 p(drive)=0.678 p(walk)=0.320 greedy='Drive<|im_end|>'
+  substrate  M_sum=-0.470  M_first=-0.500 p(drive)=0.383 p(walk)=0.613 greedy='Walk<|im_end|>'
+patching ...
+  patch L00: M_sum=+0.625
+  patch L01: M_sum=+0.626
+  patch L02: M_sum=+0.628
+  patch L03: M_sum=+0.626
+  patch L04: M_sum=+0.252
+  patch L05: M_sum=+0.251
+  patch L06: M_sum=-0.121
+  patch L07: M_sum=-0.125
+  patch L08: M_sum=-0.248
+  patch L09: M_sum=-0.373
+  patch L10: M_sum=-0.499
+  patch L11: M_sum=-0.125
+  patch L12: M_sum=-0.625
+  patch L13: M_sum=-1.129
+  patch L14: M_sum=-1.124
+  patch L15: M_sum=-1.124
+  patch L16: M_sum=-1.124
+  patch L17: M_sum=-1.238
+  patch L18: M_sum=-1.110
+  patch L19: M_sum=-1.352
+  patch L20: M_sum=-0.911
+  patch L21: M_sum=-0.722
+  patch L22: M_sum=-0.594
+  patch L23: M_sum=-0.470
+ablations ...
+  loo_line1      M_sum=-0.124
+  loo_line2      M_sum=-0.222
+  loo_line3      M_sum=-0.780
+  loo_line4      M_sum=-0.714
+  loo_line5      M_sum=-0.905
+  loo_line6      M_sum=-0.717
+  loo_line7      M_sum=-0.707
+  loo_line8      M_sum=-0.600
+  loo_line9      M_sum=-0.075
+  only_line1     M_sum=-0.605
+  only_line2     M_sum=-0.778
+  only_line3     M_sum=-0.598
+  only_line4     M_sum=-0.737
+  only_line5     M_sum=-0.362
+  only_line6     M_sum=-0.763
+  only_line7     M_sum=+0.884
+  only_line8     M_sum=+0.251
+  only_line9     M_sum=-0.489
+  headers_only   M_sum=-0.374
+benchmarks ...
+  baseline                 M_sum=+0.751 argmax='Drive' greedy='Drive<|im_end|>'  decision@0: M=0.751
+  benchmark_CoT            M_sum=+0.626 argmax='Drive' greedy='Drive<|im_end|>'  decision@0: M=0.626
+  benchmark_encourage      M_sum=-0.223 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-0.223
+  benchmark_expert         M_sum=+0.497 argmax='Drive' greedy='Drive<|im_end|>'  decision@0: M=0.497
+  benchmark_goaloriented   M_sum=+1.001 argmax='Drive' greedy='Drive<|im_end|>'  decision@0: M=1.001
+  benchmark_hallucination  M_sum=+0.000 argmax='Drive' greedy='Drive<|im_end|>'  decision@0: M=0.0
+  benchmark_nomistakes     M_sum=-0.262 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-0.262
+  benchmark_threat         M_sum=-0.647 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-0.647
+  benchmark_urgency        M_sum=+1.250 argmax='Drive' greedy='Drive<|im_end|>'  decision@0: M=1.25
+  substrate                M_sum=-0.470 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-0.47
+wrote results/qwen2.5-0.5b/bf16/internals.json in 17.6 s

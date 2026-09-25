@@ -139,18 +139,25 @@ specification and has \emph{not} been re-run against the current text, because t
 control prompt was removed from the prompt set; we report it as prior evidence
 rather than as a control on the present runs.
 
-Fourth, the two models measured under both protocols bound how much of the observed
-state is a property of the model rather than of the serving stack. Llama-3.1-8B is
-reproducibly incorrect untreated under both, but under the specification answers
-correctly on 7 of 10 samples through the routed API and 10 of 10 locally --- a
-change of reproducibility class, from non-reproducible to reproducibly correct, with
-the prompt bytes, temperature and sample count held fixed. Llama-3.2-3B is
-non-reproducible under both but at 8/10 and 4/10 respectively. Per-sample records
-show the API runs for these models were routed across several upstream providers
-within a single condition, so the difference contains whatever varies between
-serving backends --- precision, kernels, stack --- and not sampling variance alone.
-We take the local rows as the model-level measurement and note that a hosted
-endpoint is not a substitute for one.
+Fourth, the two models measured under both protocols give a consistency check, and
+one that does not fully resolve at $R=10$. Llama-3.1-8B is reproducibly incorrect
+untreated under both protocols; under the specification it answers correctly on 7 of
+10 samples through the routed API and 10 of 10 locally, which would place it in
+different reproducibility classes depending on the route. Llama-3.2-3B is
+non-reproducible under both, at 8/10 and 4/10. Neither difference is significant at
+this sample size (Fisher two-sided $p = 0.21$ and $p = 0.17$), so we report them as
+unresolved rather than as a measured effect of the serving stack; separating the two
+would need roughly $R = 15$ per arm.
+
+What the per-sample records do establish is that the hosted rows carry a term the
+local rows do not. The ten API samples for Llama-3.1-8B under the specification were
+served by three different upstream providers within the single condition, and the
+incorrect samples are split across two of them (Novita 4/6 correct, DeepInfra 2/3,
+Cloudflare 1/1), so no one backend accounts for them. Within-condition spread on
+these rows is therefore not sampling variance alone --- it also contains whatever
+differs between backends in precision, kernels and serving stack --- and it cannot
+be decomposed after the fact. We take the local rows as the model-level measurement
+for that reason, not because the two are shown to differ.
 
 \begin{table}[t]
 \centering

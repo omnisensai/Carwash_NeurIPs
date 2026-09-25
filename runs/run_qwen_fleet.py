@@ -67,10 +67,10 @@ WALK = (" walk", "walk", " Walk", "Walk", " WALK", "WALK")
 # internals.json of each result folder names. `openrouter` is None where no
 # hosted endpoint serves that checkpoint.
 #
-# The two slugs below are unverified: they were written from memory, not read
-# from the catalogue. Run `runs/check_openrouter.py --emit` and paste its
-# output over this table before trusting --backend openrouter. The `hf` ids
-# are read from internals.json and are not guesses.
+# Checked against the OpenRouter catalogue on 25 Sep 2026 (`check_openrouter.sh`):
+# two of the seven checkpoints are served, and both endpoints declare exactly
+# the checkpoint internals.json names. Nothing in the catalogue is a near miss
+# for the other five, so there is no lookalike to mistake for them.
 MODELS: dict[str, dict] = {
     "qwen2.5-0.5b":  dict(hf="Qwen/Qwen2.5-0.5B-Instruct",   label="Qwen2.5-0.5B",   openrouter=None),
     "qwen2.5-1.5b":  dict(hf="Qwen/Qwen2.5-1.5B-Instruct",   label="Qwen2.5-1.5B",   openrouter=None),

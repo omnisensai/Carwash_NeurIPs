@@ -117,7 +117,15 @@ are not, so they have a mechanistic row and no behavioural one.
 | Qwen3-4B-2507 | `Qwen/Qwen3-4B-Instruct-2507` | — |
 | Qwen3-8B | `Qwen/Qwen3-8B` | `qwen/qwen3-8b` |
 
-Four of the seven are too small to be served by any hosted API, so
+Checked against the OpenRouter catalogue on 25 Sep 2026 with
+`runs/check_openrouter.sh`, which matches on the `hugging_face_id` OpenRouter
+publishes rather than on the slug: **two of the seven are served**, and both
+endpoints declare exactly the checkpoint `internals.json` names. The catalogue
+holds no near miss for the other five, so there is no lookalike to mistake for
+them — a real risk here, since `Qwen3-4B` and `Qwen3-4B-Instruct-2507` are
+different weights.
+
+Five of the seven are too small to be served by any hosted API, so
 `runs/run_qwen_fleet.py` samples local weights by default and treats
 OpenRouter as a cross-check for the two that are hosted. Sampling matches the
 published sweep — temperature 1.0, 10 samples, `max_tokens` 80 (500 for chain

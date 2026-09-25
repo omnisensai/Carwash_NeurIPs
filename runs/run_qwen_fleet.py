@@ -66,6 +66,11 @@ WALK = (" walk", "walk", " Walk", "Walk", " WALK", "WALK")
 # The seven Qwens measured in internals/RESULTS.md, by the checkpoint the
 # internals.json of each result folder names. `openrouter` is None where no
 # hosted endpoint serves that checkpoint.
+#
+# The two slugs below are unverified: they were written from memory, not read
+# from the catalogue. Run `runs/check_openrouter.py --emit` and paste its
+# output over this table before trusting --backend openrouter. The `hf` ids
+# are read from internals.json and are not guesses.
 MODELS: dict[str, dict] = {
     "qwen2.5-0.5b":  dict(hf="Qwen/Qwen2.5-0.5B-Instruct",   label="Qwen2.5-0.5B",   openrouter=None),
     "qwen2.5-1.5b":  dict(hf="Qwen/Qwen2.5-1.5B-Instruct",   label="Qwen2.5-1.5B",   openrouter=None),

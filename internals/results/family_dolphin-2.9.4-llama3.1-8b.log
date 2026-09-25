@@ -1,81 +1,0 @@
-model=cognitivecomputations/dolphin-2.9.4-llama3.1-8b  gpu_total=163118 MiB  quant=none  -> results/dolphin-2.9.4-llama3.1-8b/bf16
-loading cognitivecomputations/dolphin-2.9.4-llama3.1-8b (default dtype, cuda) ...
-/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:301: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
-  warnings.warn(
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files:  25%|██▌       | 1/4 [00:36<01:50, 36.99s/it]Fetching 4 files:  50%|█████     | 2/4 [01:00<00:58, 29.28s/it]Fetching 4 files:  75%|███████▌  | 3/4 [01:02<00:16, 16.77s/it]Fetching 4 files: 100%|██████████| 4/4 [01:04<00:00, 10.80s/it]Fetching 4 files: 100%|██████████| 4/4 [01:04<00:00, 16.10s/it]
-Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:   0%|          | 1/291 [00:00<00:36,  7.86it/s]Loading weights:   4%|▍         | 13/291 [00:00<00:06, 45.57it/s]Loading weights:   8%|▊         | 24/291 [00:00<00:04, 59.44it/s]Loading weights:  11%|█         | 32/291 [00:00<00:04, 63.34it/s]Loading weights:  14%|█▍        | 41/291 [00:00<00:03, 65.78it/s]Loading weights:  17%|█▋        | 49/291 [00:00<00:03, 68.51it/s]Loading weights:  20%|█▉        | 58/291 [00:00<00:03, 68.14it/s]Loading weights:  23%|██▎       | 67/291 [00:01<00:03, 68.18it/s]Loading weights:  26%|██▌       | 76/291 [00:01<00:03, 67.99it/s]Loading weights:  29%|██▉       | 85/291 [00:01<00:03, 68.18it/s]Loading weights:  32%|███▏      | 92/291 [00:01<00:02, 68.39it/s]Loading weights:  34%|███▍      | 99/291 [00:01<00:02, 65.65it/s]Loading weights:  36%|███▋      | 106/291 [00:01<00:03, 59.45it/s]Loading weights:  39%|███▉      | 113/291 [00:01<00:02, 60.54it/s]Loading weights:  42%|████▏     | 121/291 [00:01<00:02, 64.91it/s]Loading weights:  44%|████▍     | 128/291 [00:02<00:02, 65.55it/s]Loading weights:  46%|████▋     | 135/291 [00:02<00:02, 64.20it/s]Loading weights:  49%|████▉     | 142/291 [00:02<00:02, 58.45it/s]Loading weights:  51%|█████     | 149/291 [00:02<00:02, 59.63it/s]Loading weights:  54%|█████▍    | 157/291 [00:02<00:02, 63.85it/s]Loading weights:  57%|█████▋    | 166/291 [00:02<00:01, 65.80it/s]Loading weights:  59%|█████▉    | 173/291 [00:02<00:01, 65.10it/s]Loading weights:  62%|██████▏   | 180/291 [00:02<00:01, 61.54it/s]Loading weights:  65%|██████▌   | 190/291 [00:02<00:01, 70.87it/s]Loading weights:  69%|██████▊   | 200/291 [00:03<00:01, 78.52it/s]Loading weights:  72%|███████▏  | 209/291 [00:03<00:01, 79.04it/s]Loading weights:  75%|███████▍  | 218/291 [00:03<00:00, 78.21it/s]Loading weights:  78%|███████▊  | 226/291 [00:03<00:00, 70.16it/s]Loading weights:  80%|████████  | 234/291 [00:03<00:00, 69.17it/s]Loading weights:  83%|████████▎ | 242/291 [00:03<00:00, 68.73it/s]Loading weights:  86%|████████▌ | 249/291 [00:03<00:00, 64.02it/s]Loading weights:  89%|████████▊ | 258/291 [00:03<00:00, 65.46it/s]Loading weights:  91%|█████████▏| 266/291 [00:04<00:00, 67.96it/s]Loading weights:  95%|█████████▍| 275/291 [00:04<00:00, 68.36it/s]Loading weights:  98%|█████████▊| 284/291 [00:04<00:00, 68.40it/s]Loading weights: 100%|██████████| 291/291 [00:04<00:00, 66.48it/s]
-answer token ids: {'drive': [6678, 33067, 16542, 33557, 96887], 'walk': [4321, 19599, 12839, 49949]}
-baseline ...
-[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
-substrate ...
-note: baseline picked different answer surface forms; re-attributing baseline with the substrate's drive/walk tokens
-  baseline   M_sum=-1.228  M_first=-1.094 p(drive)=0.000 p(walk)=0.000 greedy='I need to wash'
-  substrate  M_sum=-0.728  M_first=-0.812 p(drive)=0.000 p(walk)=0.000 greedy='I need to wash'
-patching ...
-  patch L00: M_sum=+2.040
-  patch L01: M_sum=+2.292
-  patch L02: M_sum=+2.353
-  patch L03: M_sum=+1.945
-  patch L04: M_sum=+1.975
-  patch L05: M_sum=+1.818
-  patch L06: M_sum=+2.287
-  patch L07: M_sum=+2.381
-  patch L08: M_sum=+2.256
-  patch L09: M_sum=+2.413
-  patch L10: M_sum=+2.539
-  patch L11: M_sum=+2.537
-  patch L12: M_sum=+2.225
-  patch L13: M_sum=+2.318
-  patch L14: M_sum=+2.632
-  patch L15: M_sum=+3.006
-  patch L16: M_sum=+3.038
-  patch L17: M_sum=+2.818
-  patch L18: M_sum=+3.099
-  patch L19: M_sum=+3.036
-  patch L20: M_sum=+3.066
-  patch L21: M_sum=+3.067
-  patch L22: M_sum=+2.879
-  patch L23: M_sum=+2.661
-  patch L24: M_sum=+2.787
-  patch L25: M_sum=+2.568
-  patch L26: M_sum=+2.535
-  patch L27: M_sum=+2.379
-  patch L28: M_sum=+2.128
-  patch L29: M_sum=+2.377
-  patch L30: M_sum=+2.438
-  patch L31: M_sum=+2.970
-ablations ...
-  loo_line1      M_sum=-0.871
-  loo_line2      M_sum=-1.187
-  loo_line3      M_sum=-0.956
-  loo_line4      M_sum=-0.875
-  loo_line5      M_sum=-1.099
-  loo_line6      M_sum=-1.018
-  loo_line7      M_sum=-0.628
-  loo_line8      M_sum=-0.774
-  loo_line9      M_sum=-0.902
-  only_line1     M_sum=-1.116
-  only_line2     M_sum=-0.324
-  only_line3     M_sum=-1.140
-  only_line4     M_sum=-0.211
-  only_line5     M_sum=-0.836
-  only_line6     M_sum=-0.348
-  only_line7     M_sum=-1.346
-  only_line8     M_sum=-1.201
-  only_line9     M_sum=-0.387
-  headers_only   M_sum=-0.403
-benchmarks ...
-  baseline                 M_sum=-1.228 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_CoT            M_sum=-0.506 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_encourage      M_sum=-2.293 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_expert         M_sum=-1.143 argmax='I' greedy='I am a car'  decision@None: M=None
-  benchmark_goaloriented   M_sum=-1.445 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_hallucination  M_sum=-0.506 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_nomistakes     M_sum=-0.773 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_threat         M_sum=-0.868 argmax='I' greedy='I need to wash'  decision@None: M=None
-  benchmark_urgency        M_sum=-0.726 argmax='I' greedy='I need to wash'  decision@None: M=None
-  substrate                M_sum=-0.728 argmax='I' greedy='I need to wash'  decision@None: M=None
-wrote results/dolphin-2.9.4-llama3.1-8b/bf16/internals.json in 97.4 s
-figures in results/dolphin-2.9.4-llama3.1-8b/bf16/
-done — send back the whole results/dolphin-2.9.4-llama3.1-8b/bf16/ folder (json + png + summary.md + run.log)

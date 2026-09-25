@@ -147,3 +147,52 @@ Ten models × nine conditions × ten samples is 900 generations of a few tokens
 each; the weights, not the sampling, dominate the wall clock.
 
 **Not yet run.** No `runs/local/` rows exist.
+
+## The 24-model behavioural fleet
+
+Every model measured behaviourally, with the source of the row that counts.
+Untreated and specification cells are correct executions out of ten, at
+temperature 1.0, `top_p` 1.0, on prompt text whose sha256 matches `prompts/`.
+
+| # | Model | Row used | Untreated | Specification | Transition |
+|---|---|---|---:|---:|---|
+| 1 | Claude Haiku 4.5 | Anthropic API | 0/10 | 10/10 | RI → RC |
+| 2 | Claude Opus 4.7 | Anthropic API | 5/10 | 10/10 | NR → RC |
+| 3 | Claude Sonnet 4.5 | Anthropic API | 0/10 | 10/10 | RI → RC |
+| 4 | Claude Sonnet 4.6 | Anthropic API | 0/10 | 10/10 | RI → RC |
+| 5 | Claude Sonnet 5 | Anthropic API | 0/10 | 10/10 | RI → RC |
+| 6 | GPT-4 | OpenAI API | 0/10 | 10/10 | RI → RC |
+| 7 | GPT-4o | OpenAI API | 0/10 | 10/10 | RI → RC |
+| 8 | GPT-4.1 | OpenAI API | 0/10 | 10/10 | RI → RC |
+| 9 | GPT-4.1-mini | OpenAI API | 0/10 | 10/10 | RI → RC |
+| 10 | GPT-3.5-turbo | OpenAI API | 1/10 | 10/10 | NR → RC |
+| 11 | DeepSeek V3.2 | OpenRouter | 0/10 | 8/10 | RI → NR |
+| 12 | Kimi K2 | OpenRouter | 4/10 | 10/10 | NR → RC |
+| 13 | Llama 3.3-70B | OpenRouter | 0/10 | 10/10 | RI → RC |
+| 14 | Llama 4-Maverick | OpenRouter | 0/10 | 10/10 | RI → RC |
+| 15 | Mistral Large | OpenRouter | 0/10 | 10/10 | RI → RC |
+| 16 | Llama 3.2-3B | local bf16 \* | 4/10 | 4/10 | NR → NR |
+| 17 | Llama 3.1-8B | local bf16 \* | 0/10 | 10/10 | RI → RC |
+| 18 | Qwen2.5-0.5B | local bf16 | 7/10 | 3/10 | NR → NR |
+| 19 | Qwen2.5-1.5B | local bf16 | 6/10 | 8/10 | NR → NR |
+| 20 | Qwen2.5-3B | local bf16 | 10/10 | 10/10 | RC → RC |
+| 21 | Qwen2.5-7B | local bf16 | 0/10 | 0/10 | RI → RI |
+| 22 | Qwen3-0.6B | local bf16 | 7/10 | 10/10 | NR → RC |
+| 23 | Qwen3-4B-2507 | local bf16 | 0/10 | 0/10 | RI → RI |
+| 24 | Qwen3-8B | local bf16 | 0/10 | 10/10 | RI → RC |
+
+\* Also measured through OpenRouter. **Those API rows are excluded from every
+count**: the two protocols disagree (7/10 vs 10/10 and 8/10 vs 4/10 under the
+specification), the disagreement is not significant at ten samples
+(Fisher two-sided p = 0.21 and 0.17), and the API rows for these two models were
+routed across several upstream providers within a single condition, so their
+within-condition spread cannot be decomposed after the fact. The local rows are
+single-protocol, bf16, with a recorded seed per sample.
+
+Totals: **untreated** 1 RC, 7 NR, 16 RI. **Specification** 18 RC, 4 NR, 2 RI.
+Of the 16 reproducibly incorrect models, 13 become reproducibly correct, 1
+becomes non-reproducible, and 2 remain reproducibly incorrect.
+
+Five models (DeepSeek V3.2, Kimi K2, Llama 3.3-70B, Llama 4-Maverick, Mistral
+Large) are OpenRouter-served with no local counterpart, so they carry the same
+routing caveat and it is not removable without weights large enough to host.

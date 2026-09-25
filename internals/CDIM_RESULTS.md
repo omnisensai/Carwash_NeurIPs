@@ -1,6 +1,6 @@
 # CDIM results — where a substrate line takes effect
 
-> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`.
+> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`; the 21 Sep results on it are in `SWEEP_RESULTS.md`.
 
 Measured 18 Sep 2026 with `cdim.py` (Mechanistic_paper.md §2–§9). For each
 model: the substrate S (system prompt + baseline question) against a
@@ -15,7 +15,7 @@ position, chat template, bf16.
 Llama-70B on 2× A100 (every second row); Llama 8B, 3B and Qwen3-8B in bf16
 on CPU (every row). Per-model figures and tables are in
 `results/<model>/<precision>/cdim_summary.md` and `cdim_*.png`;
-`results/cdim_overview.png` puts the five primary maps side by side.
+`results/old-substrate-v1/cdim_overview.png` puts the five primary maps side by side.
 
 ## The table
 
@@ -77,5 +77,5 @@ The answer site at the last row always carries 100 % by construction.
 
 Llama 8B with the pro substrate (the paper's failed-intervention case,
 M = −0.36) and Qwen3-4B with both substrates (only the pro one flips it) are
-queued; results land in `results/llama-3.1-8b/bf16-pro/` and
-`results/qwen3-4b-2507/`.
+queued; results land in `results/old-substrate-v1/llama-3.1-8b/bf16-pro/` and
+`results/old-substrate-v1/qwen3-4b-2507/`.

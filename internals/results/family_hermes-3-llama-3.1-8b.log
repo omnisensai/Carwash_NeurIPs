@@ -1,0 +1,80 @@
+model=NousResearch/Hermes-3-Llama-3.1-8B  gpu_total=163118 MiB  quant=none  -> results/hermes-3-llama-3.1-8b/bf16
+loading NousResearch/Hermes-3-Llama-3.1-8B (default dtype, cuda) ...
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:301: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Fetching 4 files:   0%|          | 0/4 [00:00<?, ?it/s]Fetching 4 files:  25%|██▌       | 1/4 [00:16<00:49, 16.48s/it]Fetching 4 files:  50%|█████     | 2/4 [00:49<00:52, 26.38s/it]Fetching 4 files:  75%|███████▌  | 3/4 [00:54<00:16, 16.62s/it]Fetching 4 files: 100%|██████████| 4/4 [01:01<00:00, 12.65s/it]Fetching 4 files: 100%|██████████| 4/4 [01:01<00:00, 15.34s/it]
+Loading weights:   0%|          | 0/291 [00:00<?, ?it/s]Loading weights:   0%|          | 1/291 [00:00<01:00,  4.77it/s]Loading weights:   3%|▎         | 8/291 [00:00<00:11, 25.19it/s]Loading weights:  10%|▉         | 28/291 [00:00<00:03, 80.83it/s]Loading weights:  14%|█▎        | 40/291 [00:00<00:02, 92.12it/s]Loading weights:  18%|█▊        | 52/291 [00:00<00:03, 73.73it/s]Loading weights:  21%|██▏       | 62/291 [00:00<00:03, 69.18it/s]Loading weights:  24%|██▍       | 71/291 [00:01<00:03, 67.91it/s]Loading weights:  27%|██▋       | 79/291 [00:01<00:03, 65.27it/s]Loading weights:  30%|██▉       | 86/291 [00:01<00:03, 65.68it/s]Loading weights:  32%|███▏      | 94/291 [00:01<00:02, 66.26it/s]Loading weights:  35%|███▍      | 101/291 [00:01<00:02, 64.98it/s]Loading weights:  37%|███▋      | 108/291 [00:01<00:03, 58.19it/s]Loading weights:  40%|███▉      | 115/291 [00:01<00:03, 56.18it/s]Loading weights:  42%|████▏     | 122/291 [00:01<00:02, 59.04it/s]Loading weights:  45%|████▌     | 131/291 [00:02<00:02, 62.73it/s]Loading weights:  48%|████▊     | 139/291 [00:02<00:02, 66.26it/s]Loading weights:  50%|█████     | 146/291 [00:02<00:02, 66.05it/s]Loading weights:  53%|█████▎    | 153/291 [00:02<00:02, 62.00it/s]Loading weights:  55%|█████▍    | 160/291 [00:02<00:02, 59.39it/s]Loading weights:  57%|█████▋    | 167/291 [00:02<00:02, 61.20it/s]Loading weights:  60%|██████    | 175/291 [00:02<00:01, 65.40it/s]Loading weights:  63%|██████▎   | 182/291 [00:02<00:01, 63.58it/s]Loading weights:  65%|██████▍   | 189/291 [00:03<00:01, 60.13it/s]Loading weights:  67%|██████▋   | 196/291 [00:03<00:01, 56.29it/s]Loading weights:  70%|██████▉   | 203/291 [00:03<00:01, 59.11it/s]Loading weights:  73%|███████▎  | 211/291 [00:03<00:01, 63.79it/s]Loading weights:  75%|███████▍  | 218/291 [00:03<00:01, 64.43it/s]Loading weights:  77%|███████▋  | 225/291 [00:03<00:01, 57.97it/s]Loading weights:  79%|███████▉  | 231/291 [00:03<00:01, 56.04it/s]Loading weights:  82%|████████▏ | 239/291 [00:03<00:00, 61.69it/s]Loading weights:  85%|████████▍ | 247/291 [00:03<00:00, 64.77it/s]Loading weights:  88%|████████▊ | 256/291 [00:04<00:00, 66.40it/s]Loading weights:  90%|█████████ | 263/291 [00:04<00:00, 63.09it/s]Loading weights:  93%|█████████▎| 270/291 [00:04<00:00, 61.93it/s]Loading weights:  96%|█████████▌| 278/291 [00:04<00:00, 63.55it/s]Loading weights:  99%|█████████▉| 289/291 [00:04<00:00, 75.04it/s]Loading weights: 100%|██████████| 291/291 [00:04<00:00, 63.81it/s]
+answer token ids: {'drive': [6678, 33067, 16542, 33557, 96887], 'walk': [4321, 19599, 12839, 49949]}
+baseline ...
+[transformers] Ignoring clean_up_tokenization_spaces=True for BPE tokenizer TokenizersBackend. The clean_up_tokenization post-processing step is designed for WordPiece tokenizers and is destructive for BPE (it strips spaces before punctuation). Set clean_up_tokenization_spaces=False to suppress this warning, or set clean_up_tokenization_spaces_for_bpe_even_though_it_will_corrupt_output=True to force cleanup anyway.
+substrate ...
+  baseline   M_sum=-5.050  M_first=-5.125 p(drive)=0.006 p(walk)=0.993 greedy='walk<|im_end|>'
+  substrate  M_sum=+3.000  M_first=+3.000 p(drive)=0.947 p(walk)=0.047 greedy='drive<|im_end|>'
+patching ...
+  patch L00: M_sum=-5.036
+  patch L01: M_sum=-5.058
+  patch L02: M_sum=-5.042
+  patch L03: M_sum=-5.066
+  patch L04: M_sum=-4.816
+  patch L05: M_sum=-5.058
+  patch L06: M_sum=-4.793
+  patch L07: M_sum=-5.070
+  patch L08: M_sum=-5.061
+  patch L09: M_sum=-5.558
+  patch L10: M_sum=-5.801
+  patch L11: M_sum=-5.566
+  patch L12: M_sum=-5.308
+  patch L13: M_sum=-5.000
+  patch L14: M_sum=+1.386
+  patch L15: M_sum=+2.009
+  patch L16: M_sum=+2.246
+  patch L17: M_sum=+2.880
+  patch L18: M_sum=+2.868
+  patch L19: M_sum=+2.996
+  patch L20: M_sum=+3.000
+  patch L21: M_sum=+3.000
+  patch L22: M_sum=+3.129
+  patch L23: M_sum=+2.880
+  patch L24: M_sum=+2.750
+  patch L25: M_sum=+2.524
+  patch L26: M_sum=+2.628
+  patch L27: M_sum=+2.637
+  patch L28: M_sum=+2.630
+  patch L29: M_sum=+3.002
+  patch L30: M_sum=+3.002
+  patch L31: M_sum=+3.000
+ablations ...
+  loo_line1      M_sum=+4.247
+  loo_line2      M_sum=+3.493
+  loo_line3      M_sum=+2.750
+  loo_line4      M_sum=+4.000
+  loo_line5      M_sum=+3.373
+  loo_line6      M_sum=+3.871
+  loo_line7      M_sum=+3.246
+  loo_line8      M_sum=+3.000
+  loo_line9      M_sum=+1.002
+  only_line1     M_sum=-1.869
+  only_line2     M_sum=-2.736
+  only_line3     M_sum=+0.623
+  only_line4     M_sum=-1.871
+  only_line5     M_sum=+0.750
+  only_line6     M_sum=+0.000
+  only_line7     M_sum=+2.740
+  only_line8     M_sum=+3.237
+  only_line9     M_sum=+1.121
+  headers_only   M_sum=-4.232
+benchmarks ...
+  baseline                 M_sum=-5.050 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-5.05
+  benchmark_CoT            M_sum=-4.360 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-4.36
+  benchmark_encourage      M_sum=-5.061 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-5.061
+  benchmark_expert         M_sum=-4.250 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-4.25
+  benchmark_goaloriented   M_sum=-2.943 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-2.943
+  benchmark_hallucination  M_sum=-4.890 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-4.89
+  benchmark_nomistakes     M_sum=-4.688 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-4.688
+  benchmark_threat         M_sum=-4.844 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-4.844
+  benchmark_urgency        M_sum=-3.611 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-3.611
+  substrate                M_sum=+3.000 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=3.0
+wrote results/hermes-3-llama-3.1-8b/bf16/internals.json in 89.4 s
+figures in results/hermes-3-llama-3.1-8b/bf16/
+done — send back the whole results/hermes-3-llama-3.1-8b/bf16/ folder (json + png + summary.md + run.log)

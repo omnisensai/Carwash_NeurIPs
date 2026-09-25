@@ -1,0 +1,11 @@
+gate: PASS llama-3-8b baseline M=-9.64 substrate M=+0.75 delta=+10.39 greedy='drive<|eot_id|>'
+gate: PASS llama-3.1-8b baseline M=-3.71 substrate M=+1.51 delta=+5.22 greedy='drive<|eot_id|>'
+gate: PASS hermes-2-pro-llama-3-8b baseline M=-7.26 substrate M=+5.43 delta=+12.69 greedy='drive<|im_end|>'
+gate: PASS hermes-3-llama-3.1-8b baseline M=-5.05 substrate M=+3.00 delta=+8.05 greedy='drive<|im_end|>'
+gate: PASS llama-3.1-tulu-3-8b baseline M=-4.79 substrate M=+0.89 delta=+5.67 greedy='drive<|end_of_text|>'
+gate: PASS llama-3.1-tulu-3.1-8b baseline M=-2.00 substrate M=+2.62 delta=+4.62 greedy='drive<|end_of_text|>'
+gate: FAIL dolphin-2.9.4-llama3.1-8b baseline M=-1.23 substrate M=-0.73 delta=+0.50 greedy='I need to wash'
+gate: PASS llama-3.1-8b-instruct-abliterated baseline M=-7.48 substrate M=+2.05 delta=+9.53 greedy='drive<|eot_id|>'
+gate: ERROR llama3-openbiollm-8b ([Errno 2] No such file or directory: 'results/llama3-openbiollm-8b/bf16/internals.json')
+gate: PASS llama-3.1-storm-8b baseline M=-6.22 substrate M=+5.66 delta=+11.87 greedy='drive<|eot_id|>'
+gate: PASS llama-3.1-8b-lexi-uncensored-v2 baseline M=-2.66 substrate M=+1.05 delta=+3.71 greedy='drive.<|eot_id|>'

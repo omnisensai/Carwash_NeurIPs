@@ -43,7 +43,9 @@ python build_prompts.py
 if [ "$GRID" != 0 ]; then
   python run_grid.py --model "$MODEL" $QARG --out "$OUT" --label "$LABEL" 2>&1 | tee -a "$OUT/grid.log"
 fi
+if [ "$PLAN" != none ]; then
 python run_cdim_cells.py --model "$MODEL" $QARG --out "$OUT" --label "$LABEL" --plan "$PLAN" \
     --row-stride "$STRIDE" --path-stride $((STRIDE * 2)) --map auto 2>&1 | tee -a "$OUT/cdim_cells.log"
+fi
 python analyse.py "$OUT"
 echo "done — send back $OUT/ (grid.json, */*/cdim.json + png, sweep_summary.md, logs); cdim_resid.pt files are large, drop them if space matters"

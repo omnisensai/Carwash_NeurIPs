@@ -38,7 +38,7 @@ with the same grid.
 | `runpod_sweep.sh` | all of it on a pod; resumable. |
 
 Result folders: `results/<model>/<precision>-sweep/{grid.json, ladder/<L>/, paraphrase/<P>_<T>/, scenario/<s>/}`.
-The L0 and pro carwash cells are the first-round `results/<model>/<precision>/` and `<precision>-pro/` cdim.json files; `analyse.py` uses them only when their bullet lines match the retired files. `runpod.sh` reruns on the old models must set `OUT=` so those folders are not overwritten with the new substrate.
+The L0 and pro carwash cells are the first-round cdim.json files, now under `results/old-substrate-v1/<model>/<precision>[-pro]/`; `analyse.py` uses them only when their bullet lines match the retired files. `runpod.sh` reruns on the old models must set `OUT=` so those folders are not overwritten with the new substrate.
 
 ## Predictions, written before running
 

@@ -1,6 +1,6 @@
 # What the substrate changes inside open-weight models
 
-> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`.
+> **Substrate version.** Everything below was measured on the six-line abstract substrate and the `substrate_pro.txt` that `prompts/` held on 17–18 Sep 2026. On 19 Sep `prompts/substrate.txt` was replaced by a nine-line substrate with a Definitions block and `substrate_pro.txt` / `benchmark_library.txt` were removed. The two retired files are kept verbatim as `cdim_sweep/ladder/L0.txt` and `cdim_sweep/ladder/pro.txt`; the json files record the sha256 of the system text they used. No number here applies to the current `substrate.txt`; the 21 Sep results on it are in `SWEEP_RESULTS.md`.
 
 Measured 17 Sep 2026 with `run_internals.py`. All readouts at the position
 that predicts the first answer token, teacher-forced, chat template, bf16
@@ -33,7 +33,7 @@ Llama 8B and Qwen 4B+ ran in bf16 on CPU (identical maths, no
 quantisation); 70B on 2× A100 80 GB (RunPod); the rest on one 16 GB card.
 Qwen3.5 is a hybrid architecture the hooks do not support and was skipped.
 
-![Llama lens overview](results/overview.png)
+![Llama lens overview](results/old-substrate-v1/overview.png)
 
 ## Findings
 
@@ -77,25 +77,25 @@ Qwen3.5 is a hybrid architecture the hooks do not support and was skipped.
 
 70B, substrate.txt: logit lens for both prompts and the patching curve.
 
-![70B lens](results/llama-3.3-70b/bf16/lens.png)
+![70B lens](results/old-substrate-v1/llama-3.3-70b/bf16/lens.png)
 
 70B line ablations, substrate.txt (blue = that line alone, red = all but
 that line):
 
-![70B ablations](results/llama-3.3-70b/bf16/ablations.png)
+![70B ablations](results/old-substrate-v1/llama-3.3-70b/bf16/ablations.png)
 
 70B direct logit attribution per sublayer:
 
-![70B dla](results/llama-3.3-70b/bf16/dla.png)
+![70B dla](results/old-substrate-v1/llama-3.3-70b/bf16/dla.png)
 
 Llama 8B, substrate.txt: lens + patching, and the line ablations.
 
-![8B lens](results/llama-3.1-8b/bf16/lens.png)
-![8B ablations](results/llama-3.1-8b/bf16/ablations.png)
+![8B lens](results/old-substrate-v1/llama-3.1-8b/bf16/lens.png)
+![8B ablations](results/old-substrate-v1/llama-3.1-8b/bf16/ablations.png)
 
 Llama lens overview with substrate_pro:
 
-![Llama pro overview](results/overview-pro.png)
+![Llama pro overview](results/old-substrate-v1/overview-pro.png)
 
 Every run has the same seven figures and a `summary.md` under
 `results/<model>/<precision>[-pro]/`; the numbers are in `internals.json`.

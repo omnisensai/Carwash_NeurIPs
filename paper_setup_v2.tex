@@ -24,15 +24,16 @@ by changing only the supplied task specification. Model weights and
 decoding procedure remain fixed, and no response-dependent retries,
 voting, fine-tuning, retraining, or post-generation correction are
 used. Three samples across two cells were reissued after upstream
-transport errors; the reissue carries the cell's declared
-configuration and replaces the failed attempt at the same sample
-index.
+transport errors that produced no model response. Each reissue used
+the cell's declared configuration and replaced the failed attempt at
+the same sample index; these are infrastructure retries rather than
+response-dependent model retries.
 
 For each fixed model--input condition we draw $R=10$ single-pass
-samples. Temperature $1.0$ is requested on every execution and
-recorded with it; no provider echoes sampling parameters in its
-response, so the record is of the requested configuration rather than
-a provider confirmation. Locally sampled models additionally use
+samples. Temperature $1.0$ is requested on every execution;
+no provider echoes sampling parameters in its response, so the record
+is of the requested configuration rather than a provider
+confirmation. Locally sampled models additionally use
 $\mathrm{top}_p=1.0$ with a per-sample seed recorded; hosted models
 run at provider default nucleus sampling. Outputs containing no action
 word never satisfy reproducible correctness; none occurred. The
@@ -117,11 +118,11 @@ open-weight models, where the full next-token distribution is
 available and no truncation bound is required.
 
 For open-weight models we access internal activations. An observed
-activation difference is not treated as a mechanism merely because it
-co-occurs with a successful response; an internal state is treated as
-causally consequential only when replacing the corresponding untreated
-state changes the downstream decision margin. We measure that margin
-at the position predicting the first answer token:
+activation difference is not treated as causal merely because it
+co-occurs with a successful response. We attribute a causal effect on
+the measured decision preference only when replacing the corresponding
+untreated state changes the downstream decision margin. We measure
+that margin at the position predicting the first answer token:
 \begin{equation}
     M(x) = \log \sum_{t \in \mathcal{D}} P(t \mid x)
          - \log \sum_{t \in \mathcal{W}} P(t \mid x),

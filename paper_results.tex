@@ -61,6 +61,49 @@ Baseline & 0 & 7 & 16 \\
 \end{tabular}
 \end{table}
 
+\begin{table}[h]
+\centering
+\caption{Per-model operational state at baseline and under the substrate. Cells are
+intended actions out of ten samples. RC: reproducibly correct (10/10). NR:
+non-reproducible. RI: reproducibly incorrect (0/10). Qwen2.5-3B is reproducibly
+correct at baseline and excluded.}
+\label{tab:per-model}
+\small
+\begin{tabular}{lccl}
+\toprule
+Model & Baseline & Substrate & Transition \\
+\midrule
+Claude Haiku 4.5 & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Claude Sonnet 4.5 & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Claude Sonnet 4.6 & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Claude Sonnet 5 & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+GPT-4 & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+GPT-4.1 & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+GPT-4.1-mini & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+GPT-4o & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Llama 3.1-8B & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Llama 3.3-70B & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Llama 4-Maverick & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Mistral Large & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+Qwen3-8B & 0/10 & \textbf{10/10} & RI $\rightarrow$ RC \\
+\midrule
+DeepSeek V3.2 & 0/10 & 8/10 & RI $\rightarrow$ NR \\
+\midrule
+Qwen2.5-7B & 0/10 & 0/10 & RI $\rightarrow$ RI \\
+Qwen3-4B-2507 & 0/10 & 0/10 & RI $\rightarrow$ RI \\
+\midrule
+Claude Opus 4.7 & 5/10 & \textbf{10/10} & NR $\rightarrow$ RC \\
+GPT-3.5-turbo & 1/10 & \textbf{10/10} & NR $\rightarrow$ RC \\
+Kimi K2 & 4/10 & \textbf{10/10} & NR $\rightarrow$ RC \\
+Qwen3-0.6B & 7/10 & \textbf{10/10} & NR $\rightarrow$ RC \\
+\midrule
+Qwen2.5-1.5B & 6/10 & 8/10 & NR $\rightarrow$ NR \\
+Llama 3.2-3B & 4/10 & 4/10 & NR $\rightarrow$ NR \\
+Qwen2.5-0.5B & 7/10 & 3/10 & NR $\rightarrow$ NR \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Transitions between reproducibly incorrect, non-reproducible, and
 reproducibly correct states.}
 Transitions are reported separately for the two baseline failure modes

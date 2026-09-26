@@ -94,3 +94,54 @@ wordings are equivalent --- the results show they are not. It is a claim about w
 single measurement licenses: the condition under which a system will be operated is
 part of what is being tested, and a reliability claim that omits it is
 underdetermined in the same way the untreated task itself is.
+
+
+\subsection{Specification as the Experimental Variable}
+\label{sec:specification-variable}
+
+Conventional prompt interventions and the substrate reach the model through the same
+channel. Neither touches parameters, decoding or retry policy; both are text placed
+around an unchanged question. What differs is what the text specifies. The seven
+conventional interventions specify a disposition --- how carefully the model should
+reason, who it should imagine itself to be, what it should avoid, how much the
+outcome matters. The substrate specifies the task: what the object is, where it must
+end up, and which movements do and do not bring it there. Through one channel, with
+the question fixed, the first kind of text leaves fifteen of sixteen reproducibly
+incorrect models where it found them and the second moves thirteen of them to
+reproducible correctness.
+
+Supplying that task content is the intervention under study, not leakage into the
+evaluation. The two framings correspond to different experiments. Asking whether a
+model recovers unstated task semantics unaided is a question about the model: it
+measures what the model supplies when the input does not. Asking whether supplying
+those semantics establishes reproducible correctness is a question about the input:
+it measures what a specification has to contain before a decision becomes a function
+of it. These are not a stricter and a weaker version of one test. A system that will
+be deployed with a fixed input is described by the second; the first describes a
+system operated without one.
+
+The substrate does not contain the correct action. It names the object, the service
+location, the objective, and the reason the incorrect action fails to achieve the
+objective. The word naming the correct action appears nowhere in its 585 characters;
+the word naming the incorrect action appears twice. Whatever moves thirteen models
+from ten wrong answers to ten correct ones, it is not the presence of the answer.
+
+The distinction the substrate encodes is between output admissibility and
+interpretive correctness. Both actions are admissible outputs of the question as
+posed: each is a single word naming a way to cover fifty metres, and a reader who
+treats the question as being about distance will prefer the wrong one. Which action
+is correct depends on relations the question leaves unstated --- that the object must
+arrive, that it is not portable, that one of the two movements leaves it behind.
+Where multiple outputs are admissible in principle, reliability is not a property the
+model can supply on its own; it depends on the conditions under which each output is
+correct having been specified.
+
+We refer to constructing and testing such a specification against the criterion in
+Equation~\eqref{eq:reproducible-correctness} as Substrate Engineering. The practice
+treats the specification as an experimental artifact rather than an incidental
+wrapper: it is written, hashed, versioned, and tested per model--condition, and it
+succeeds or fails per model--condition. Six of the twenty-three models in this study
+are not rescued by the substrate reported here, two of them not at all. That is not
+a caveat attached to a general claim; it is the form the claim takes. Sufficiency is
+established for particular pairs on a particular task, and neither a universal
+specification nor transfer to other tasks is demonstrated by these results.

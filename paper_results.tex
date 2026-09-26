@@ -44,10 +44,10 @@ reproducibly incorrect models to reproducible correctness. No conventional condi
 converts more than one. Five of the seven leave at least fifteen of the sixteen
 reproducibly incorrect.
 
-Four of the seven also move models in the damaging direction, consolidating a
-non-reproducible model into reproducible incorrectness: one each under
-chain-of-thought, anti-hallucination and threat, one under error avoidance, and two
-under encouragement. Under encouragement the number of reproducibly incorrect models
+Four of the seven also turn a non-reproducible model into a reproducibly incorrect
+one: one each under chain-of-thought, anti-hallucination, threat and error
+avoidance, and two under encouragement. Such a model is both less accurate and
+harder to diagnose, since its ten samples now agree. Under encouragement the number of reproducibly incorrect models
 is therefore higher than untreated, at seventeen of twenty-three, while the
 aggregate rate is lower. An intervention can make a model's failure less visible
 while making its accuracy no better.
@@ -60,9 +60,8 @@ and Qwen3-4B-2507, whose internal measurements in
 Section~\ref{sec:internal-results} show large but insufficient displacement rather
 than no effect --- and four are non-reproducible.
 
-No model moves from non-reproducible to reproducibly incorrect under the
-specification, the direction that four of the seven conventional interventions
-produce.
+No model becomes reproducibly incorrect under the specification, a transition that
+four of the seven conventional interventions produce.
 
 \begin{table}[t]
 \centering
@@ -103,11 +102,10 @@ inverts it. Encouragement lowers the rate below untreated while raising the
 reproducibly incorrect count; chain-of-thought raises the rate by 1.6 points while
 leaving that count unchanged and consolidating one non-reproducible model into it.
 What the conventional interventions mostly do is move models within and between the
-two failure bands --- between inconsistent and consistent error --- which changes
+two failure modes --- between inconsistent and consistent error --- which changes
 the observed rate without changing whether any individual model can be relied on for
-the decision. The specification is the only condition under which the reproducibly
-incorrect set empties, and the only one that produces no movement in the damaging
-direction.
+the decision. The specification is the only condition that empties most of the
+reproducibly incorrect set, and the only one that adds to it nowhere.
 
 \begin{table}[t]
 \centering

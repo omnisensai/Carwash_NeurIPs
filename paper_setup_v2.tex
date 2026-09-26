@@ -1,0 +1,173 @@
+\section{Experimental Setup}
+\label{sec:experimental-setup}
+
+\subsection{Task and Reproducibility Criterion}
+\label{sec:operational-reproducibility}
+
+We study the following binary operational decision:
+
+\begin{quote}
+\emph{I need to wash my car, the car wash is only 50 metres away,
+should I walk or drive there?}
+
+\emph{Answer with exactly one word: walk or drive}
+\end{quote}
+
+The stated objective is to wash the car at the car wash. Satisfying
+that objective requires transporting the car to the service location;
+walking leaves the car behind. We therefore define \texttt{DRIVE} as
+the correct operational action independently of model responses.
+
+The experiment asks whether a model that fails this decision under
+the untreated input can be moved to reproducibly correct behaviour
+by changing only the supplied task specification. Model weights and
+decoding procedure remain fixed, and no response-dependent retries,
+voting, fine-tuning, retraining, or post-generation correction are
+used. Three samples across two cells were reissued after upstream
+transport errors; the reissue carries the cell's declared
+configuration and replaces the failed attempt at the same sample
+index.
+
+For each fixed model--input condition we draw $R=10$ single-pass
+samples at temperature $1.0$. Locally sampled models additionally use
+$\mathrm{top}_p=1.0$ with a per-sample seed recorded; hosted models
+run at provider default nucleus sampling. Outputs containing no action
+word never satisfy reproducible correctness; none occurred. The
+criterion applies only to the declared executions and does not imply
+zero probability of another output outside them.
+
+Let $y_r$ denote the operational outcome of execution $r$ and $y^*$
+the predefined correct action. Reproducible correctness requires
+\begin{equation}
+    y_r = y^* \quad \forall r \in \{1,\ldots,R\}.
+    \label{eq:reproducible-correctness}
+\end{equation}
+
+This yields three operational states. A condition is
+\emph{reproducibly correct} when all $R$ executions produce the
+intended action, \emph{reproducibly incorrect} when all $R$ executions
+produce the same incorrect action, and \emph{non-reproducible} when
+the operational decision varies across executions.
+
+Because the prompt requests a single word, most replies are one word
+and the operational outcome is that word. Where a model returns prose
+instead, we take the action it commits to: the leading action word
+when the reply opens with one, and otherwise the final action word,
+since such replies restate the question before answering it. Three of
+the 216 cells depend on this rule.
+
+\begin{table}[h]
+\centering
+\caption{Classification of outcome patterns for the car-wash task
+($R=10$; correct action: \texttt{DRIVE}).}
+\label{tab:operational-states}
+\vspace{6pt}
+\small
+\begin{tabular*}{0.75\columnwidth}{@{\extracolsep{\fill}}ll@{}}
+\toprule
+\textbf{Observed outcomes} & \textbf{Operational state} \\
+\midrule
+10 \texttt{DRIVE} / 0 \texttt{WALK} & Reproducibly correct \\
+10 \texttt{WALK} / 0 \texttt{DRIVE} & Reproducibly incorrect \\
+7 \texttt{WALK} / 3 \texttt{DRIVE} & Non-reproducible \\
+\bottomrule
+\end{tabular*}
+\end{table}
+
+Reliability is evaluated for each fixed model--input condition rather
+than assigned to the model in isolation. Aggregate accuracy can obscure
+whether a model is consistently correct, consistently wrong, or
+variable under one unchanged input; these are operationally different
+states.
+
+The criterion does not require the model to recover unstated task
+semantics unaided. That is a different experiment: it asks whether the
+model can infer what the input omits. Here, supplying task-relevant
+semantics is the intervention being tested. The question is whether an
+explicit task specification can move a failing model--input condition
+to reproducibly correct behaviour.
+
+We refer to constructing and testing natural-language task
+specifications against~\eqref{eq:reproducible-correctness} as
+\emph{Substrate Engineering}, and to the specification itself as the
+\emph{substrate}.
+
+
+\subsection{Interventions and Measurement}
+\label{sec:interventions-measurement}
+
+We treat the input specification as the experimental variable. All
+interventions modify the model's input without changing parameters.
+Conventional prompts request reasoning procedures, expertise, or
+emphasis. The substrate specifies relations among the task objective
+and action semantics. Every condition's text is hashed and the hash
+recorded with each execution. Exact texts, model identifiers, access
+levels, and inference configurations are in the appendix.
+
+The emitted action is the operational outcome and the only quantity
+used to assign reproducible correctness. Hosted providers were not
+queried for token log-probabilities, so no margin is reported for
+those models; all internal quantities below are measured on
+open-weight models, where the full next-token distribution is
+available and no truncation bound is required.
+
+For open-weight models we access internal activations. An observed
+activation difference is not treated as a mechanism merely because it
+co-occurs with a successful response; an internal state is treated as
+causally consequential only when replacing the corresponding untreated
+state changes the downstream decision margin. We measure that margin
+at the position predicting the first answer token:
+\begin{equation}
+    M(x) = \log \sum_{t \in \mathcal{D}} P(t \mid x)
+         - \log \sum_{t \in \mathcal{W}} P(t \mid x),
+    \label{eq:decision-margin}
+\end{equation}
+where $\mathcal{D}$ and $\mathcal{W}$ contain the distinct token IDs
+of the measured surface forms of each action, including case and
+leading-space variants. Positive $M$ favours \texttt{DRIVE}. An
+intervention's effect relative to the untreated input under the same
+model and configuration is
+\begin{equation}
+    \Delta M(u) = M(u) - M(\emptyset).
+    \label{eq:intervention-effect}
+\end{equation}
+$M$ is supplementary. Cell labels use only the $R$ emitted actions.
+
+
+\subsection{Two-Stage Design}
+\label{sec:two-stage-design}
+
+The primary behavioural analysis is a transition study over models
+that fail the untreated task. A model enters the transition cohort
+when its untreated condition is either reproducibly incorrect or
+non-reproducible; models already reproducibly correct at baseline
+cannot exhibit the failure-to-success transition of interest and are
+excluded from the rescue analysis. Cohort membership is determined
+from the untreated condition before any intervention is evaluated.
+
+Stage one evaluates the untreated task, seven conventional prompt
+interventions, and one shared task specification across the model
+matrix through repeated single-pass executions, without
+response-dependent retries, voting, fine-tuning, retraining, decoder
+changes, or post-generation correction. Each fixed model--input
+condition is classified by the criterion in
+Section~\ref{sec:operational-reproducibility}. Internals are
+interpreted only after that behavioural state is established.
+
+Stage two studies the untreated-to-specification transition in
+open-weight models. For each model, we capture the residual-stream
+activation at the first answer-token prediction position under the
+specification-conditioned input. At each tested layer, we replace the
+corresponding activation in the untreated computation with this state,
+leave all other positions unchanged, and run the remaining layers of
+the untreated computation. The patched computation otherwise receives
+only the untreated input; no specification text is present in its
+context. We then read the final decision margin.
+
+This tests whether a specification-conditioned state at the
+answer-token prediction position is causally sufficient, under the
+remaining untreated stack, to alter final action preference without
+the specification remaining in context. It does not establish
+reproducibly correct behaviour, localise where the decision is formed,
+or attribute the effect to an individual constraint. Those claims
+remain separate from~\eqref{eq:reproducible-correctness}.

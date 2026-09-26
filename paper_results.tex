@@ -6,28 +6,32 @@
 \subsection{Behavioural Results}
 \label{sec:behavioural-results}
 
-The behavioural fleet is 24 distinct models measured under two protocols. Seventeen
-were sampled through hosted APIs; nine open-weight models were sampled locally in
-bf16 under a single protocol, with per-sample seeds recorded. Two models
-(Llama-3.1-8B, Llama-3.2-3B) appear in both and are counted once, taking the local
-row, which is free of the provider-routing term discussed below. All models see
-byte-identical prompt text, $T = 1.0$, $\mathrm{top}_p = 1.0$ and $R = 10$ samples
-per condition, giving 240 executions per condition.
+We report on the 23 models that are not already reproducibly correct on the
+untreated question. The fleet is 24 distinct models measured under two protocols:
+seventeen sampled through hosted APIs and nine open-weight models sampled locally in
+bf16 with a per-sample seed recorded, two of which appear in both and are counted
+once from the local rows. All models receive byte-identical prompt text at $T=1.0$,
+$\mathrm{top}_p = 1.0$, with $R=10$ samples per condition. One model
+(Qwen2.5-3B) answers correctly on all ten untreated samples and is excluded
+throughout: a model that is already reproducibly correct cannot exhibit a rescue,
+and including it would let the aggregate rate move without any model changing state.
+The remaining 23 give 230 executions per condition.
 
 \paragraph{Untreated operational state.}
-Under the untreated question, one of 24 models is reproducibly correct. Sixteen are
-reproducibly incorrect, naming the wrong action on all ten samples; seven are
-non-reproducible, returning both actions across repetitions of one unchanged input.
-The modal untreated state is therefore not error but \emph{consistent} error: for
-two thirds of the fleet the failure is invisible to any procedure that samples the
-same input twice and compares.
+Under the untreated question, 34 of 230 executions name the correct action
+(14.8\%). Sixteen models are reproducibly incorrect, naming the wrong action on all
+ten samples; the remaining seven are non-reproducible, returning both actions across
+repetitions of one unchanged input. No model in the study population is reproducibly
+correct, by construction.
 
-Aggregate accuracy obscures this. The untreated correct-action rate is 18.3\%
-(44/240) over the full fleet and 7.6\% (13/170) over the seventeen hosted models;
-the difference is carried by four sub-4B open-weight models that answer correctly
-without any intervention, and which we show in Section~\ref{sec:internal-results}
-answer correctly for the wrong reason. The rate moves by ten points while the
-operational state of every individual model is unchanged.
+The two states fail differently and only one of them fails visibly. A
+non-reproducible model announces its own unreliability: sample it twice and the
+answers disagree. A reproducibly incorrect model does not. For sixteen of
+twenty-three models --- roughly seven in ten --- the failure survives any procedure
+that samples the same input repeatedly and compares, because every sample agrees.
+Repetition is the standard check available to a practitioner at deployment time, and
+on this decision it certifies the majority of the fleet as stable while they are
+uniformly wrong.
 
 \paragraph{Effects of conventional prompt interventions.}
 Seven conventional interventions were applied to the same question under the same
@@ -35,27 +39,34 @@ protocol: expert role assignment, objective emphasis, chain-of-thought elicitati
 anti-hallucination instruction, threat, encouragement, and error-avoidance
 instruction. None changes the operational state of the fleet
 (Table~\ref{tab:conditions}). The strongest, expert role assignment, raises the
-correct-action rate from 18.3\% to 39.2\% while converting exactly one of the
-sixteen reproducibly incorrect models to reproducible correctness. No conventional
-condition converts more than one. Six of the seven leave at least fourteen of the
-sixteen reproducibly incorrect.
+correct-action rate from 14.8\% to 36.5\% while converting one of sixteen
+reproducibly incorrect models to reproducible correctness. No conventional condition
+converts more than one. Five of the seven leave at least fifteen of the sixteen
+reproducibly incorrect.
 
-The pattern is sharper on the open-weight fleet, where four models are reproducibly
-incorrect untreated: across seven conditions and those four models --- 28
-model-condition cells --- 27 are 0/10 and one is 4/10. No conventional intervention
-produces a single reproducibly correct cell among them.
+Four of the seven also move models in the damaging direction, consolidating a
+non-reproducible model into reproducible incorrectness: one each under
+chain-of-thought, anti-hallucination and threat, one under error avoidance, and two
+under encouragement. Under encouragement the number of reproducibly incorrect models
+is therefore higher than untreated, at seventeen of twenty-three, while the
+aggregate rate is lower. An intervention can make a model's failure less visible
+while making its accuracy no better.
 
 \paragraph{Specification-conditioned operational state.}
 Under the task specification, supplied as a system message with the question
-unchanged, 203 of 240 executions name the correct action (84.6\%; 95.9\% over the
-seventeen hosted models). Eighteen of 24 models are reproducibly correct and two
-remain reproducibly incorrect --- Qwen2.5-7B and Qwen3-4B-2507, whose internal
-measurements in Section~\ref{sec:internal-results} show large but insufficient
-displacement rather than no effect.
+unchanged, 193 of 230 executions name the correct action (83.9\%). Seventeen of 23
+models are reproducibly correct. Two remain reproducibly incorrect --- Qwen2.5-7B
+and Qwen3-4B-2507, whose internal measurements in
+Section~\ref{sec:internal-results} show large but insufficient displacement rather
+than no effect --- and four are non-reproducible.
+
+No model moves from non-reproducible to reproducibly incorrect under the
+specification, the direction that four of the seven conventional interventions
+produce.
 
 \begin{table}[t]
 \centering
-\caption{Operational state of the 24-model fleet under each condition.
+\caption{Operational state of the 23-model study population under each condition.
 RC: reproducibly correct (10/10). NR: non-reproducible. RI: reproducibly incorrect
 (0/10). Rate is correct executions over usable executions.}
 \label{tab:conditions}
@@ -63,16 +74,16 @@ RC: reproducibly correct (10/10). NR: non-reproducible. RI: reproducibly incorre
 \toprule
 Condition & Rate & RC & NR & RI \\
 \midrule
-\textbf{Task specification} & \textbf{84.6\%} & \textbf{18} & 4 & \textbf{2} \\
-Expert role & 39.2\% & 3 & 9 & 12 \\
-Objective emphasis & 26.7\% & 2 & 8 & 14 \\
-Anti-hallucination & 21.2\% & 2 & 6 & 16 \\
-Chain of thought & 19.8\% & 2 & 6 & 16 \\
-Error avoidance & 17.0\% & 1 & 7 & 16 \\
-Threat & 16.7\% & 1 & 7 & 16 \\
-Encouragement & 16.7\% & 2 & 5 & 17 \\
+\textbf{Task specification} & \textbf{83.9\%} & \textbf{17} & 4 & \textbf{2} \\
+Expert role & 36.5\% & 2 & 9 & 12 \\
+Objective emphasis & 23.5\% & 1 & 8 & 14 \\
+Anti-hallucination & 17.8\% & 1 & 6 & 16 \\
+Chain of thought & 16.4\% & 1 & 6 & 16 \\
+Error avoidance & 13.4\% & 0 & 7 & 16 \\
+Threat & 13.0\% & 0 & 7 & 16 \\
+Encouragement & 13.0\% & 1 & 5 & 17 \\
 \midrule
-Untreated & 18.3\% & 1 & 7 & 16 \\
+Untreated & 14.8\% & 0 & 7 & 16 \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -80,204 +91,44 @@ Untreated & 18.3\% & 1 & 7 & 16 \\
 \paragraph{Transitions between reproducibly incorrect, non-reproducible, and
 reproducibly correct states.}
 The quantity of interest is not the aggregate rate but the transition each model
-makes from its untreated state. Restricting attention to the sixteen models that are
-reproducibly incorrect untreated (Table~\ref{tab:transitions}), the task
-specification moves thirteen to reproducible correctness and one to
-non-reproducibility. Every conventional intervention leaves at least twelve of the
-sixteen unchanged, and three of the seven move none of them to reproducible
-correctness at all.
+makes from its untreated state, separately for the two failure modes
+(Table~\ref{tab:transitions}). The task specification moves 13 of the 16
+reproducibly incorrect models to reproducible correctness and 4 of the 7
+non-reproducible models, rescuing 17 of 23 in a single pass with no change to the
+question and no sampling, voting or retry. Every conventional intervention rescues
+at most one model from either group.
 
-This separation is categorical rather than one of degree, and
-Table~\ref{tab:conditions} shows why the aggregate rate cannot express it. Under
-encouragement the fleet rate falls below untreated while the reproducibly incorrect
-count \emph{rises} by one; under chain of thought the rate rises by 1.5 points with
-the same count. Conventional interventions largely move models within and between
-the non-reproducible and reproducibly incorrect bands --- between consistent and
-inconsistent error --- which changes the observed rate without changing whether any
-given model can be relied on for the decision.
+Aggregate accuracy cannot express this separation, and in two conditions it
+inverts it. Encouragement lowers the rate below untreated while raising the
+reproducibly incorrect count; chain-of-thought raises the rate by 1.6 points while
+leaving that count unchanged and consolidating one non-reproducible model into it.
+What the conventional interventions mostly do is move models within and between the
+two failure bands --- between inconsistent and consistent error --- which changes
+the observed rate without changing whether any individual model can be relied on for
+the decision. The specification is the only condition under which the reproducibly
+incorrect set empties, and the only one that produces no movement in the damaging
+direction.
 
 \begin{table}[t]
 \centering
-\caption{Transitions of the 16 models that are reproducibly incorrect untreated.
-Each row reports where those 16 models land under one condition.}
+\caption{Transitions from each untreated state. Left: where the 16 reproducibly
+incorrect models land. Right: where the 7 non-reproducible models land. Rescued is
+the total reaching reproducible correctness.}
 \label{tab:transitions}
-\begin{tabular}{lrrr}
+\begin{tabular}{lrrrcrrrcr}
 \toprule
-Condition & $\rightarrow$ RC & $\rightarrow$ NR & remain RI \\
+& \multicolumn{3}{c}{from RI ($n=16$)} && \multicolumn{3}{c}{from NR ($n=7$)} && \\
+\cmidrule{2-4}\cmidrule{6-8}
+Condition & RC & NR & RI && RC & NR & RI && Rescued \\
 \midrule
-\textbf{Task specification} & \textbf{13} & 1 & \textbf{2} \\
-Expert role & 1 & 3 & 12 \\
-Anti-hallucination & 1 & 0 & 15 \\
-Chain of thought & 1 & 0 & 15 \\
-Encouragement & 1 & 0 & 15 \\
-Objective emphasis & 0 & 2 & 14 \\
-Threat & 0 & 1 & 15 \\
-Error avoidance & 0 & 1 & 15 \\
+\textbf{Task specification} & \textbf{13} & 1 & 2 && \textbf{4} & 3 & \textbf{0} && \textbf{17} \\
+Expert role & 1 & 3 & 12 && 1 & 6 & 0 && 2 \\
+Objective emphasis & 0 & 2 & 14 && 1 & 6 & 0 && 1 \\
+Anti-hallucination & 1 & 0 & 15 && 0 & 6 & 1 && 1 \\
+Chain of thought & 1 & 0 & 15 && 0 & 6 & 1 && 1 \\
+Encouragement & 1 & 0 & 15 && 0 & 5 & 2 && 1 \\
+Threat & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\
+Error avoidance & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\paragraph{Directionality controls.}
-Three observations bear on whether the specification acts as a task description or
-merely as a bias toward one answer token. They constrain direction, not scope: we do
-not test whether a specification written for one task transfers to another, and no
-claim of generalisation is made here.
-
-First, the effect is not unidirectional. Qwen2.5-0.5B answers correctly on 7 of 10
-untreated samples and on 3 of 10 under the specification, moving away from the
-correct action; its decision margin moves correspondingly, from $+0.75$ to $-0.47$
-nats. A generic bias toward the correct token would not produce this.
-
-Second, the specification does not disturb a model that is already reproducibly
-correct: Qwen2.5-3B answers correctly on 10 of 10 samples untreated and under the
-specification.
-
-Third, the two models measured under both protocols give a consistency check, and
-one that does not fully resolve at $R=10$. Llama-3.1-8B is reproducibly incorrect
-untreated under both protocols; under the specification it answers correctly on 7 of
-10 samples through the routed API and 10 of 10 locally, which would place it in
-different reproducibility classes depending on the route. Llama-3.2-3B is
-non-reproducible under both, at 8/10 and 4/10. Neither difference is significant at
-this sample size (Fisher two-sided $p = 0.21$ and $p = 0.17$), so we report them as
-unresolved rather than as a measured effect of the serving stack; separating the two
-would need roughly $R = 15$ per arm.
-
-What the per-sample records do establish is that the hosted rows carry a term the
-local rows do not. The ten API samples for Llama-3.1-8B under the specification were
-served by three different upstream providers within the single condition, and the
-incorrect samples are split across two of them (Novita 4/6 correct, DeepInfra 2/3,
-Cloudflare 1/1), so no one backend accounts for them. Within-condition spread on
-these rows is therefore not sampling variance alone --- it also contains whatever
-differs between backends in precision, kernels and serving stack --- and it cannot
-be decomposed after the fact. We take the local rows as the model-level measurement
-for that reason, not because the two are shown to differ.
-
-\begin{table}[t]
-\centering
-\caption{Open-weight fleet, sampled locally under one protocol ($T=1.0$,
-$\mathrm{top}_p=1.0$, $R=10$). Cells are correct executions out of ten.
-Llama-3.3-70B does not fit the single-device configuration used here and appears in
-the hosted fleet only.}
-\label{tab:local-fleet}
-\begin{tabular}{lrrrrrrrrr}
-\toprule
-Model & Untr. & \textbf{Spec.} & Exp. & Obj. & CoT & Hall. & Thr. & Enc. & Err. \\
-\midrule
-Llama 3.1-8B  & 0 & \textbf{10} & 0 & 4 & 0 & 0 & 0 & 0 & 0 \\
-Qwen3-8B      & 0 & \textbf{10} & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-Qwen2.5-7B    & 0 & 0  & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-Qwen3-4B-2507 & 0 & 0  & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-\midrule
-Llama 3.2-3B  & 4 & 4  & 6 & 4 & 4 & 4 & 4 & 4 & 4 \\
-Qwen2.5-0.5B  & 7 & 3  & 6 & 7 & 7 & 2 & 3 & 3 & 3 \\
-Qwen2.5-1.5B  & 6 & 8  & 6 & 4 & 2 & 9 & 6 & 5 & 7 \\
-Qwen3-0.6B    & 7 & 10 & 9 & 5 & 8 & 6 & 6 & 5 & 6 \\
-Qwen2.5-3B    & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 & 10 \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-% ============================================================
-\subsection{Internal Causal Results}
-\label{sec:internal-results}
-
-\paragraph{Untreated and specification-conditioned decision preference.}
-On ten open-weight models we measure the decision margin
-$M = \log \sum_{t \in \mathcal{D}} P(t) - \log \sum_{t \in \mathcal{W}} P(t)$
-at the position that predicts the first answer token, teacher-forced, under the
-chat template, in bf16 (Table~\ref{tab:margins}). Six models prefer the
-incorrect action untreated, with margins from $-0.50$ to $-22.00$ nats. Under
-the specification, four of the six cross zero.
-
-The conventional interventions do not. On Llama-3.3-70B, whose untreated margin
-is $-13.65$, the seven conventional conditions span $-18.21$ to $-4.67$ nats:
-every one remains on the incorrect side, and one (chain of thought) moves the
-margin further from the correct action than no intervention at all. The
-specification reaches $+15.01$. On Llama-3.1-8B the pattern repeats at smaller
-scale: conventional conditions span $-4.57$ to $-0.35$ against an untreated
-$-3.71$, and the specification reaches $+1.51$. Across both models, no
-conventional intervention crosses zero.
-
-\begin{table}[t]
-\centering
-\caption{Decision margin $M$ in nats at the answer position; $M>0$ favours the
-correct action. \emph{Transplant} is the shallowest layer at which patching the
-specification-run residual into the untreated run reverses the untreated
-preference.}
-\label{tab:margins}
-\begin{tabular}{lrrrr}
-\toprule
-Model & Layers & Untreated & Specification & Transplant \\
-\midrule
-Llama 3.2-3B   & 28 & $-0.50$  & $+0.18$  & L13 \\
-Llama 3.1-8B   & 32 & $-3.71$  & $+1.51$  & L15 \\
-Llama 3.3-70B  & 80 & $-13.65$ & $+15.01$ & L38 \\
-Qwen3-8B       & 36 & $-14.07$ & $+7.25$  & L24 \\
-Qwen2.5-7B     & 28 & $-10.50$ & $-1.50$  & --- \\
-Qwen3-4B-2507  & 36 & $-22.00$ & $-5.50$  & --- \\
-\midrule
-Qwen2.5-0.5B   & 24 & $+0.75$  & $-0.47$  & n/a \\
-Qwen2.5-1.5B   & 28 & $+1.53$  & $+2.02$  & n/a \\
-Qwen3-0.6B     & 28 & $+2.25$  & $+4.37$  & n/a \\
-Qwen2.5-3B     & 36 & $+4.50$  & $+12.87$ & n/a \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Activation transplantation.}
-To test whether the specification's effect is carried by the residual stream at
-the decision position rather than by the presence of its tokens in context, we
-run the untreated prompt and replace the residual at the answer position, at a
-single layer, with the residual from the specification run at the same position
-and layer. No specification token is present in the patched forward pass. In
-every model whose preference the specification reverses, this transplant alone
-reverses the untreated preference. The specification's effect is therefore
-present as a state at one position, and is transferable without the text that
-produced it.
-
-Two controls bound the procedure. Patching a run with its own residual
-(same-run $S \rightarrow S$) produces $\Delta M = 0.00$ in all 96 cells per
-model, confirming the intervention machinery contributes nothing on its own.
-Patching a random direction of matched norm produces $\max |\Delta M|$ of
-$0.87$, $0.39$ and $2.00$ nats on Llama-3.3-70B, Llama-3.1-8B and Qwen3-8B,
-against measured single-line effects reaching $2.29$, $1.99$ and $14.75$ nats
-in the same models. The effect is not a norm perturbation.
-
-\paragraph{Layerwise causal effects.}
-The transplant is effective from the middle of the stack: layer 13 of 28, 15 of
-32, 38 of 80 and 24 of 36, that is between $0.46$ and $0.67$ of depth. Below
-those layers the patched margin is indistinguishable from untreated; above
-them, the patched run answers correctly. The decision is thus determined well
-before the layers at which the unembedding makes it visible --- the logit lens
-resolves the reversal only in the last few layers, underestimating by 10 to 40
-layers the depth at which the constraint is installed.
-
-\paragraph{Successful and unsuccessful preference reversals.}
-Four of the six models that prefer the incorrect action untreated cross zero
-under the specification; two do not. Both failures move substantially in the
-correct direction without arriving: Qwen2.5-7B from $-10.50$ to $-1.50$
-(9.0 nats) and Qwen3-4B-2507 from $-22.00$ to $-5.50$ (16.5 nats). Their
-behavioural rows agree: both answer incorrectly on 10 of 10 samples under the
-specification.
-
-These are not cases in which the specification fails to act. They are cases in
-which it acts and the displacement is insufficient. The distinction matters for
-what the method claims: a specification that reverses a preference in four
-models of six, and moves the margin by 9 to 16 nats in the two it does not
-reverse, is an intervention of graded strength, not a switch.
-
-\paragraph{Relationship between internal and behavioural measurements.}
-The two measurements are taken on the same models and the same prompt text but
-by different procedures --- one deterministic forward pass against ten sampled
-generations --- and they agree quantitatively. Treating
-$\sigma(M)$ as a predicted correct-action rate, predicted and observed counts
-agree within 1.5 of 10 samples in 14 of 18 model-condition cells, with a
-maximum discrepancy of 2.2 samples. In no cell do the two disagree in sign:
-every model's majority sampled action matches the sign of its margin.
-
-The four larger discrepancies are all in the direction of greater determinism
-than the margin predicts: models at intermediate margins emit the favoured
-action more consistently than a first-token reading implies. We note this as an
-observation about the relationship between the two readouts rather than a
-correction to either, since the margin is measured at a single teacher-forced
-position while sampling runs the full generation.

@@ -11,18 +11,21 @@ untreated question. The fleet is 24 distinct models measured under two protocols
 seventeen sampled through hosted APIs and nine open-weight models sampled locally in
 bf16 with a per-sample seed recorded, two of which appear in both and are counted
 once from the local rows. All models receive byte-identical prompt text at $T=1.0$,
-$\mathrm{top}_p = 1.0$, with $R=10$ samples per condition. One model
-(Qwen2.5-3B) answers correctly on all ten untreated samples and is excluded
-throughout: a model that is already reproducibly correct cannot exhibit a rescue,
-and including it would let the aggregate rate move without any model changing state.
-The remaining 23 give 230 executions per condition.
+$\mathrm{top}_p = 1.0$, with $R=10$ samples per condition. One model (Qwen2.5-3B)
+answers correctly on all ten untreated samples and is excluded throughout: a model
+that is already reproducibly correct cannot exhibit a rescue, and including it would
+let an aggregate figure move without any model changing state. The remaining 23 give
+230 executions per condition.
+
+Results are reported as model counts by operational state. Aggregate correctness
+appears only where it is the object of the argument rather than the measure of the
+outcome.
 
 \paragraph{Untreated operational state.}
-Under the untreated question, 34 of 230 executions name the correct action
-(14.8\%). Sixteen models are reproducibly incorrect, naming the wrong action on all
-ten samples; the remaining seven are non-reproducible, returning both actions across
-repetitions of one unchanged input. No model in the study population is reproducibly
-correct, by construction.
+Under the untreated question, sixteen of the 23 models are reproducibly incorrect,
+naming the wrong action on all ten samples. The remaining seven are
+non-reproducible, returning both actions across repetitions of one unchanged input.
+None is reproducibly correct, by construction of the study population.
 
 The two states fail differently and only one of them fails visibly. A
 non-reproducible model announces its own unreliability: sample it twice and the
@@ -38,27 +41,25 @@ Seven conventional interventions were applied to the same question under the sam
 protocol: expert role assignment, objective emphasis, chain-of-thought elicitation,
 anti-hallucination instruction, threat, encouragement, and error-avoidance
 instruction. None changes the operational state of the fleet
-(Table~\ref{tab:conditions}). The strongest, expert role assignment, raises the
-correct-action rate from 14.8\% to 36.5\% while converting one of sixteen
-reproducibly incorrect models to reproducible correctness. No conventional condition
-converts more than one. Five of the seven leave at least fifteen of the sixteen
-reproducibly incorrect.
+(Table~\ref{tab:conditions}). The strongest, expert role assignment, converts one of
+the sixteen reproducibly incorrect models to reproducible correctness. No
+conventional condition converts more than one, and across all seven the converted
+model is the same one each time. Five of the seven leave at least fifteen of the
+sixteen reproducibly incorrect.
 
 Four of the seven also turn a non-reproducible model into a reproducibly incorrect
 one: one each under chain-of-thought, anti-hallucination, threat and error
 avoidance, and two under encouragement. Such a model is both less accurate and
-harder to diagnose, since its ten samples now agree. Under encouragement the number of reproducibly incorrect models
-is therefore higher than untreated, at seventeen of twenty-three, while the
-aggregate rate is lower. An intervention can make a model's failure less visible
-while making its accuracy no better.
+harder to diagnose, since its ten samples now agree. Under encouragement the number
+of reproducibly incorrect models is therefore higher than untreated, at seventeen of
+twenty-three.
 
 \paragraph{Specification-conditioned operational state.}
 Under the task specification, supplied as a system message with the question
-unchanged, 193 of 230 executions name the correct action (83.9\%). Seventeen of 23
-models are reproducibly correct. Two remain reproducibly incorrect --- Qwen2.5-7B
-and Qwen3-4B-2507, whose internal measurements in
-Section~\ref{sec:internal-results} show large but insufficient displacement rather
-than no effect --- and four are non-reproducible.
+unchanged, seventeen of the 23 models are reproducibly correct. Two remain
+reproducibly incorrect --- Qwen2.5-7B and Qwen3-4B-2507, whose internal measurements
+in Section~\ref{sec:internal-results} show large but insufficient displacement
+rather than no effect --- and four are non-reproducible.
 
 No model becomes reproducibly incorrect under the specification, a transition that
 four of the seven conventional interventions produce.
@@ -67,51 +68,57 @@ four of the seven conventional interventions produce.
 \centering
 \caption{Operational state of the 23-model study population under each condition.
 RC: reproducibly correct (10/10). NR: non-reproducible. RI: reproducibly incorrect
-(0/10). Rate is correct executions over usable executions.}
+(0/10). Each row sums to 23.}
 \label{tab:conditions}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrr}
 \toprule
-Condition & Rate & RC & NR & RI \\
+Condition & RC & NR & RI \\
 \midrule
-\textbf{Task specification} & \textbf{83.9\%} & \textbf{17} & 4 & \textbf{2} \\
-Expert role & 36.5\% & 2 & 9 & 12 \\
-Objective emphasis & 23.5\% & 1 & 8 & 14 \\
-Anti-hallucination & 17.8\% & 1 & 6 & 16 \\
-Chain of thought & 16.4\% & 1 & 6 & 16 \\
-Error avoidance & 13.4\% & 0 & 7 & 16 \\
-Threat & 13.0\% & 0 & 7 & 16 \\
-Encouragement & 13.0\% & 1 & 5 & 17 \\
+\textbf{Task specification} & \textbf{17} & 4 & \textbf{2} \\
+Expert role & 2 & 9 & 12 \\
+Objective emphasis & 1 & 8 & 14 \\
+Anti-hallucination & 1 & 6 & 16 \\
+Chain of thought & 1 & 6 & 16 \\
+Encouragement & 1 & 5 & 17 \\
+Error avoidance & 0 & 7 & 16 \\
+Threat & 0 & 7 & 16 \\
 \midrule
-Untreated & 14.8\% & 0 & 7 & 16 \\
+Untreated & 0 & 7 & 16 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \paragraph{Transitions between reproducibly incorrect, non-reproducible, and
 reproducibly correct states.}
-The quantity of interest is not the aggregate rate but the transition each model
-makes from its untreated state, separately for the two failure modes
-(Table~\ref{tab:transitions}). The task specification moves 13 of the 16
-reproducibly incorrect models to reproducible correctness and 4 of the 7
-non-reproducible models, rescuing 17 of 23 in a single pass with no change to the
-question and no sampling, voting or retry. Every conventional intervention rescues
-at most one model from either group.
+The quantity of interest is the transition each model makes from its untreated
+state, separately for the two failure modes (Table~\ref{tab:transitions}). The task
+specification moves thirteen of the sixteen reproducibly incorrect models to
+reproducible correctness and four of the seven non-reproducible ones, rescuing
+seventeen of 23 in a single pass with no change to the question and no sampling,
+voting or retry. Every conventional intervention rescues at most one model from
+either group.
 
-Aggregate accuracy cannot express this separation, and in two conditions it
-inverts it. Encouragement lowers the rate below untreated while raising the
-reproducibly incorrect count; chain-of-thought raises the rate by 1.6 points while
-leaving that count unchanged and driving one non-reproducible model into it.
+An aggregate correctness figure cannot express this separation, and in two
+conditions it points the wrong way. Encouragement yields fewer correct executions
+than no intervention at all, 30 of 230 against 34, while the number of reproducibly
+incorrect models rises from sixteen to seventeen: the aggregate falls, and so does
+the visibility of the failure. Chain-of-thought yields more correct executions than
+no intervention, 38 of 232 against 34, while leaving the reproducibly incorrect
+count unchanged and driving one non-reproducible model into it. In both cases the
+aggregate moves in one direction and the operational state of the fleet in the
+other.
+
 What the conventional interventions mostly do is move models within and between the
-two failure modes --- between inconsistent and consistent error --- which changes
-the observed rate without changing whether any individual model can be relied on for
+two failure modes --- between inconsistent and consistent error --- which changes an
+aggregate figure without changing whether any individual model can be relied on for
 the decision. The specification is the only condition that empties most of the
 reproducibly incorrect set, and the only one that adds to it nowhere.
 
 \begin{table}[t]
 \centering
-\caption{Transitions from each untreated state. Left: where the 16 reproducibly
-incorrect models land. Right: where the 7 non-reproducible models land. Rescued is
-the total reaching reproducible correctness.}
+\caption{Transitions from each untreated state. Left: where the sixteen reproducibly
+incorrect models land. Right: where the seven non-reproducible models land. Rescued
+is the total reaching reproducible correctness.}
 \label{tab:transitions}
 \begin{tabular}{lrrrcrrrcr}
 \toprule

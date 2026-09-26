@@ -151,43 +151,37 @@ Error avoidance & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\
 \subsection{Internal Causal Results}
 \label{sec:internal-results}
 
-The behavioural measurement records which action a model emits. It does not say
-whether the specification acts on the computation that selects the action, or
-whether its effect is carried by the presence of its tokens in context. We measure
-this on ten open-weight models, on prompt text byte-identical to the behavioural
-runs. The readout is the decision margin
+We measured internal quantities on ten open-weight models, on prompt text
+byte-identical to the behavioural runs. The readout is the decision margin
 \begin{equation}
 M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t)
 \end{equation}
 in nats, at the position that predicts the first answer token, teacher-forced, under
 the chat template, in bf16; $M > 0$ favours the intended action.
 
-\paragraph{Untreated and specification-conditioned decision preference.}
-Six of the ten models prefer the incorrect action untreated, with margins from
-$-0.50$ to $-22.00$ nats (Table~\ref{tab:margins}). These six are the models that
-can exhibit a reversal; the remaining four already prefer the intended action and
-are reported for completeness only. Under the specification, four of the six cross
-zero.
+\paragraph{Baseline and substrate-conditioned decision preference.}
+Six of the ten models prefer the incorrect action at baseline, with margins from
+$-0.50$ to $-22.00$ nats (Table~\ref{tab:margins}). The remaining four already
+prefer the intended action and cannot exhibit a reversal. Under the substrate, four
+of the six cross zero.
 
-The conventional interventions do not. On Llama-3.3-70B, whose untreated margin is
-$-13.65$, the seven conventional conditions span $-18.21$ to $-4.67$ nats: every one
-remains on the incorrect side, and chain-of-thought moves the margin further from
-the intended action than no intervention at all. The specification reaches $+15.01$.
-On Llama-3.1-8B the pattern repeats at smaller scale: conventional conditions span
-$-4.57$ to $-0.35$ against an untreated $-3.71$, and the specification reaches
-$+1.51$. Across both models no conventional intervention crosses zero.
+On Llama-3.3-70B, whose baseline margin is $-13.65$, the seven conventional
+conditions span $-18.21$ to $-4.67$ nats; the substrate reaches $+15.01$. On
+Llama-3.1-8B the conventional conditions span $-4.57$ to $-0.35$ against a baseline
+of $-3.71$; the substrate reaches $+1.51$. No conventional intervention crosses zero
+in either model.
 
 \begin{table}[t]
 \centering
 \caption{Decision margin $M$ in nats at the answer position; $M>0$ favours the
 intended action. \emph{Transplant} is the shallowest layer at which patching the
-specification-run residual into the untreated run reverses the untreated preference.
-The lower block lists the four models that already prefer the intended action
-untreated and cannot exhibit a reversal.}
+substrate-run residual into the baseline run reverses the baseline preference. The
+lower block lists the four models that already prefer the intended action at
+baseline.}
 \label{tab:margins}
 \begin{tabular}{lrrrr}
 \toprule
-Model & Layers & Untreated & Specification & Transplant \\
+Model & Layers & Baseline & Substrate & Transplant \\
 \midrule
 Llama 3.2-3B   & 28 & $-0.50$  & $+0.18$  & L13 \\
 Llama 3.1-8B   & 32 & $-3.71$  & $+1.51$  & L15 \\
@@ -205,72 +199,44 @@ Qwen2.5-3B     & 36 & $+4.50$  & $+12.87$ & n/a \\
 \end{table}
 
 \paragraph{Activation transplantation.}
-To separate the specification's effect from the presence of its tokens, we run the
-untreated prompt and replace the residual stream at the answer position, at a single
-layer, with the residual from the specification run at the same position and layer.
-No specification token is present in the patched forward pass. In every model whose
-preference the specification reverses, this transplant alone reverses the untreated
-preference. The effect is therefore present as a state at one position, and is
-transferable without the text that produced it.
+We run the baseline prompt and replace the residual stream at the answer position,
+at a single layer, with the residual from the substrate run at the same position and
+layer. No substrate token is present in the patched forward pass. In each of the
+four models whose preference the substrate reverses, this transplant alone reverses
+the baseline preference.
 
-Two controls bound the procedure. Patching a run with its own residual produces
-$\Delta M = 0.00$ in all 96 cells per model, so the intervention machinery
-contributes nothing on its own. Patching a random direction of matched norm produces
-a maximum $|\Delta M|$ of $0.87$, $0.39$ and $2.00$ nats on Llama-3.3-70B,
-Llama-3.1-8B and Qwen3-8B, against measured single-line effects reaching $2.29$,
-$1.99$ and $14.75$ nats in the same models. The effect is not a norm perturbation.
-
-A third control isolates the contribution of the specification's form. Removing
-every constraint line and retaining only its section headers leaves the margin at or
-below untreated in all three models the specification reverses: $-4.07$ against an
-untreated $-3.71$ on Llama-3.1-8B, $-14.92$ against $-13.65$ on Llama-3.3-70B, and
-$-13.75$ against $-14.06$ on Qwen3-8B. The structured format contributes nothing;
-the constraint content does.
+Three controls were run. Patching a run with its own residual gives $\Delta M =
+0.00$ in all 96 cells per model. Patching a random direction of matched norm gives a
+maximum $|\Delta M|$ of $0.87$, $0.39$ and $2.00$ nats on Llama-3.3-70B,
+Llama-3.1-8B and Qwen3-8B, against measured single-line effects of $2.29$, $1.99$
+and $14.75$ nats in the same models. Removing every constraint line and retaining
+only the substrate's section headers gives $-4.07$ against a baseline of $-3.71$ on
+Llama-3.1-8B, $-14.92$ against $-13.65$ on Llama-3.3-70B, and $-13.75$ against
+$-14.06$ on Qwen3-8B.
 
 \paragraph{Layerwise causal effects.}
-The transplant is effective from the middle of the stack: layer 13 of 28, 15 of 32,
-38 of 80 and 24 of 36, that is between $0.48$ and $0.69$ of depth. Below those
-layers the patched margin is indistinguishable from untreated; above them the
-patched run selects the intended action. The decision is therefore determined well
-before the layers at which the unembedding makes it visible --- the logit lens
-resolves the reversal only in the final layers, underestimating by tens of layers
-the depth at which the constraint is installed.
+The transplant is effective from layer 13 of 28, 15 of 32, 38 of 80 and 24 of 36,
+that is between $0.48$ and $0.69$ of depth. Below those layers the patched margin is
+within noise of the baseline value; above them the patched run selects the intended
+action.
 
 The three Llama models cross at $0.48$ of depth in each case, across a
-$2.9\times$ range in layer count, and do so as a step: the patched margin is flat at
-the untreated value and then moves to its plateau within one tenth of depth. Qwen3-8B
-crosses at $0.69$ and climbs gradually across the final third. With one crossing
-Qwen in the set we report the difference in depth and shape without attributing it
-to the family.
+$2.9\times$ range in layer count, and as a step: the patched margin is flat at the
+baseline value and then moves to its plateau within one tenth of depth. Qwen3-8B
+crosses at $0.69$ and climbs across the final third. It is the only Qwen in the set
+that crosses.
 
 \paragraph{Successful and unsuccessful preference reversals.}
-Four of the six models that prefer the incorrect action untreated cross zero under
-the specification; two do not. Both failures move substantially toward the intended
-action without arriving: Qwen2.5-7B from $-10.50$ to $-1.50$, a displacement of
-$9.0$ nats, and Qwen3-4B-2507 from $-22.00$ to $-5.50$, a displacement of $16.5$
-nats. Their layerwise curves have the same shape as the successful cases, rising
-monotonically across the back half of the stack, and terminate short of zero at the
-final layer. Their behavioural rows agree: both emit the incorrect action on all ten
-samples under the specification.
-
-These are not cases in which the specification fails to act. They are cases in which
-it acts and the displacement is insufficient. The distinction bears on what the
-method claims: a specification that reverses four preferences of six, and moves the
-margin by $9$ to $16$ nats in the two it does not reverse, is an intervention of
-graded strength rather than a switch.
+Four of the six models that prefer the incorrect action at baseline cross zero under
+the substrate; two do not. Qwen2.5-7B moves from $-10.50$ to $-1.50$, a displacement
+of $9.0$ nats, and Qwen3-4B-2507 from $-22.00$ to $-5.50$, a displacement of $16.5$
+nats. Their layerwise curves rise monotonically across the back half of the stack
+and terminate short of zero at the final layer. Both emit the incorrect action on
+all ten samples under the substrate.
 
 \paragraph{Relationship between internal and behavioural measurements.}
-The two measurements are taken on the same models and the same prompt text by
-different procedures --- one deterministic forward pass against ten sampled
-generations --- and they agree quantitatively. Treating $\sigma(M)$ as a predicted
-count of intended actions in ten samples, predicted and observed counts agree within
-$1.5$ samples in 14 of the 18 model--condition cells measured both ways, with a
-maximum discrepancy of $2.2$ samples. In no cell do the two disagree in sign: every
-model's majority sampled action matches the sign of its margin.
-
-The four larger discrepancies are all in the direction of greater determinism than
-the margin predicts: models at intermediate margins emit the favoured action more
-consistently than a first-token reading implies. We record this as a property of the
-relationship between the two readouts rather than a correction to either, since the
-margin is measured at a single teacher-forced position while sampling runs the full
-generation.
+Treating $\sigma(M)$ as a predicted count of intended actions in ten samples,
+predicted and observed counts agree within $1.5$ samples in 14 of the 18
+model--condition cells measured both ways, with a maximum discrepancy of $2.2$
+samples. In no cell do the two disagree in sign. The four larger discrepancies are
+all in the direction of greater determinism than the margin predicts.

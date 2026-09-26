@@ -3,6 +3,47 @@
 \label{sec:discussion}
 % ============================================================
 
+\paragraph{From the reproducibility crisis to a cell-level control problem.}
+A decade of work has treated irreproducibility as a failure to re-obtain a published
+number: missing artifacts, underspecified protocols, and implementation drift
+\citep{baker2016reproducibility,gundersen2018state,pineau2021improving}. In machine
+learning the same agenda produced checklists, code release policies, and
+kernel-level fixes for run-to-run numerical variation
+\citep{pineau2021improving,he2025nondeterminism}. For language-model decision
+modules a further source appears once artifacts and numerics are held fixed. Under
+stochastic decoding the emitted action is a random variable
+\citep{Ouyang_2025,atil2025nondeterminismdeterministicllmsettings}. An
+underspecified input can yield a stable incorrect action or a mixture of actions;
+where the unit of interest is the operational decision rather than a mean score,
+both are failures to obtain a result.
+
+The present challenge is therefore not only whether an experiment can be rerun, but
+whether a declared input makes the decision a function of the input rather than of
+the sample. Sufficiency is a property of the triple (weights, specification, task),
+not of how explicit the specification looks to a reader. The shared specification
+names the object, the service location, the objective, and the reason the incorrect
+action fails to achieve it. It does not name the correct action anywhere in its
+text. Seventeen of twenty-three models become reproducibly correct under it. Six do
+not and remain operationally uncontrolled: two emit the incorrect action on all ten
+samples, two improve without reaching unanimity, one is unchanged from its untreated
+state, and one moves away from the intended action.
+
+Human-legible emphasis is not the same object. The objective-emphasis prompt states
+the goal in capitals and leaves fourteen of the twenty-three models reproducibly
+incorrect. The specification states the binding relations among object, location and
+movement, and leaves two. What must be made explicit is the relation that rules out
+the incorrect action, not the intensity of the request.
+
+Reproducibility engineering for a decision module is therefore the cell test after
+specification, including on models for which the same specification already works
+elsewhere in the fleet. We do not claim that a denser specification would control
+the six residual cells, nor that those models cannot implement the task under some
+other specification. We claim only that this one, sufficient for seventeen models,
+is not sufficient for them --- and that recovering a published metric from an
+underspecified prompt is a different protocol from making a decision reproducibly
+correct.
+
+
 \subsection{Operational Sufficiency}
 \label{sec:operational-sufficiency}
 

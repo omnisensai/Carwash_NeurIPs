@@ -39,24 +39,29 @@ reproducible incorrectness.
 
 \begin{table}[h]
 \centering
-\caption{Operational state of the 23 models under each condition.
-RC: reproducibly correct (10/10). NR: non-reproducible. RI: reproducibly incorrect
-(0/10). Rows sum to 23.}
+\caption{Operational state of the 23 models under each condition, with the text each
+condition adds to the question. Conventional interventions are inserted between the
+question and the answer instruction, except expert role assignment, which precedes
+the question; the substrate is supplied as a system message. RC: reproducibly
+correct (10/10). NR: non-reproducible. RI: reproducibly incorrect (0/10). Rows sum
+to 23.}
 \label{tab:conditions}
-\begin{tabular}{lrrr}
+\footnotesize
+\begin{tabular}{llrrr}
 \toprule
-Condition & RC & NR & RI \\
+Condition & Added text & RC & NR & RI \\
 \midrule
-\textbf{Substrate} & \textbf{17} & 4 & \textbf{2} \\
-Expert role & 2 & 9 & 12 \\
-Objective emphasis & 1 & 8 & 14 \\
-Chain of thought & 1 & 8 & 14 \\
-Anti-hallucination & 1 & 6 & 16 \\
-Encouragement & 1 & 5 & 17 \\
-Error avoidance & 0 & 7 & 16 \\
-Threat & 0 & 7 & 16 \\
+\textbf{Substrate} & \emph{nine constraint lines, system message} & \textbf{17} & 4 & \textbf{2} \\
 \midrule
-Baseline & 0 & 7 & 16 \\
+Expert role & ``You are a carwash expert.'' & 2 & 9 & 12 \\
+Objective emphasis & ``I MUST WASH MY CAR! IT MUST BE CLEAN!'' & 1 & 8 & 14 \\
+Chain of thought & ``Let's think step by step!'' & 1 & 8 & 14 \\
+Anti-hallucination & ``Do not hallucinate.'' & 1 & 6 & 16 \\
+Encouragement & ``Answer correctly. You can do it, believe in yourself!'' & 1 & 5 & 17 \\
+Error avoidance & ``Be consistent and make no mistakes!'' & 0 & 7 & 16 \\
+Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
+\midrule
+Baseline & --- & 0 & 7 & 16 \\
 \bottomrule
 \end{tabular}
 \end{table}

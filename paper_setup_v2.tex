@@ -29,7 +29,10 @@ configuration and replaces the failed attempt at the same sample
 index.
 
 For each fixed model--input condition we draw $R=10$ single-pass
-samples at temperature $1.0$. Locally sampled models additionally use
+samples. Temperature $1.0$ is requested on every execution and
+recorded with it; no provider echoes sampling parameters in its
+response, so the record is of the requested configuration rather than
+a provider confirmation. Locally sampled models additionally use
 $\mathrm{top}_p=1.0$ with a per-sample seed recorded; hosted models
 run at provider default nucleus sampling. Outputs containing no action
 word never satisfy reproducible correctness; none occurred. The

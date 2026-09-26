@@ -96,6 +96,18 @@ part of what is being tested, and a reliability claim that omits it is
 underdetermined in the same way the untreated task itself is.
 
 
+The consequences of the distinction are not confined to how a result is reported. A
+decision module of this kind sits at a branch point: its output selects a tool call,
+a route, or the context passed downstream. A reproducibly incorrect module sends
+every case down the same wrong branch, consistently and without signalling
+anything --- the surrounding system observes a stable component and builds on it. A
+non-reproducible module sends identical cases down different branches, so two runs
+of the same workflow diverge at a point no component-level score records. Neither
+condition is visible in an aggregate figure for the module, and neither is repaired
+by a workflow that aggregates several such modules. Reliability has to be
+established at the decision boundaries themselves, and reproducible correctness at
+one boundary does not establish it for a chain of them.
+
 \subsection{Specification as the Experimental Variable}
 \label{sec:specification-variable}
 
@@ -145,3 +157,54 @@ are not rescued by the substrate reported here, two of them not at all. That is 
 a caveat attached to a general claim; it is the form the claim takes. Sufficiency is
 established for particular pairs on a particular task, and neither a universal
 specification nor transfer to other tasks is demonstrated by these results.
+
+
+\subsection{A Behavioural Reference for Causal Analysis}
+\label{sec:behavioural-reference}
+
+Internal analysis of a language model's decision needs a behavioural object to
+explain, and a single successful generation is not one. A model that emits the
+intended action on four of ten samples emits it on some runs and not others; the
+activations recorded during one of those runs describe that run. Treating them as
+the mechanism of the model's success presumes a stable success that the sampling
+does not show. The difficulty is not that such activations are uninformative but
+that the thing being explained moves between executions, so a mechanistic account
+of it cannot be checked by repeating the measurement.
+
+The criterion supplies a stable object. A model--condition pair that is reproducibly
+incorrect fails on all ten executions; the same model under the substrate is
+reproducibly correct on all ten. Both ends of that transition are verified before
+any activation is read, and the transition is a property of the pair rather than of
+a run. Stage two is therefore anchored: it asks what changes internally between two
+conditions whose behaviour is already established, rather than what is present
+during one successful generation.
+
+Against that reference, transplantation gives a causal result. Replacing the
+residual stream at the answer position, at one layer, with the state from the
+substrate run reverses the baseline preference in each of the four models whose
+preference the substrate reverses, with no substrate token in the patched context.
+Three controls bound it: a run patched with its own residual gives $\Delta M = 0.00$
+in all 96 cells per model; a random direction of matched norm reaches
+$|\Delta M|$ of at most $0.87$, $0.39$ and $2.00$ nats against measured effects of
+$2.29$, $1.99$ and $14.75$; and the substrate's section headers with every
+constraint line removed leave the margin at or below baseline in all three.
+
+Four things this does not establish. Showing that a state causally affects the
+measured preference is not identifying the mechanism that produces the preference;
+the transplant relocates an effect without describing the computation that built
+it. Showing that a state is sufficient to reverse the preference is not showing that
+it is necessary, and the ablations indicate it is not: on the three reversing models
+for which we measured leave-one-out effects, no single constraint line is required
+--- removing any one costs at most $1.11$, $1.65$ and $2.75$ nats against margins of
+$+1.51$, $+15.01$ and $+7.25$, and the reversal survives every deletion. A reversed
+margin is not reproducibly correct behaviour, which is measured by sampling and not
+by a forward pass. And the shallowest layer at which the transplant takes effect is
+a threshold of that intervention at that position, not the layer at which the
+decision is formed; a state sufficient from layer 15 may have been determined
+earlier, later, or across many positions the transplant does not touch.
+
+Internal claims here are therefore scoped to the verified behavioural transition and
+to the specific intervention tested. What the measurements support is that the
+substrate's effect on the decision is present as a state at the answer position, is
+transferable without the text that produced it, and is not reducible to any one of
+the constraint lines that produced it.

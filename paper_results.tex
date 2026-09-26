@@ -44,12 +44,12 @@ instruction. None changes the operational state of the fleet
 (Table~\ref{tab:conditions}). The strongest, expert role assignment, converts one of
 the sixteen reproducibly incorrect models to reproducible correctness. No
 conventional condition converts more than one, and across all seven the converted
-model is the same one each time. Five of the seven leave at least fifteen of the
+model is the same one each time. Four of the seven leave at least fifteen of the
 sixteen reproducibly incorrect.
 
-Four of the seven also turn a non-reproducible model into a reproducibly incorrect
-one: one each under chain-of-thought, anti-hallucination, threat and error
-avoidance, and two under encouragement. Such a model is both less accurate and
+Five of the seven also turn a non-reproducible model into a reproducibly incorrect
+one: one each under anti-hallucination, chain-of-thought, error avoidance and
+threat, and two under encouragement. Such a model is both less accurate and
 harder to diagnose, since its ten samples now agree. Under encouragement the number
 of reproducibly incorrect models is therefore higher than untreated, at seventeen of
 twenty-three.
@@ -62,7 +62,7 @@ in Section~\ref{sec:internal-results} show large but insufficient displacement
 rather than no effect --- and four are non-reproducible.
 
 No model becomes reproducibly incorrect under the specification, a transition that
-four of the seven conventional interventions produce.
+five of the seven conventional interventions produce.
 
 \begin{table}[t]
 \centering
@@ -78,7 +78,7 @@ Condition & RC & NR & RI \\
 Expert role & 2 & 9 & 12 \\
 Objective emphasis & 1 & 8 & 14 \\
 Anti-hallucination & 1 & 6 & 16 \\
-Chain of thought & 1 & 6 & 16 \\
+Chain of thought & 1 & 8 & 14 \\
 Encouragement & 1 & 5 & 17 \\
 Error avoidance & 0 & 7 & 16 \\
 Threat & 0 & 7 & 16 \\
@@ -102,9 +102,9 @@ An aggregate correctness figure cannot express this separation, and in two
 conditions it points the wrong way. Encouragement yields fewer correct executions
 than no intervention at all, 30 of 230 against 34, while the number of reproducibly
 incorrect models rises from sixteen to seventeen: the aggregate falls, and so does
-the visibility of the failure. Chain-of-thought yields more correct executions than
-no intervention, 38 of 232 against 34, while leaving the reproducibly incorrect
-count unchanged and driving one non-reproducible model into it. In both cases the
+the visibility of the failure. Anti-hallucination yields more correct executions
+than no intervention, 41 of 230 against 34, while leaving the reproducibly incorrect
+count unchanged at sixteen and driving one non-reproducible model into it. In both cases the
 aggregate moves in one direction and the operational state of the fleet in the
 other.
 
@@ -130,7 +130,7 @@ Condition & RC & NR & RI && RC & NR & RI && Rescued \\
 Expert role & 1 & 3 & 12 && 1 & 6 & 0 && 2 \\
 Objective emphasis & 0 & 2 & 14 && 1 & 6 & 0 && 1 \\
 Anti-hallucination & 1 & 0 & 15 && 0 & 6 & 1 && 1 \\
-Chain of thought & 1 & 0 & 15 && 0 & 6 & 1 && 1 \\
+Chain of thought & 1 & 2 & 13 && 0 & 6 & 1 && 1 \\
 Encouragement & 1 & 0 & 15 && 0 & 5 & 2 && 1 \\
 Threat & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\
 Error avoidance & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\

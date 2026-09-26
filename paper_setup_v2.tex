@@ -20,8 +20,9 @@ the correct operational action independently of model responses.
 
 The experiment asks whether a model that fails this decision under
 the untreated input can be moved to reproducibly correct behaviour
-by changing only the supplied task specification. Model weights and
-decoding procedure remain fixed, and no response-dependent retries,
+by changing only the supplied task specification. No model parameters
+are modified by us, and the declared model and inference configuration
+are held fixed across conditions. No response-dependent retries,
 voting, fine-tuning, retraining, or post-generation correction are
 used. Three samples across two cells were reissued after upstream
 transport errors that produced no model response. Each reissue used
@@ -34,8 +35,8 @@ samples. Temperature $1.0$ is requested on every execution;
 no provider echoes sampling parameters in its response, so the record
 is of the requested configuration rather than a provider
 confirmation. Locally sampled models additionally use
-$\mathrm{top}_p=1.0$ with a per-sample seed recorded; hosted models
-run at provider default nucleus sampling. Outputs containing no action
+$\mathrm{top}_p=1.0$ with a per-sample seed recorded; other sampling
+parameters for hosted models remain at provider defaults. Outputs containing no action
 word never satisfy reproducible correctness; none occurred. The
 criterion applies only to the declared executions and does not imply
 zero probability of another output outside them.
@@ -57,10 +58,12 @@ Because the prompt requests a single word, most replies are one word
 and the operational outcome is that word. Where a model returns prose
 instead, we take the action it commits to: the leading action word
 when the reply opens with one, and otherwise the final action word,
-since such replies restate the question before answering it. Three of
+since such replies restate the question before answering it. Five of
 the 207 cells in the study population contain replies whose leading
-and final action words differ, and the rule resolves them; in the
-remaining cells every reasonable reading agrees.
+and final action words differ; in three of the five the resulting
+operational state differs between the two extraction positions. In
+the remaining 202 cells both positions yield the same action in every
+reply.
 
 \begin{table}[h]
 \centering
@@ -171,9 +174,12 @@ only the untreated input; no specification text is present in its
 context. We then read the final decision margin.
 
 This tests whether a specification-conditioned state at the
-answer-token prediction position is causally sufficient, under the
-remaining untreated stack, to alter final action preference without
-the specification remaining in context. It does not establish
-reproducibly correct behaviour, localise where the decision is formed,
-or attribute the effect to an individual constraint. Those claims
-remain separate from~\eqref{eq:reproducible-correctness}.
+answer-token prediction position causally affects the final action
+preference under the remaining untreated stack, without specification
+text being present in the patched context. When transplantation
+reverses the sign of the decision margin, the transplanted state is
+sufficient, under the remaining untreated computation, to reverse the
+measured action preference. It does not establish reproducibly correct
+behaviour, localise where the decision is formed, or attribute the
+effect to an individual constraint. Those claims remain separate
+from~\eqref{eq:reproducible-correctness}.

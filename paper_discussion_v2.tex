@@ -1,0 +1,54 @@
+% ============================================================
+\section{Discussion}
+\label{sec:discussion}
+% ============================================================
+
+\subsection{Operational Sufficiency}
+\label{sec:operational-sufficiency}
+
+A deployed decision module either satisfies its requirement or it does not. The
+requirement here is stated in advance and admits no partial credit: under a declared
+condition, every execution names the intended action. Measured against that
+requirement, an improvement in aggregate correctness is not evidence of anything in
+particular. Expert role assignment produces the largest aggregate movement of the
+seven conventional interventions, and converts one of the sixteen reproducibly
+incorrect models. The other fifteen are exactly where they were. An aggregate figure
+sums over models that changed state and models that did not, and reports a number
+that belongs to neither.
+
+The two conditions in which the aggregate points the wrong way make the objection
+concrete rather than rhetorical. Encouragement yields fewer correct executions than
+no intervention at all while the count of reproducibly incorrect models rises;
+chain-of-thought yields more correct executions while that count stays fixed and one
+model moves from inconsistent to consistent error. A practitioner reading either
+figure alone would draw a conclusion the underlying states contradict.
+
+Reproducibly correct, reproducibly incorrect and non-reproducible are therefore not
+three points on a scale but three operational conditions with different consequences.
+The distinction that matters is not how often a model is wrong but whether being
+wrong is detectable. A non-reproducible model discloses its own unreliability to
+the cheapest available check: run the input twice and the answers differ. A
+reproducibly incorrect model passes that check and every repetition of it. Sixteen
+of the twenty-three models in the study population fail in the second way, which
+means that the standard deployment-time test certifies the majority of the fleet as
+stable while they are uniformly wrong. An intervention that moves a model from the
+first state to the second has made the system worse in a way no accuracy figure
+will show, and four of the seven conventional interventions do exactly that.
+
+Because the operational state depends on the input text as much as on the weights,
+the unit that can carry a reliability claim is the model--condition pair rather than
+the model. One model in the fleet illustrates the range. Claude Sonnet 5, on one
+question, across nine wordings, is reproducibly correct under five of them,
+non-reproducible under two, and reproducibly incorrect under two. The weights,
+decoding configuration and retry policy are identical throughout; only the
+surrounding text differs. There is no single fact about this model's reliability on
+this decision to report.
+
+A score obtained under one wording therefore establishes performance under that
+wording. It does not, by itself, establish a wording-independent capability, and
+treating it as one attributes to the model a property that the measurement locates
+in the pair. This is not a claim that models lack capabilities, nor that all
+wordings are equivalent --- the results show they are not. It is a claim about what a
+single measurement licenses: the condition under which a system will be operated is
+part of what is being tested, and a reliability claim that omits it is
+underdetermined in the same way the untreated task itself is.

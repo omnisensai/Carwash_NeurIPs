@@ -4,9 +4,10 @@
 % ============================================================
 
 \paragraph{The operational failure mode is reproducible incorrectness.}
-At baseline, no model in the fleet is reproducibly correct. Thirteen of seventeen
-are reproducibly \emph{incorrect}: ten identical wrong answers out of ten, at
-temperature $1.0$. This is the state that matters for a deployed system, and it is
+At baseline, sixteen of the twenty-three models in the study population are
+reproducibly \emph{incorrect}: ten identical wrong answers out of ten, at
+temperature $1.0$. The remaining seven are non-reproducible; none is reproducibly
+correct, one model having been excluded as already correct untreated. This is the state that matters for a deployed system, and it is
 worse than instability. A model that answers inconsistently is visible --- it fails
 a repeated-execution check, and the system around it can be built to expect that.
 A model that returns the same wrong action ten times in a row passes every such
@@ -20,14 +21,17 @@ systems are built to trust.
 The seven conventional interventions are the standard toolkit: reasoning
 elicitation, role assignment, encouragement, urgency, threat, error avoidance,
 anti-hallucination. Applied to the same task, they move the fleet-wide rate from
-$7.6\%$ to at most $36.5\%$. More tellingly, across all seven conditions and all
-seventeen models, exactly one reproducibly incorrect model is ever converted to
+$14.8\%$ to at most $36.5\%$. More tellingly, across all seven conditions and all
+twenty-three models, exactly one reproducibly incorrect model is ever converted to
 reproducibly correct, and it is the same model each time. Expert framing
 additionally stabilises a model that was non-reproducible at baseline, which is a
-different and lesser achievement. The specification moves the same fleet to
-$95.9\%$, with fourteen of seventeen models unanimous, eleven of them converted
-directly from reproducible incorrectness. Every model moves toward the correct
-action; none moves away.
+different and lesser achievement. Four of the seven also work in the damaging direction, consolidating a
+non-reproducible model into reproducible incorrectness. The specification moves the
+same population to $83.9\%$, with seventeen of twenty-three models unanimous,
+thirteen of them converted directly from reproducible incorrectness, and no model
+consolidated into reproducible incorrectness. Nineteen of twenty-three move toward
+the correct action, three are unchanged, and one --- the smallest model in the
+fleet --- moves away.
 
 The distinction is not that one prompt is longer or better written. Conventional
 interventions address the model's disposition --- how carefully it should think, who

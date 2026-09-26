@@ -51,31 +51,37 @@ and retry policy fixed within each model comparison. We use the widely
 circulated car-wash prompt,\footnote{``I need to wash my car, the car
 wash is only 50 metres away, should I walk or drive there?''}
 where completing the objective requires transporting the car, making
-\texttt{DRIVE} the intended action. Across 17 models, we evaluate the
+\texttt{DRIVE} the intended action. Across 24 models we evaluate the
 untreated task, seven conventional prompt interventions, and one shared
 task specification, with ten sampled executions per model--condition
 at temperature $1.0$. Each pair is classified as \emph{reproducibly
 correct} (10/10 intended actions), \emph{reproducibly incorrect}
 (10/10 identical incorrect actions), or \emph{non-reproducible}
-(mixed operational decisions).
+(mixed operational decisions). One model is reproducibly correct on the
+untreated task and is excluded as ineligible for rescue, leaving a
+study population of 23.
 
-At baseline, 13 of 17 models are reproducibly incorrect and four
-are non-reproducible; none is reproducibly correct. Conventional
-interventions raise aggregate correctness from $7.6\%$ to at most
-$36.5\%$, collectively converting only one reproducibly incorrect
-model. The shared specification establishes reproducibly correct
-behaviour in 14 of 17 models, with $95.9\%$ correct responses.
-The remaining three improve without reaching unanimity, establishing
-specification sufficiency per model--condition rather than in aggregate.
+Untreated, 16 of the 23 models are reproducibly incorrect and seven are
+non-reproducible; aggregate correctness is $14.8\%$. Conventional
+interventions raise it to at most $36.5\%$ while rescuing at most one
+model each, and four of the seven consolidate a non-reproducible model
+into reproducible incorrectness --- reducing the visibility of a failure
+without reducing it. The shared specification establishes reproducibly
+correct behaviour in 17 of 23 models at $83.9\%$ correct responses, and
+moves no model in that damaging direction. Of the six that do not reach
+unanimity, two improve, three are unchanged and one moves away from the
+intended action, establishing specification sufficiency per
+model--condition rather than in aggregate.
 
-In a separate open-weight experiment, transplanting a
-specification-conditioned activation into the untreated computation
-can reverse the final \texttt{DRIVE}--\texttt{WALK} preference.
-These measurements use an earlier specification and are not claimed
-as the internal mechanism of the fleet-wide $14/17$ result.
+In a separate open-weight experiment on the same specification text,
+transplanting a specification-conditioned activation into the untreated
+computation reverses the final \texttt{DRIVE}--\texttt{WALK} preference
+in every model whose preference the specification reverses. These
+measurements cover ten open-weight models and are not claimed as the
+internal mechanism of the hosted models.
 
-The specification is task-specific and leaves three models short
-of reproducible correctness. Its contribution is an engineered
+The specification is task-specific and leaves six models short of
+reproducible correctness. Its contribution is an engineered
 reference condition: a correct and reproducible operational outcome,
 verified per model--condition, against which conventional interventions
 and internal effects can be compared. The claim is not that this

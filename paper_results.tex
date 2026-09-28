@@ -6,12 +6,13 @@
 \subsection{Behavioural Results}
 \label{sec:behavioural-results}
 
-We measured 24 distinct models: seventeen sampled through hosted APIs and nine
-open-weight models sampled locally in bf16 with a per-sample seed recorded. Two
-models appear in both and are counted once, from the local rows. Every model
-receives byte-identical prompt text, $R=10$ samples per condition. One model
-(Qwen2.5-3B) is reproducibly correct at baseline and is excluded as ineligible for
-rescue, leaving 23 models and 230 executions per condition.
+The question is whether a model that fails this decision can be moved to
+reproducible correctness. We therefore measured 23 models that are not reproducibly
+correct at baseline: a model that already names the intended action on all ten
+baseline samples has nothing to rescue and is outside the study. Fifteen are sampled
+through hosted APIs and eight are open-weight models sampled locally in bf16 with a
+per-sample seed recorded. Every model receives byte-identical prompt text, $R=10$
+samples per condition, giving 230 executions per condition.
 
 \paragraph{Baseline operational state.}
 Sixteen of the 23 models are reproducibly incorrect, naming the wrong action on all
@@ -75,8 +76,7 @@ Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
 \centering
 \caption{Per-model operational state at baseline and under the substrate. Cells are
 intended actions out of ten samples: 10/10 is reproducibly correct, 0/10
-reproducibly incorrect, and any other value non-reproducible. Qwen2.5-3B is
-reproducibly correct at baseline and excluded.}
+reproducibly incorrect, and any other value non-reproducible.}
 \label{tab:per-model}
 \footnotesize
 \begin{tabular}{lccl}
@@ -151,8 +151,8 @@ Error avoidance & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\
 \subsection{Internal Causal Results}
 \label{sec:internal-results}
 
-We measured internal quantities on ten open-weight models, on prompt text
-byte-identical to the behavioural runs. The readout is the decision margin
+We measured internal quantities on the nine open-weight models in the study
+population, on prompt text byte-identical to the behavioural runs. The readout is the decision margin
 \begin{equation}
 M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t)
 \end{equation}
@@ -160,10 +160,11 @@ in nats, at the position that predicts the first answer token, teacher-forced, u
 the chat template, in bf16; $M > 0$ favours the intended action.
 
 \paragraph{Baseline and substrate-conditioned decision preference.}
-Six of the ten models prefer the incorrect action at baseline, with margins from
-$-0.50$ to $-22.00$ nats (Table~\ref{tab:margins}). The remaining four already
-prefer the intended action and cannot exhibit a reversal. Under the substrate, four
-of the six cross zero.
+Six of the nine prefer the incorrect action at baseline, with margins from $-0.50$
+to $-22.00$ nats (Table~\ref{tab:margins}). The remaining three are
+non-reproducible behaviourally but favour the intended action at the answer position
+and so cannot exhibit a margin reversal. Under the substrate, four of the six cross
+zero.
 
 On Llama-3.3-70B, whose baseline margin is $-13.65$, the seven conventional
 conditions span $-18.21$ to $-4.67$ nats; the substrate reaches $+15.01$. On
@@ -176,8 +177,8 @@ in either model.
 \caption{Decision margin $M$ in nats at the answer position; $M>0$ favours the
 intended action. \emph{Transplant} is the shallowest layer at which patching the
 substrate-run residual into the baseline run reverses the baseline preference. The
-lower block lists the four models that already prefer the intended action at
-baseline.}
+lower block lists the three models that favour the intended action at the answer
+position at baseline and so cannot exhibit a margin reversal.}
 \label{tab:margins}
 \begin{tabular}{lrrrr}
 \toprule
@@ -193,7 +194,6 @@ Qwen3-4B-2507  & 36 & $-22.00$ & $-5.50$  & --- \\
 Qwen2.5-0.5B   & 24 & $+0.75$  & $-0.47$  & n/a \\
 Qwen2.5-1.5B   & 28 & $+1.53$  & $+2.02$  & n/a \\
 Qwen3-0.6B     & 28 & $+2.25$  & $+4.37$  & n/a \\
-Qwen2.5-3B     & 36 & $+4.50$  & $+12.87$ & n/a \\
 \bottomrule
 \end{tabular}
 \end{table}

@@ -51,15 +51,14 @@ and retry policy fixed within each model comparison. We use the widely
 circulated car-wash prompt,\footnote{``I need to wash my car, the car
 wash is only 50 metres away, should I walk or drive there?''}
 where completing the objective requires transporting the car, making
-\texttt{DRIVE} the intended action. Across 24 models we evaluate the
-untreated task, seven conventional prompt interventions, and one shared
-task specification, with ten sampled executions per model--condition
-at temperature $1.0$. Each pair is classified as \emph{reproducibly
+\texttt{DRIVE} the intended action. Across 23 models that fail this
+decision at baseline we evaluate the untreated task, seven conventional
+prompt interventions, and one shared task specification, with ten
+sampled executions per model--condition at temperature $1.0$. Each pair is classified as \emph{reproducibly
 correct} (10/10 intended actions), \emph{reproducibly incorrect}
 (10/10 identical incorrect actions), or \emph{non-reproducible}
-(mixed operational decisions). One model is reproducibly correct on the
-untreated task and is excluded as ineligible for rescue, leaving a
-study population of 23.
+(mixed operational decisions). A model already reproducibly correct on
+the untreated task has nothing to rescue and is outside the study.
 
 Untreated, 16 of the 23 models are reproducibly incorrect and seven are
 non-reproducible. Across all seven conventional interventions, one

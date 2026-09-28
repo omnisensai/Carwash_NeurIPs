@@ -151,8 +151,11 @@ Error avoidance & 0 & 1 & 15 && 0 & 6 & 1 && 0 \\
 \subsection{Internal Causal Results}
 \label{sec:internal-results}
 
-We measured internal quantities on the nine open-weight models in the study
-population, on prompt text byte-identical to the behavioural runs. The readout is the decision margin
+We measured internal quantities on nine of the 23 models, running their weights
+locally, on prompt text byte-identical to the behavioural runs. Eight are the
+locally sampled models of Table~\ref{tab:per-model}; Llama 3.3-70B is sampled
+behaviourally through a hosted API and run locally for this measurement. The
+readout is the decision margin
 \begin{equation}
 M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t)
 \end{equation}
@@ -166,9 +169,9 @@ non-reproducible behaviourally but favour the intended action at the answer posi
 and so cannot exhibit a margin reversal. Under the substrate, four of the six cross
 zero.
 
-On Llama-3.3-70B, whose baseline margin is $-13.65$, the seven conventional
+On Llama 3.3-70B, whose baseline margin is $-13.65$, the seven conventional
 conditions span $-18.21$ to $-4.67$ nats; the substrate reaches $+15.01$. On
-Llama-3.1-8B the conventional conditions span $-4.57$ to $-0.35$ against a baseline
+Llama 3.1-8B the conventional conditions span $-4.57$ to $-0.35$ against a baseline
 of $-3.71$; the substrate reaches $+1.51$. No conventional intervention crosses zero
 in either model.
 
@@ -207,11 +210,11 @@ the baseline preference.
 
 Three controls were run. Patching a run with its own residual gives $\Delta M =
 0.00$ in all 96 cells per model. Patching a random direction of matched norm gives a
-maximum $|\Delta M|$ of $0.87$, $0.39$ and $2.00$ nats on Llama-3.3-70B,
-Llama-3.1-8B and Qwen3-8B, against measured single-line effects of $2.29$, $1.99$
+maximum $|\Delta M|$ of $0.87$, $0.39$ and $2.00$ nats on Llama 3.3-70B,
+Llama 3.1-8B and Qwen3-8B, against measured single-line effects of $2.29$, $1.99$
 and $14.75$ nats in the same models. Removing every constraint line and retaining
 only the substrate's section headers gives $-4.07$ against a baseline of $-3.71$ on
-Llama-3.1-8B, $-14.92$ against $-13.65$ on Llama-3.3-70B, and $-13.75$ against
+Llama 3.1-8B, $-14.92$ against $-13.65$ on Llama 3.3-70B, and $-13.75$ against
 $-14.06$ on Qwen3-8B.
 
 \paragraph{Layerwise causal effects.}

@@ -1,4 +1,5 @@
 internals/results/**/*cdim_resid.pt*
 internals/results/**/resid_last.pt
+internals/results/superseded/
 .idea/
 __pycache__/

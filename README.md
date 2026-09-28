@@ -29,7 +29,8 @@ Internals, one model (needs a GPU):
 
 ```bash
 cd internals
-MODEL=unsloth/Llama-3.2-3B-Instruct bash scripts/runpod.sh
+MODEL=unsloth/Llama-3.2-3B-Instruct bash scripts/runpod.sh   # one model
+bash scripts/runpod_qwen.sh                                  # the seven Qwens
 python scripts/plot_internals.py results/llama-3.2-3b/*/
 ```
 

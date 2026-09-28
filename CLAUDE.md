@@ -49,6 +49,11 @@ CDIM=1 MODEL=unsloth/Llama-3.2-3B-Instruct bash scripts/runpod.sh   # + the inte
 python scripts/plot_internals.py results/llama-3.2-3b/*/
 ```
 
+`scripts/runpod_qwen.sh` is the driver that produced `results/qwen*/bf16/`: it
+runs the seven Qwens in one go and refuses to finish unless every result it
+wrote is on the current prompts. `scripts/runpod.sh` is the general one-model
+driver.
+
 The script picks precision from the GPU memory it finds and records it as
 `quantize` in the json; say which one ran. bf16 is the reference — the 8B
 numbers move by ~0.6 nats between bf16 and nf4. Run under `tmux` or `nohup`

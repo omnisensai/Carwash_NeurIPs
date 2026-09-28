@@ -48,7 +48,10 @@ ninety-three of 230 executions name the intended action. Thirteen of the sixteen
 models that are reproducibly incorrect at baseline and four of the seven that are
 non-reproducible reach reproducible correctness, in a single pass with the question
 unchanged and no sampling, voting or retry. No model moves to reproducible
-incorrectness. One model names the intended action less often than at baseline
+incorrectness. One model reproducibly incorrect at baseline reaches the intended
+action on most but not all samples (DeepSeek V3.2, 0/10 to 8/10); it names the
+incorrect action on all ten samples at baseline and under all seven conventional
+conditions. One model names the intended action less often than at baseline
 (Qwen2.5-0.5B, 7/10 to 3/10) without leaving the non-reproducible state, and one is
 unchanged sample for sample (Llama 3.2-3B, 4/10 at both conditions, the same four
 sample indices).

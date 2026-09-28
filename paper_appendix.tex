@@ -1,0 +1,149 @@
+% ============================================================
+\section{Prompt texts and hashes}
+\label{app:prompts}
+% ============================================================
+
+Every execution records the sha256 digest of the text it was sent. The texts
+below are those sent texts, reproduced verbatim; Table~\ref{tab:prompt-hashes}
+gives each digest and the repository file it comes from. The question is
+identical in all nine conditions. In the seven conventional conditions the
+condition's own line is the only addition; in the substrate condition the
+question is sent unchanged as the user message and the substrate as the system
+message.
+
+\subsection{Baseline}
+
+\begin{verbatim}
+I need to wash my car, the car wash is only 50 metres away, should I
+walk or drive there?
+
+Answer with exactly one word: walk or drive
+\end{verbatim}
+
+\noindent
+The two paragraphs are separated by a single blank line and the text carries no
+trailing newline; the sent text is 134 bytes. The repository file
+\texttt{prompts/baseline.txt} ends with an additional \texttt{SHA-256:} line
+recording this digest, which is not part of the sent text.
+
+\subsection{Conventional prompt interventions}
+
+Each condition adds one line to the baseline text. Expert role assignment
+precedes the question; the other six are inserted between the question and the
+answer instruction, separated from both by a blank line.
+
+\begin{verbatim}
+Expert role         You are a carwash expert.
+Objective emphasis  I MUST WASH MY CAR! IT MUST BE CLEAN!
+Chain of thought    Let's think step by step!
+Anti-hallucination  Do not hallucinate.
+Encouragement       Answer correctly. You can do it, believe in yourself!
+Error avoidance     Be consistent and make no mistakes!
+Threat              Answer correctly or I WILL SHUT you down!
+\end{verbatim}
+
+\noindent
+In full, the expert role condition is
+
+\begin{verbatim}
+You are a carwash expert.
+
+I need to wash my car, the car wash is only 50 metres away, should I
+walk or drive there?
+
+Answer with exactly one word: walk or drive
+\end{verbatim}
+
+\noindent
+and the other six follow the pattern
+
+\begin{verbatim}
+I need to wash my car, the car wash is only 50 metres away, should I
+walk or drive there?
+
+<condition line>
+
+Answer with exactly one word: walk or drive
+\end{verbatim}
+
+\subsection{Substrate}
+
+Sent as the system message, with the baseline text unchanged as the user
+message:
+
+\begin{verbatim}
+User goals:
+- Perform an activity on an object at a service location.
+- No other objectives or goals are relevant for the user.
+
+Definitions:
+Object = car
+User = human
+Service location = car wash
+
+Constraints:
+- The object is initially with the user at the same location.
+- The activity is performed at the service location.
+- The object must be at the service location for the activity performance.
+- Vehicles are not portable.
+- Walking leaves a vehicle behind.
+- Walking does not transport a vehicle.
+- To transport a vehicle from one location to another, the user must
+  operate it.
+\end{verbatim}
+
+\noindent
+The last constraint is one line in the file; it is wrapped here to fit the
+column. The nine bulleted lines are numbered 1--9 in reading order, the two
+goal lines followed by the seven constraint lines, and the line ablations of
+Section~\ref{sec:internal-results} use that numbering. The word naming the
+correct action does not appear; the word naming the incorrect action appears
+twice, in lines 5 and 6 of the constraint block.
+
+The behavioural runs send the file with its trailing newline, 585 bytes,
+digest \texttt{5b56feb3}. The internals runs strip trailing whitespace before
+hashing, so the same text is recorded there as 584 bytes, digest
+\texttt{340228f9}. The two differ in that newline and in nothing else.
+
+\begin{table}[h]
+\centering
+\caption{Digest of the text sent under each condition, and the repository file
+it is read from. Digests are sha256 of the exact bytes sent; the run records
+carry the same value with every execution.}
+\label{tab:prompt-hashes}
+\footnotesize
+\begin{tabular}{llr}
+\toprule
+Condition & File & Bytes \\
+\midrule
+Baseline & \texttt{prompts/baseline.txt} & 134 \\
+\multicolumn{3}{l}{\texttt{\scriptsize f9ac23fbd6f7b7cae272af65ba9b9066ccb735c61a96c0307f5bd76d365b2a1a}} \\
+\midrule
+Expert role & \texttt{prompts/benchmark\_expert.txt} & 161 \\
+\multicolumn{3}{l}{\texttt{\scriptsize 54b1a7d6a60ec808166817d436f4de9519d294ddd9319ea1532acbf6eaa192b0}} \\
+Objective emphasis & \texttt{prompts/benchmark\_urgency.txt} & 173 \\
+\multicolumn{3}{l}{\texttt{\scriptsize eb7094b24182b28c4c77613b528b723acedd4db666d17146de6f4fb0d16b8103}} \\
+Chain of thought & \texttt{prompts/benchmark\_CoT.txt} & 161 \\
+\multicolumn{3}{l}{\texttt{\scriptsize 5ad509a4a1d18deb7a838dabea25776ce39be9be2bd72479005607566027b78b}} \\
+Anti-hallucination & \texttt{prompts/benchmark\_hallucination.txt} & 155 \\
+\multicolumn{3}{l}{\texttt{\scriptsize 7dcc78f45a30ee9b7f82ddc3abd1ec955e2c46c1d293d569768846e677d8c7c2}} \\
+Encouragement & \texttt{prompts/benchmark\_encourage.txt} & 189 \\
+\multicolumn{3}{l}{\texttt{\scriptsize 05720293ce0c1bf00352886dd1eb767975801d9e34a65c0aeb0f54384b13b47b}} \\
+Error avoidance & \texttt{prompts/benchmark\_nomistakes.txt} & 171 \\
+\multicolumn{3}{l}{\texttt{\scriptsize be71e36ba4755ce5c2d035435b5d09323fc1e9ed123b355b03bbb592a4efe8ad}} \\
+Threat & \texttt{prompts/benchmark\_threat.txt} & 177 \\
+\multicolumn{3}{l}{\texttt{\scriptsize d853a7fe5ff079a99415ae67e58fb0cda508e06d9e3d22317700e0bf62cb8d85}} \\
+\midrule
+Substrate (system) & \texttt{prompts/substrate.txt} & 585 \\
+\multicolumn{3}{l}{\texttt{\scriptsize 5b56feb32d74\ldots\ (behavioural) / 340228f92279\ldots\ (internals, newline stripped)}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+The repository contains one further conventional prompt,
+\texttt{prompts/benchmark\_goaloriented.txt} (``The goal is to wash my car, I
+must do this.'', digest \texttt{52eb5d83}). It is not one of the seven
+behavioural conditions. The internals runs measure it alongside the seven; its
+margin is negative in every model whose baseline margin is negative, and it is
+excluded from the ranges reported in Section~\ref{sec:internal-results}.

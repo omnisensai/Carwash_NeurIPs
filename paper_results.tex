@@ -12,7 +12,10 @@ confidently wrong or unreliable: each names the wrong action on all ten baseline
 samples, or names different actions across them. Fifteen are sampled
 through hosted APIs and eight are open-weight models sampled locally in bf16 with a
 per-sample seed recorded. Every model receives byte-identical prompt text, $R=10$
-samples per condition, giving 230 executions per condition.
+samples per condition, giving 230 executions per condition. The baseline prompt,
+the seven conventional prompts and the substrate are reproduced verbatim in
+Appendix~\ref{app:prompts}, each with the sha256 digest recorded with every
+execution.
 
 \paragraph{Baseline operational state.}
 Sixteen of the 23 models are reproducibly incorrect, naming the wrong action on all
@@ -43,22 +46,24 @@ same four sample indices).
 
 \begin{table}[h]
 \centering
-\caption{Operational state of the 23 models under each condition. The baseline row
-gives the complete prompt; each conventional row gives only the text that condition
-adds to it, inserted between the question and the answer instruction, except expert
-role assignment, which precedes the question. The substrate is supplied as a system
-message with the baseline prompt unchanged. RC: reproducibly correct (10/10). NR:
-non-reproducible. RI: reproducibly incorrect (0/10). Rows sum to 23.}
+\caption{Operational state of the 23 models under each condition. Each conventional
+row gives only the text that condition adds to the baseline prompt, inserted between
+the question and the answer instruction, except expert role assignment, which
+precedes the question. The substrate is supplied as a system message with the
+baseline prompt unchanged. All texts are reproduced verbatim in
+Appendix~\ref{app:prompts}. RC: reproducibly correct (10/10). NR: non-reproducible.
+RI: reproducibly incorrect (0/10). Rows sum to 23.}
 \label{tab:conditions}
-\footnotesize
-\begin{tabular}{lp{6.2cm}rrr}
+\small
+\begin{tabular}{@{}lp{7.4cm}ccc@{}}
 \toprule
-Condition & Text & RC & NR & RI \\
+Condition & Added text & RC & NR & RI \\
 \midrule
-Baseline & ``I need to wash my car, the car wash is only 50 metres away, should I
-walk or drive there?'' followed by ``Answer with exactly one word: walk or drive''
+Baseline & \emph{the question and the answer instruction, unmodified}
 & 0 & 7 & 16 \\
+\addlinespace
 \midrule
+\addlinespace
 Expert role & ``You are a carwash expert.'' & 2 & 9 & 12 \\
 Objective emphasis & ``I MUST WASH MY CAR! IT MUST BE CLEAN!'' & 1 & 8 & 14 \\
 Chain of thought & ``Let's think step by step!'' & 1 & 8 & 14 \\
@@ -66,8 +71,11 @@ Anti-hallucination & ``Do not hallucinate.'' & 1 & 6 & 16 \\
 Encouragement & ``Answer correctly. You can do it, believe in yourself!'' & 1 & 5 & 17 \\
 Error avoidance & ``Be consistent and make no mistakes!'' & 0 & 7 & 16 \\
 Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
+\addlinespace
 \midrule
-\textbf{Substrate} & \emph{nine constraint lines, system message} & \textbf{17} & 4 & \textbf{2} \\
+\addlinespace
+\textbf{Substrate} & \emph{two goal lines and seven constraint lines, as a system
+message} & \textbf{17} & 4 & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -170,10 +178,10 @@ and so cannot exhibit a margin reversal. Under the substrate, four of the six cr
 zero.
 
 On Llama 3.3-70B, whose baseline margin is $-13.65$, the seven conventional
-conditions span $-18.21$ to $-4.67$ nats; the substrate reaches $+15.01$. On
-Llama 3.1-8B the conventional conditions span $-4.57$ to $-0.35$ against a baseline
-of $-3.71$; the substrate reaches $+1.51$. No conventional intervention crosses zero
-in either model.
+conditions of Table~\ref{tab:conditions} span $-18.21$ to $-5.51$ nats; the
+substrate reaches $+15.01$. On Llama 3.1-8B they span $-4.57$ to $-0.83$ against a
+baseline of $-3.71$; the substrate reaches $+1.51$. No conventional intervention
+crosses zero in either model.
 
 \begin{table}[t]
 \centering

@@ -5,10 +5,9 @@
 > `prompts/baseline.txt` as the user message (sha256 `f9ac23fb…`) — the same
 > prompt texts as the behavioural runs in `runs/`. Runs measured on the
 > superseded six-line substrate (`6f89be2b…`), on the removed `substrate_pro.txt`
-> (`5b9775f1…`), or on the pre-19-Sep question wording are retired under
-> `results/old-substrate-v1/` and `results/old-question-v1/`; the findings from
-> those are kept in `RESULTS-old-substrate-v1.md` and no number there applies to
-> the current substrate.
+> (`5b9775f1…`), or on the pre-19-Sep question wording are not in the working
+> tree; they are in git history before `efbc195`, and no number from them
+> applies to the current substrate.
 
 Ten models, bf16, chat template, teacher-forced. `M` is the decision margin in
 nats at the position predicting the first answer token; `M > 0` favours Drive.

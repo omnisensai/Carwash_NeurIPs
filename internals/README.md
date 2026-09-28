@@ -37,14 +37,14 @@ logits (`final_row_matches_model`), and the DLA sums equal the model's
 
 ```
 # 3B / 8B on one 16 GB card (8B next to other GPU users: --quantize 4bit)
-python run_internals.py --model unsloth/Llama-3.2-3B-Instruct --out results/llama-3.2-3b/bf16
-python run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --quantize 4bit --out results/llama-3.1-8b/nf4
+python scripts/run_internals.py --model unsloth/Llama-3.2-3B-Instruct --out results/llama-3.2-3b/bf16
+python scripts/run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --quantize 4bit --out results/llama-3.1-8b/bf16
 # exact bf16 reference for 8B without a free GPU: CPU, ~1 min on 16 cores / 30 GB RAM
-python run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b/bf16
+python scripts/run_internals.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b/bf16
 # figures + summary.md, several dirs → also results/overview.png
-python plot_internals.py results/llama-3.2-3b/bf16 results/llama-3.1-8b/bf16
+python scripts/plot_internals.py results/llama-3.2-3b/bf16 results/llama-3.1-8b/bf16
 # 70B on RunPod
-bash runpod.sh
+bash scripts/runpod.sh
 ```
 
 Prompts are fed through the model's chat template (`System:` block → system
@@ -78,9 +78,9 @@ counterfactual, so `R[line_i][0]` must equal `delta_beh`), row l+1 the output
 of layer l.
 
 ```
-python cdim.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b/bf16
-python cdim.py --model unsloth/Llama-3.3-70B-Instruct --row-stride 2 --path-stride 4 --out results/llama-3.3-70b/bf16
-python plot_cdim.py results/llama-3.1-8b/bf16 results/llama-3.3-70b/bf16      # + results/cdim_overview.png
+python scripts/cdim.py --model meta-llama/Llama-3.1-8B-Instruct --device cpu --dtype bfloat16 --out results/llama-3.1-8b/bf16
+python scripts/cdim.py --model unsloth/Llama-3.3-70B-Instruct --row-stride 2 --path-stride 4 --out results/llama-3.3-70b/bf16
+python scripts/plot_cdim.py results/llama-3.1-8b/bf16 results/llama-3.3-70b/bf16      # + results/<model>/bf16/cdim_map.png
 ```
 
 Outputs next to `internals.json`: `cdim.json`, `cdim_resid.pt` (full S / C

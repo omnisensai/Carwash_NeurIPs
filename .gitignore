@@ -1,3 +1,4 @@
 internals/results/**/*cdim_resid.pt*
+internals/results/**/resid_last.pt
 .idea/
 __pycache__/

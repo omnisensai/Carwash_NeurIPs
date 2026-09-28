@@ -1,114 +1,61 @@
 # Carwash_NeurIPs — instructions for coding agents
 
-This repo is a reproducibility bundle for a NeurIPS submission. `prompts/`
-and the `*.md` at the root are the paper's material. `internals/` is a
-residual-stream analysis of the same prompts on open-weight Llamas
-(logit lens, activation patching, direct logit attribution, attention,
-line ablations). Read `internals/README.md` for what each readout means and
-`internals/RESULTS.md` for what came out on 3B / 8B.
+Reproducibility bundle for one binary operational decision, measured two ways.
+
+```
+prompts/        the experiment. Never edited.
+behavioural/    scripts/ + runs/ + models.md, summary.md — what models emit
+internals/      scripts/ + results/ + README.md, RESULTS.md — what changes inside
+paper/          LaTeX sources and bibliography
+```
+
+Read `internals/README.md` for what each readout means and
+`internals/RESULTS.md` for the current numbers.
 
 ## Ground rules
 
 - **Never edit anything in `prompts/`.** Not even whitespace. The prompt
   files are the experiment. If a file looks odd (e.g. a trailing
   `SHA-256:` line), leave it; the scripts already handle that.
-- **Never push to `main`.** Work on a branch named `results-<model>` (e.g.
-  `results-llama-70b`) and open a pull request. Commit only what you
-  produced under `internals/results/<model>/` (the run log is written there).
-- Result folders follow `internals/results/<model>/<precision>[-<substrate>][-raw]/`,
-  e.g. `llama-3.1-8b/bf16`, `llama-3.1-8b/nf4`, `llama-3.1-8b/bf16-pro`.
-  `runpod.sh` does this for you; do not invent other names.
-- **Do not rewrite `internals/run_internals.py` or `plot_internals.py`** to
-  make a run pass. If something fails, fix the environment or report the
-  traceback in the PR; a small compatibility patch is fine if it is
-  clearly explained in the commit message.
+- **Never push to `main`.** Work on a branch and open a pull request.
+- **Every internals run must use the same prompt texts as the behavioural
+  runs**: substrate sha256 `340228f9…`, baseline sha256 `f9ac23fb…`, both
+  recorded in each `internals.json`. A run on any other prompt text does not
+  belong in `internals/results/` and must not be mixed into the paper's
+  tables. Check before you cite a number:
+  `python -c "import json;d=json.load(open(P));print(d['substrate_sha256'][:8],d['baseline_sha256'][:8])"`
+- Result folders are `internals/results/<model>/bf16/`. `scripts/runpod.sh`
+  does this for you; do not invent other names.
+- **Do not rewrite `internals/scripts/run_internals.py`, `cdim.py` or
+  `plot_internals.py`** to make a run pass. If something fails, fix the
+  environment or report the traceback; a small compatibility patch is fine if
+  it is clearly explained in the commit message.
 - Commit messages: one short line, no trailers.
-- Report what actually ran. If a step was skipped or errored, say so in the
-  PR text; do not paraphrase numbers you did not measure.
+- Report what actually ran. If a step was skipped or errored, say so; do not
+  paraphrase numbers you did not measure.
 
-## The job: run the internals sweep on Llama-3.3-70B
+## Running a model
 
-Everything is a few dozen short forward passes (prompts are < 300 tokens),
-so compute is minutes. The 70B download (~140 GB in bf16) dominates.
-
-### 1. Pod
-
-- GPU: **2× A100 80 GB or 2× H100 80 GB for bf16** (preferred: the 8B
-  numbers move by ~0.6 nats between bf16 and nf4, so bf16 is the reference).
-  Fallback: 1× 80 GB card runs 8-bit; a 48 GB card runs 4-bit. The script
-  picks the precision from the GPU memory it finds; say which one ran.
-- Template: any recent PyTorch CUDA image (RunPod "PyTorch 2.x" is fine).
-- **Volume: ≥ 250 GB**, mounted at `/workspace`. Put the HF cache on it.
-- No HF token is needed: `unsloth/Llama-3.3-70B-Instruct` is an ungated
-  mirror of Meta's weights (identical tensors).
-
-### 2. Setup (inside the pod)
-
-The repo is **private**: a plain `git clone` on the pod fails with "could
-not read Username". Either clone with a GitHub token
-(`https://<token>@github.com/omnisensai/Carwash_NeurIPs`) or copy the
-checkout from your machine (`rsync -a --exclude .git --exclude results
-Carwash_NeurIPs/ root@<pod>:/workspace/Carwash_NeurIPs/`) and commit the
-results from your machine afterwards.
+Compute is minutes — a few dozen short forward passes, prompts under 300
+tokens. Weight download dominates (~140 GB for the 70B in bf16).
 
 ```bash
-cd /workspace
-git clone https://<token>@github.com/omnisensai/Carwash_NeurIPs && cd Carwash_NeurIPs
-git checkout -b results-llama-70b
-export HF_HOME=/workspace/hf HF_HUB_ENABLE_HF_TRANSFER=1
-# RunPod's PyTorch images ship torch already and pip refuses system installs without the flag
-pip install -q --break-system-packages "transformers>=4.45" accelerate bitsandbytes numpy matplotlib hf_transfer
 cd internals
+export HF_HOME=/workspace/hf HF_HUB_ENABLE_HF_TRANSFER=1
+pip install -q --break-system-packages "transformers>=4.45" accelerate bitsandbytes numpy matplotlib hf_transfer
+
+MODEL=unsloth/Llama-3.2-3B-Instruct bash scripts/runpod.sh     # internals.json + figures
+CDIM=1 MODEL=unsloth/Llama-3.2-3B-Instruct bash scripts/runpod.sh   # + the intervention map and controls
+python scripts/plot_internals.py results/llama-3.2-3b/*/
 ```
 
-Sanity check on a small model first (2–3 minutes, catches environment
-problems before the 140 GB download):
+The script picks precision from the GPU memory it finds and records it as
+`quantize` in the json; say which one ran. bf16 is the reference — the 8B
+numbers move by ~0.6 nats between bf16 and nf4. Run under `tmux` or `nohup`
+so a dropped SSH session does not kill the run.
 
-```bash
-MODEL=unsloth/Llama-3.2-3B-Instruct bash runpod.sh
-```
-
-Expected: `results/llama-3.2-3b/bf16/summary.md` with baseline
-M ≈ −3.5 and substrate M ≈ −1.8 (both Walk). If the numbers are within
-±0.3 of that, the environment matches ours.
-
-### 3. The 70B runs
-
-```bash
-bash runpod.sh                                # substrate.txt      → results/llama-3.3-70b/<precision>/
-SUBSTRATE=substrate_pro.txt bash runpod.sh    # substrate_pro.txt  → results/llama-3.3-70b/<precision>-pro/
-python plot_internals.py results/llama-3.3-70b/*/            # + results/llama-3.3-70b/overview.png
-```
-
-Run in `tmux` or `nohup` so a dropped SSH session does not kill the run.
-The first run downloads the weights; the second reuses the cache.
-
-If the pod has one card and the script chose 4-bit/8-bit, also note the
-`quantize` field in `internals.json` in the PR text.
-
-### 4. Deliver
-
-```bash
-cd /workspace/Carwash_NeurIPs
-git add internals/results/
-git commit -m "internals: Llama-3.3-70B results"
-git push -u origin results-llama-70b
-```
-
-Then open a PR against `main` with: pod GPU(s), precision that ran,
-the two headline M values (baseline / substrate) per substrate file, and
-the sanity-check numbers from step 2. Paste the `summary.md` of the 70B
-runs into the PR description.
-
-### What to look at (and mention in the PR)
-
-- `summary.md` → the first table (baseline vs substrate M, greedy answer).
-- `patching` line → the first layer from which the substrate residual alone
-  flips the baseline (was L17/32 on 8B, L15 with substrate_pro).
-- `substrate line ablations` → whether one line carries the effect (8B:
-  line 6 for substrate.txt; spread out for substrate_pro).
-- `anti_test` rows → the library question must stay Walk under every
-  substrate; if it goes Drive, say so prominently.
+Sanity check against `internals/RESULTS.md`: Llama 3.2-3B should give
+M = −0.50 at baseline and +0.18 under the substrate, transplant at L13.
 
 ## Things that went wrong before (so you do not repeat them)
 
@@ -121,3 +68,6 @@ runs into the PR description.
   actually lands.
 - `device_map="auto"` on a shared single card spills layers to CPU and
   bitsandbytes refuses; the script forces `{"": 0}` on one card.
+- Two runs of the same model on different pods differ in the second decimal
+  (Qwen3-8B: −14.0745 vs −14.0627). Cite one run per model; do not take the
+  baseline from one and an ablation from another.

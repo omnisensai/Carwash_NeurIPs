@@ -94,6 +94,10 @@ a requirement that the model recover omitted semantics unaided. We
 refer to constructing and testing natural-language task specifications
 against~\eqref{eq:reproducible-correctness} as \emph{Substrate
 Engineering}, and to the specification itself as the \emph{substrate}.
+A substrate is not a prompt that scores well. It is written, hashed and
+versioned, and it is tested against~\eqref{eq:reproducible-correctness}
+for each model--condition pair it is claimed to control: for that pair it
+either establishes reproducible correctness or is recorded as failing to.
 
 
 \subsection{Interventions and Measurement}

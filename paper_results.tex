@@ -7,9 +7,9 @@
 \label{sec:behavioural-results}
 
 The question is whether a model that fails this decision can be moved to
-reproducible correctness. We therefore measured 23 models that are not reproducibly
-correct at baseline: a model that already names the intended action on all ten
-baseline samples has nothing to rescue and is outside the study. Fifteen are sampled
+reproducible correctness. We measured 23 models that fail it at baseline, either
+confidently wrong or unreliable: each names the wrong action on all ten baseline
+samples, or names different actions across them. Fifteen are sampled
 through hosted APIs and eight are open-weight models sampled locally in bf16 with a
 per-sample seed recorded. Every model receives byte-identical prompt text, $R=10$
 samples per condition, giving 230 executions per condition.

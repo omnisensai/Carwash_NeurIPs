@@ -19,7 +19,7 @@ walking leaves the car behind. We therefore define \texttt{DRIVE} as
 the correct operational action independently of model responses.
 
 The experiment asks whether a model that fails this decision under
-the untreated input can be moved to reproducibly correct behaviour
+the baseline input can be moved to reproducibly correct behaviour
 by changing only the supplied task specification. No model parameters
 are modified by us, and the declared model and inference configuration
 are held fixed across conditions. No response-dependent retries,
@@ -89,97 +89,79 @@ whether a model is consistently correct, consistently wrong, or
 variable under one unchanged input; these are operationally different
 states.
 
-The criterion does not require the model to recover unstated task
-semantics unaided. That is a different experiment: it asks whether the
-model can infer what the input omits. Here, supplying task-relevant
-semantics is the intervention being tested. The question is whether an
-explicit task specification can move a failing model--input condition
-to reproducibly correct behaviour.
-
-We refer to constructing and testing natural-language task
-specifications against~\eqref{eq:reproducible-correctness} as
-\emph{Substrate Engineering}, and to the specification itself as the
-\emph{substrate}.
+Supplying task-relevant semantics is the intervention under study, not
+a requirement that the model recover omitted semantics unaided. We
+refer to constructing and testing natural-language task specifications
+against~\eqref{eq:reproducible-correctness} as \emph{Substrate
+Engineering}, and to the specification itself as the \emph{substrate}.
 
 
 \subsection{Interventions and Measurement}
 \label{sec:interventions-measurement}
 
-We treat the input specification as the experimental variable. All
-interventions modify the model's input without changing parameters.
-Conventional prompts request reasoning procedures, expertise, or
-emphasis. The substrate specifies relations among the task objective
-and action semantics. Every condition's text is hashed and the hash
-recorded with each execution. Exact texts, model identifiers, access
-levels, and inference configurations are in the appendix.
+We treat the input text as the experimental variable. All
+interventions modify only the model input: conventional prompts request
+reasoning procedures, expertise, or emphasis, whereas the substrate
+specifies relations among the task objective and action semantics.
+Condition text is hashed and recorded with each execution, and the
+three reissued samples inherit their cell's declared text and hash;
+exact texts, model identifiers, access levels, and inference
+configurations are given in the appendix.
 
-The emitted action is the operational outcome and the only quantity
-used to assign reproducible correctness. Hosted providers were not
-queried for token log-probabilities, so no margin is reported for
-those models; all internal quantities below are measured on
-open-weight models, where the full next-token distribution is
-available and no truncation bound is required.
+The emitted action is the sole basis for assigning reproducible
+correctness. Hosted models are evaluated behaviourally only. For
+open-weight models, we additionally measure next-token preference and
+internal activations using the full output distribution.
 
-For open-weight models we access internal activations. An observed
-activation difference is not treated as causal merely because it
-co-occurs with a successful response. We attribute a causal effect on
-the measured decision preference only when replacing the corresponding
-untreated state changes the downstream decision margin. We measure
-that margin at the position predicting the first answer token:
+At the position predicting the first answer token, we define
 \begin{equation}
     M(x) = \log \sum_{t \in \mathcal{D}} P(t \mid x)
          - \log \sum_{t \in \mathcal{W}} P(t \mid x),
     \label{eq:decision-margin}
 \end{equation}
-where $\mathcal{D}$ and $\mathcal{W}$ contain the distinct token IDs
-of the measured surface forms of each action, including case and
-leading-space variants. Positive $M$ favours \texttt{DRIVE}. An
-intervention's effect relative to the untreated input under the same
-model and configuration is
+where $\mathcal{D}$ and $\mathcal{W}$ contain the measured token forms
+of each action, including case and leading-space variants. Positive
+$M$ favours \texttt{DRIVE}. The effect of intervention $u$ relative
+to the baseline input is
 \begin{equation}
     \Delta M(u) = M(u) - M(\emptyset).
     \label{eq:intervention-effect}
 \end{equation}
-$M$ is supplementary. Cell labels use only the $R$ emitted actions.
+
+Activation differences are treated as observational unless directly
+intervened on. We attribute a causal effect on the measured preference
+only when replacing a baseline internal state changes the downstream
+margin. $M$ is supplementary: operational-state labels depend only on
+the $R$ emitted actions.
 
 
 \subsection{Two-Stage Design}
 \label{sec:two-stage-design}
 
-The primary behavioural analysis is a transition study over models
-that fail the untreated task. A model enters the transition cohort
-when its untreated condition is either reproducibly incorrect or
-non-reproducible; models already reproducibly correct at baseline
-cannot exhibit the failure-to-success transition of interest and are
-excluded from the rescue analysis. Cohort membership is determined
-from the untreated condition before any intervention is evaluated.
+The primary behavioural analysis is a transition study over 23 models
+that fail the baseline task: under the baseline condition each is
+either reproducibly incorrect, naming the wrong action on all ten
+samples, or non-reproducible, naming different actions across them.
+Cohort membership is fixed from the baseline condition before any
+intervention is evaluated.
 
-Stage one evaluates the untreated task, seven conventional prompt
-interventions, and one shared task specification across the model
-matrix through repeated single-pass executions, without
-response-dependent retries, voting, fine-tuning, retraining, decoder
-changes, or post-generation correction. Each fixed model--input
-condition is classified by the criterion in
-Section~\ref{sec:operational-reproducibility}. Internals are
-interpreted only after that behavioural state is established.
+Stage one evaluates the baseline task, seven conventional prompt
+interventions, and one shared substrate through repeated single-pass
+executions. Each model--input condition is classified by the criterion
+in Section~\ref{sec:operational-reproducibility} before any internal
+analysis is performed.
 
-Stage two studies the untreated-to-specification transition in
-open-weight models. For each model, we capture the residual-stream
-activation at the first answer-token prediction position under the
-specification-conditioned input. At each tested layer, we replace the
-corresponding activation in the untreated computation with this state,
-leave all other positions unchanged, and run the remaining layers of
-the untreated computation. The patched computation otherwise receives
-only the untreated input; no specification text is present in its
-context. We then read the final decision margin.
+Stage two studies the baseline-to-substrate transition in open-weight
+models. At each tested layer, we replace the baseline residual-stream
+state at the first answer-token prediction position with the
+corresponding state from the substrate-conditioned run, leaving all
+other positions unchanged and completing the baseline computation.
+No substrate text is present in the patched context. We then
+measure the final decision margin.
 
-This tests whether a specification-conditioned state at the
-answer-token prediction position causally affects the final action
-preference under the remaining untreated stack, without specification
-text being present in the patched context. When transplantation
-reverses the sign of the decision margin, the transplanted state is
-sufficient, under the remaining untreated computation, to reverse the
-measured action preference. It does not establish reproducibly correct
-behaviour, localise where the decision is formed, or attribute the
-effect to an individual constraint. Those claims remain separate
-from~\eqref{eq:reproducible-correctness}.
+A change in margin establishes a causal effect of the transplanted
+state on the measured preference; a sign reversal establishes that the
+state is sufficient, under the remaining baseline computation, to
+reverse that preference. It does not establish reproducibly correct
+behaviour, localise where the decision is formed, or identify the
+effect of an individual constraint.

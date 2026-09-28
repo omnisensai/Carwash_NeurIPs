@@ -20,25 +20,25 @@ both are failures to obtain a result.
 The present challenge is therefore not only whether an experiment can be rerun, but
 whether a declared input makes the decision a function of the input rather than of
 the sample. Sufficiency is a property of the triple (weights, specification, task),
-not of how explicit the specification looks to a reader. The shared specification
+not of how explicit the specification looks to a reader. The shared substrate
 names the object, the service location, the objective, and the reason the incorrect
 action fails to achieve it. It does not name the correct action anywhere in its
 text. Seventeen of twenty-three models become reproducibly correct under it. Six do
 not and remain operationally uncontrolled: two emit the incorrect action on all ten
-samples, two improve without reaching unanimity, one is unchanged from its untreated
+samples, two improve without reaching unanimity, one is unchanged from its baseline
 state, and one moves away from the intended action.
 
 Human-legible emphasis is not the same object. The objective-emphasis prompt states
 the goal in capitals and leaves fourteen of the twenty-three models reproducibly
-incorrect. The specification states the binding relations among object, location and
+incorrect. The substrate states the binding relations among object, location and
 movement, and leaves two. What must be made explicit is the relation that rules out
 the incorrect action, not the intensity of the request.
 
 Reproducibility engineering for a decision module is therefore the cell test after
-specification, including on models for which the same specification already works
-elsewhere in the fleet. We do not claim that a denser specification would control
-the six residual cells, nor that those models cannot implement the task under some
-other specification. We claim only that this one, sufficient for seventeen models,
+the substrate is supplied, including on models for which the same substrate already
+works elsewhere among the twenty-three. We do not claim that a denser substrate would
+control the six residual cells, nor that those models cannot implement the task under
+some other substrate. We claim only that this one, sufficient for seventeen models,
 is not sufficient for them --- and that recovering a published metric from an
 underspecified prompt is a different protocol from making a decision reproducibly
 correct.
@@ -72,14 +72,14 @@ wrong is detectable. A non-reproducible model discloses its own unreliability to
 the cheapest available check: run the input twice and the answers differ. A
 reproducibly incorrect model passes that check and every repetition of it. Sixteen
 of the twenty-three models in the study population fail in the second way, which
-means that the standard deployment-time test certifies the majority of the fleet as
+means that the standard deployment-time test certifies the majority of them as
 stable while they are uniformly wrong. An intervention that moves a model from the
 first state to the second has made the system worse in a way no accuracy figure
 will show, and five of the seven conventional interventions do exactly that.
 
 Because the operational state depends on the input text as much as on the weights,
 the unit that can carry a reliability claim is the model--condition pair rather than
-the model. One model in the fleet illustrates the range. Claude Sonnet 5, on one
+the model. One of the twenty-three illustrates the range. Claude Sonnet 5, on one
 question, across nine wordings, is reproducibly correct under five of them,
 non-reproducible under two, and reproducibly incorrect under two. The weights,
 decoding configuration and retry policy are identical throughout; only the
@@ -93,7 +93,7 @@ in the pair. This is not a claim that models lack capabilities, nor that all
 wordings are equivalent --- the results show they are not. It is a claim about what a
 single measurement licenses: the condition under which a system will be operated is
 part of what is being tested, and a reliability claim that omits it is
-underdetermined in the same way the untreated task itself is.
+underdetermined in the same way the baseline task itself is.
 
 
 The consequences of the distinction are not confined to how a result is reported. A

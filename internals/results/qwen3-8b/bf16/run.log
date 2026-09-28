@@ -1,78 +1,80 @@
 loading Qwen/Qwen3-8B (default dtype, cuda) ...
+/usr/local/lib/python3.12/dist-packages/huggingface_hub/constants.py:301: FutureWarning: The `HF_HUB_ENABLE_HF_TRANSFER` environment variable is deprecated as 'hf_transfer' is not used anymore. Please use `HF_XET_HIGH_PERFORMANCE` instead to enable high performance transfer with Xet. Visit https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hfxethighperformance for more details.
+  warnings.warn(
 Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Fetching 5 files:  20%|██        | 1/5 [00:02<00:09,  2.41s/it]Fetching 5 files:  40%|████      | 2/5 [00:07<00:12,  4.22s/it]Fetching 5 files:  60%|██████    | 3/5 [00:09<00:05,  2.88s/it]Fetching 5 files:  80%|████████  | 4/5 [00:09<00:01,  1.91s/it]Fetching 5 files: 100%|██████████| 5/5 [00:11<00:00,  1.89s/it]Fetching 5 files: 100%|██████████| 5/5 [00:11<00:00,  2.29s/it]
-Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:  33%|███▎      | 132/399 [00:00<00:00, 1309.46it/s]Loading weights:  66%|██████▌   | 263/399 [00:00<00:00, 1150.40it/s]Loading weights: 100%|██████████| 399/399 [00:00<00:00, 1506.39it/s]
+Fetching 5 files:   0%|          | 0/5 [00:00<?, ?it/s]Fetching 5 files:  20%|██        | 1/5 [00:22<01:28, 22.24s/it]Fetching 5 files:  40%|████      | 2/5 [00:53<01:22, 27.63s/it]Fetching 5 files:  60%|██████    | 3/5 [00:59<00:35, 17.51s/it]Fetching 5 files:  80%|████████  | 4/5 [01:03<00:12, 12.20s/it]Fetching 5 files: 100%|██████████| 5/5 [01:05<00:00,  8.57s/it]Fetching 5 files: 100%|██████████| 5/5 [01:05<00:00, 13.06s/it]
+Loading weights:   0%|          | 0/399 [00:00<?, ?it/s]Loading weights:   0%|          | 1/399 [00:00<00:44,  8.95it/s]Loading weights:   2%|▏         | 6/399 [00:00<00:14, 26.40it/s]Loading weights:   7%|▋         | 28/399 [00:00<00:03, 94.44it/s]Loading weights:  10%|▉         | 38/399 [00:00<00:03, 91.55it/s]Loading weights:  12%|█▏        | 49/399 [00:00<00:04, 85.54it/s]Loading weights:  15%|█▌        | 61/399 [00:00<00:03, 86.45it/s]Loading weights:  18%|█▊        | 70/399 [00:00<00:03, 86.17it/s]Loading weights:  20%|██        | 81/399 [00:00<00:03, 92.61it/s]Loading weights:  23%|██▎       | 91/399 [00:01<00:03, 88.85it/s]Loading weights:  26%|██▌       | 103/399 [00:01<00:03, 92.60it/s]Loading weights:  29%|██▊       | 114/399 [00:01<00:03, 89.61it/s]Loading weights:  31%|███▏      | 125/399 [00:01<00:03, 89.27it/s]Loading weights:  34%|███▍      | 136/399 [00:01<00:02, 90.01it/s]Loading weights:  37%|███▋      | 147/399 [00:01<00:02, 89.58it/s]Loading weights:  39%|███▉      | 157/399 [00:01<00:02, 87.15it/s]Loading weights:  42%|████▏     | 169/399 [00:01<00:02, 89.55it/s]Loading weights:  45%|████▌     | 180/399 [00:02<00:02, 93.41it/s]Loading weights:  48%|████▊     | 191/399 [00:02<00:02, 93.37it/s]Loading weights:  50%|█████     | 201/399 [00:02<00:02, 87.92it/s]Loading weights:  53%|█████▎    | 213/399 [00:02<00:02, 88.69it/s]Loading weights:  56%|█████▌    | 223/399 [00:02<00:02, 84.12it/s]Loading weights:  59%|█████▉    | 235/399 [00:02<00:01, 87.93it/s]Loading weights:  62%|██████▏   | 246/399 [00:02<00:01, 88.17it/s]Loading weights:  64%|██████▍   | 257/399 [00:02<00:01, 89.46it/s]Loading weights:  67%|██████▋   | 268/399 [00:03<00:01, 89.55it/s]Loading weights:  70%|██████▉   | 279/399 [00:03<00:01, 90.72it/s]Loading weights:  73%|███████▎  | 290/399 [00:03<00:01, 90.94it/s]Loading weights:  75%|███████▌  | 301/399 [00:03<00:01, 89.56it/s]Loading weights:  78%|███████▊  | 311/399 [00:03<00:00, 91.96it/s]Loading weights:  80%|████████  | 321/399 [00:03<00:00, 84.85it/s]Loading weights:  83%|████████▎ | 330/399 [00:03<00:00, 80.99it/s]Loading weights:  85%|████████▍ | 339/399 [00:04<00:01, 53.73it/s]Loading weights:  87%|████████▋ | 346/399 [00:04<00:01, 41.02it/s]Loading weights:  89%|████████▉ | 355/399 [00:04<00:00, 48.99it/s]Loading weights:  92%|█████████▏| 366/399 [00:04<00:00, 58.12it/s]Loading weights:  95%|█████████▍| 378/399 [00:04<00:00, 67.30it/s]Loading weights:  97%|█████████▋| 389/399 [00:04<00:00, 72.84it/s]Loading weights: 100%|██████████| 399/399 [00:04<00:00, 79.97it/s]
 answer token ids: {'drive': [6541, 31967, 16150, 32457, 95787], 'walk': [4227, 19059, 12554, 48849]}
 baseline ...
 substrate ...
-  baseline   M_sum=-14.063  M_first=-14.250 p(drive)=0.000 p(walk)=1.000 greedy='walk<|im_end|>'
+  baseline   M_sum=-14.075  M_first=-14.500 p(drive)=0.000 p(walk)=1.000 greedy='walk<|im_end|>'
   substrate  M_sum=+7.250  M_first=+7.250 p(drive)=0.999 p(walk)=0.001 greedy='drive<|im_end|>'
 patching ...
-  patch L00: M_sum=-13.854
-  patch L01: M_sum=-13.528
-  patch L02: M_sum=-14.158
-  patch L03: M_sum=-13.676
-  patch L04: M_sum=-12.986
-  patch L05: M_sum=-12.995
-  patch L06: M_sum=-12.990
-  patch L07: M_sum=-12.478
-  patch L08: M_sum=-12.989
-  patch L09: M_sum=-12.695
-  patch L10: M_sum=-12.466
-  patch L11: M_sum=-12.411
-  patch L12: M_sum=-12.442
-  patch L13: M_sum=-12.908
-  patch L14: M_sum=-12.986
-  patch L15: M_sum=-14.242
-  patch L16: M_sum=-13.236
-  patch L17: M_sum=-12.998
-  patch L18: M_sum=-13.000
+  patch L00: M_sum=-14.716
+  patch L01: M_sum=-13.822
+  patch L02: M_sum=-14.317
+  patch L03: M_sum=-13.661
+  patch L04: M_sum=-13.214
+  patch L05: M_sum=-13.242
+  patch L06: M_sum=-13.492
+  patch L07: M_sum=-12.728
+  patch L08: M_sum=-12.978
+  patch L09: M_sum=-12.863
+  patch L10: M_sum=-13.132
+  patch L11: M_sum=-12.858
+  patch L12: M_sum=-12.678
+  patch L13: M_sum=-12.943
+  patch L14: M_sum=-13.233
+  patch L15: M_sum=-14.492
+  patch L16: M_sum=-13.713
+  patch L17: M_sum=-13.249
+  patch L18: M_sum=-13.250
   patch L19: M_sum=-13.500
-  patch L20: M_sum=-13.250
-  patch L21: M_sum=-12.000
+  patch L20: M_sum=-13.000
+  patch L21: M_sum=-11.750
   patch L22: M_sum=-11.250
-  patch L23: M_sum=-1.500
-  patch L24: M_sum=+1.500
+  patch L23: M_sum=-1.750
+  patch L24: M_sum=+1.250
   patch L25: M_sum=+2.250
-  patch L26: M_sum=+4.750
-  patch L27: M_sum=+5.250
-  patch L28: M_sum=+5.000
-  patch L29: M_sum=+5.750
-  patch L30: M_sum=+5.750
+  patch L26: M_sum=+5.000
+  patch L27: M_sum=+5.000
+  patch L28: M_sum=+4.750
+  patch L29: M_sum=+5.500
+  patch L30: M_sum=+5.500
   patch L31: M_sum=+5.250
   patch L32: M_sum=+5.500
   patch L33: M_sum=+6.250
-  patch L34: M_sum=+6.750
+  patch L34: M_sum=+6.500
   patch L35: M_sum=+7.250
 ablations ...
-  loo_line1      M_sum=+6.500
-  loo_line2      M_sum=+10.000
+  loo_line1      M_sum=+4.750
+  loo_line2      M_sum=+10.250
   loo_line3      M_sum=+7.250
-  loo_line4      M_sum=+10.250
-  loo_line5      M_sum=+10.250
-  loo_line6      M_sum=+5.250
-  loo_line7      M_sum=+5.250
-  loo_line8      M_sum=+7.500
-  loo_line9      M_sum=+4.500
-  only_line1     M_sum=-16.500
+  loo_line4      M_sum=+10.750
+  loo_line5      M_sum=+9.000
+  loo_line6      M_sum=+4.750
+  loo_line7      M_sum=+3.750
+  loo_line8      M_sum=+6.750
+  loo_line9      M_sum=+3.750
+  only_line1     M_sum=-16.750
   only_line2     M_sum=-14.250
   only_line3     M_sum=-11.500
-  only_line4     M_sum=-12.250
-  only_line5     M_sum=-11.000
-  only_line6     M_sum=-11.250
-  only_line7     M_sum=-6.000
-  only_line8     M_sum=+1.250
-  only_line9     M_sum=-10.500
-  headers_only   M_sum=-13.749
+  only_line4     M_sum=-12.000
+  only_line5     M_sum=-10.000
+  only_line6     M_sum=-10.750
+  only_line7     M_sum=-6.250
+  only_line8     M_sum=+2.500
+  only_line9     M_sum=-11.250
+  headers_only   M_sum=-13.499
 benchmarks ...
-  baseline                 M_sum=-14.063 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-14.063
-  benchmark_CoT            M_sum=-17.947 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-17.947
-  benchmark_encourage      M_sum=-14.784 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-14.784
-  benchmark_expert         M_sum=-11.387 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-11.387
-  benchmark_goaloriented   M_sum=-12.136 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-12.136
-  benchmark_hallucination  M_sum=-16.096 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-16.096
-  benchmark_nomistakes     M_sum=-16.128 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-16.128
-  benchmark_threat         M_sum=-14.000 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-14.0
-  benchmark_urgency        M_sum=-8.445 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-8.445
+  baseline                 M_sum=-14.075 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-14.075
+  benchmark_CoT            M_sum=-17.723 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-17.723
+  benchmark_encourage      M_sum=-15.265 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-15.265
+  benchmark_expert         M_sum=-11.637 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-11.637
+  benchmark_goaloriented   M_sum=-12.157 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-12.157
+  benchmark_hallucination  M_sum=-16.627 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-16.627
+  benchmark_nomistakes     M_sum=-15.778 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-15.778
+  benchmark_threat         M_sum=-14.500 argmax='Walk' greedy='Walk<|im_end|>'  decision@0: M=-14.5
+  benchmark_urgency        M_sum=-8.180 argmax='walk' greedy='walk<|im_end|>'  decision@0: M=-8.18
   substrate                M_sum=+7.250 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=7.25
-wrote results/qwen3-8b/bf16/internals.json in 46.7 s
+wrote results/qwen3-8b/bf16/internals.json in 92.9 s

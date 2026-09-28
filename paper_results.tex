@@ -26,7 +26,12 @@ intended action.
 Seven conventional interventions were applied to the same question under the same
 protocol: expert role assignment, objective emphasis, chain-of-thought elicitation,
 anti-hallucination instruction, threat, encouragement, and error-avoidance
-instruction (Table~\ref{tab:conditions}). Expert role assignment converts one of the
+instruction. Each adds a single line to the baseline prompt, inserted between the
+question and the answer instruction, except expert role assignment, which precedes
+the question; the texts are reproduced verbatim in Appendix~\ref{app:prompts}.
+Table~\ref{tab:conditions} gives the operational state of the 23 models under every
+condition, abbreviated RC for reproducibly correct, NR for non-reproducible and RI
+for reproducibly incorrect. Expert role assignment converts one of the
 sixteen reproducibly incorrect models to reproducible correctness; no conventional
 condition converts more than one, and across all seven the converted model is the
 same one. Four of the seven leave at least fifteen of the sixteen reproducibly
@@ -46,13 +51,7 @@ same four sample indices).
 
 \begin{table}[h]
 \centering
-\caption{Operational state of the 23 models under each condition. Each conventional
-row gives only the text that condition adds to the baseline prompt, inserted between
-the question and the answer instruction, except expert role assignment, which
-precedes the question. The substrate is supplied as a system message with the
-baseline prompt unchanged. All texts are reproduced verbatim in
-Appendix~\ref{app:prompts}. RC: reproducibly correct (10/10). NR: non-reproducible.
-RI: reproducibly incorrect (0/10). Rows sum to 23.}
+\caption{Operational state of the 23 models under each condition. Rows sum to 23.}
 \label{tab:conditions}
 \small
 \begin{tabular}{@{}lp{7.4cm}ccc@{}}
@@ -74,8 +73,8 @@ Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
 \addlinespace
 \midrule
 \addlinespace
-\textbf{Substrate} & \emph{two goal lines and seven constraint lines, as a system
-message} & \textbf{17} & 4 & \textbf{2} \\
+\textbf{Substrate} & \emph{two goal lines and seven constraint lines}
+& \textbf{17} & 4 & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{table}

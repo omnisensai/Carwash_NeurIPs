@@ -158,11 +158,16 @@ Where multiple outputs are admissible in principle, reliability is not a propert
 model can supply on its own; it depends on the conditions under which each output is
 correct having been specified.
 
-We refer to constructing and testing such a specification against the criterion in
-Equation~\eqref{eq:reproducible-correctness} as Substrate Engineering. The practice
-treats the specification as an experimental artifact rather than an incidental
-wrapper: it is written, hashed, versioned, and tested per model--condition, and it
-succeeds or fails per model--condition. Six of the twenty-three models in this study
+Substrate Engineering, as Section~\ref{sec:operational-reproducibility} names it, is
+the deliberate construction of a task specification that moves a model--condition
+pair from its baseline operational state to a declared target state. A substrate is
+not a prompt that scores well. It is an experimental artifact rather than an
+incidental wrapper: written, hashed, versioned, and tested against
+Equation~\eqref{eq:reproducible-correctness} for every pair it is claimed to control,
+so that it either locks reproducible correctness or fails where the failure can be
+seen. DeepSeek V3.2 is that second case here, eight samples of ten under the
+substrate: an improvement by any aggregate reading, and no control by the criterion.
+Six of the twenty-three models in this study
 are not rescued by the substrate reported here, two of them not at all. That is not
 a caveat attached to a general claim; it is the form the claim takes. Sufficiency is
 established for particular pairs on a particular task, and neither a universal

@@ -129,15 +129,17 @@ Qwen2.5-0.5B & 7/10 & 3/10 & Non-reproducible $\rightarrow$ non-reproducible \\
 \end{table}
 
 % ============================================================
-\subsection{Internal Measurements}
+\subsection{The Decision Margin}
 \label{sec:internal-results}
 
-The behavioural result counts sampled outputs. This section measures the same
-intervention inside the models whose weights we hold, to establish two things
-the counts cannot: that the change in output corresponds to a large change in
-the underlying decision distribution rather than to favourable sampling, and
-that it is produced by the state the substrate puts the model in rather than by
-the disturbance of supplying some alternative framing.
+The behavioural result counts sampled outputs. The two sections that follow
+measure the same intervention inside the nine models whose weights we hold, and
+establish two things the counts cannot. Section~\ref{sec:internal-results} shows
+that the change in output corresponds to a large change in the underlying
+decision distribution rather than to favourable sampling.
+Section~\ref{sec:transplant} shows that it is produced by the state the
+substrate puts the model in, and not by the disturbance of supplying some
+alternative framing.
 
 Nine of the 23 models were run locally in bf16 on the same prompt files as the
 behavioural runs. The readout is the decision margin
@@ -151,7 +153,6 @@ over the prompt, no generation, so what is measured is the distribution the
 model would sample from rather than a sampled outcome. $M>0$ favours the
 intended action.
 
-\paragraph{The behavioural transition is a large distributional shift.}
 Under the substrate the margin moves toward the intended action in eight of the
 nine models, by a median of $5.07$ nats and by as much as $28.67$ on
 Llama 3.3-70B (Table~\ref{tab:margins}). The single exception is Qwen2.5-0.5B, at
@@ -210,7 +211,15 @@ Qwen2.5-0.5B   & 24 & $+0.50$  & $-0.43$  & $-0.93$  & $+0.62$ & n/a \\
 \end{tabular}
 \end{table}
 
-\paragraph{The effect is carried by one state, and it is not generic.}
+\subsection{Activation Transplantation}
+\label{sec:transplant}
+
+A large margin shift shows that the substrate changes what the model is
+disposed to answer. It does not show that the change is carried by the
+substrate's own internal state rather than by the fact of receiving some
+framing other than the baseline. To separate those, we transplant the state
+itself.
+
 We run the \emph{baseline} prompt and replace the residual stream at the answer
 position, at a single layer, with the residual from the substrate run at the
 same position and layer. No substrate token is present anywhere in the patched
@@ -258,7 +267,7 @@ Section~\ref{sec:behavioural-results}.}
 \label{fig:patching}
 \end{figure}
 
-\paragraph{What these measurements do not establish.}
+\paragraph{What Sections~\ref{sec:internal-results} and~\ref{sec:transplant} do not establish.}
 They locate the substrate's effect and rule out one alternative explanation for
 it. They do not identify a mechanism. We do not establish what the transplanted
 state encodes, which part of the substrate produces it, or why a task

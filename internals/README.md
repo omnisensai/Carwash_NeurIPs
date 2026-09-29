@@ -70,7 +70,7 @@ differs). Everything is M at the answer position, chat template, teacher-forced.
 | `delta_beh` | M(S) − M(C_i): does the line matter behaviourally (before any tracing) |
 | `R[group][row]` forward rescue | C_i run, the S residual of one semantic group (a line, the headers, the whole system block, the question, the answer instruction, the assistant header, the answer site) patched in after row *r* → M − M(C_i): *where is the substrate-conditioned state sufficient* |
 | `D[group][row]` reverse disruption | S run, the C_i residual patched in → M(S) − M: *where is it necessary* |
-| controls | same-run patch S→S (must be 0), random direction of the same norm as S−C (must be small), the library question under the same S / C_i with the full map (must stay Walk) |
+| controls | same-run patch S→S (must be 0), random direction of the same norm as S−C (must be small). The script can also run a control question that must stay Walk, but `benchmark_library.txt` was removed from `prompts/` on 19 Sep, so every current run records `library: null` and no such control was measured. |
 | path | patch-the-receiver path patching for the primary line: its S state inserted at row r_src, then only the resulting question-span / answer-site state at row r_dst inserted into a clean C_i run → how much of the rescue is mediated by that receiver |
 
 Row 0 is the embedding output (patching the line there = the input-level

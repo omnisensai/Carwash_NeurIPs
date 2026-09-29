@@ -24,6 +24,19 @@ Read `internals/README.md` for what each readout means and
   belong in `internals/results/` and must not be mixed into the paper's
   tables. Check before you cite a number:
   `python -c "import json;d=json.load(open(P));print(d['substrate_sha256'][:8],d['baseline_sha256'][:8])"`
+- **The internals sweep is a superset of the behavioural protocol.**
+  `run_internals.py` measures every `prompts/*.txt`, so each run has ten
+  `benchmarks` keys while the behavioural runs sampled nine conditions. The
+  extra one is `benchmark_goaloriented`, which has no behavioural counterpart
+  — the condition the paper calls *objective emphasis* is
+  `benchmark_urgency.txt`. Never include `benchmark_goaloriented` in a range
+  or count reported as "the seven conventional conditions"; taking it as the
+  maximum is how `-4.67` and `-0.35` reached a draft in place of `-5.51` and
+  `-0.83`.
+- **There is no library control on the current prompts.**
+  `benchmark_library.txt` was removed from `prompts/` on 19 Sep, so every run
+  records `library: null` and an empty `anti_test`. Do not describe a
+  generalization control that was not measured.
 - Result folders are `internals/results/<model>/bf16/`. `scripts/runpod.sh`
   does this for you; do not invent other names.
 - **Do not rewrite `internals/scripts/run_internals.py`, `cdim.py` or

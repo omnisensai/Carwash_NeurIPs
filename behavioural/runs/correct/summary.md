@@ -4,7 +4,8 @@
 instruction, exactly as the seven conventional conditions are. Sent text digest
 `0b8320cfb2df8522a27549d5b2a450d816737d4cd0e03cff07b5eabc9db07d9b` (the file with
 its trailing newline stripped); one distinct user string across every row.
-Run 2026-09-29, R=10, temperature 1.0. Hosted models only.
+Run 2026-09-29, R=10, temperature 1.0. Hosted models only. Where a model was
+reissued, the cell is read from the later run, keyed on (model, sample index).
 
 | model | baseline | correct_answer | substrate | state |
 |---|---|---|---|---|
@@ -12,7 +13,7 @@ Run 2026-09-29, R=10, temperature 1.0. Hosted models only.
 | Claude Opus 4.7 | 5/10 | **10/10** | 10/10 | RC |
 | Claude Sonnet 4.5 | 0/10 | **0/10** | 10/10 | RI |
 | Claude Sonnet 4.6 | 0/10 | **0/10** | 10/10 | RI |
-| Claude Sonnet 5 | 0/10 | **9/10** | 10/10 | NR |
+| Claude Sonnet 5 | 0/10 | **10/10** | 10/10 | RC |
 | DeepSeek V3.2 | 0/10 | **10/10** | 8/10 | RC |
 | GPT-3.5-turbo | 1/10 | **10/10** | 10/10 | RC |
 | GPT-4 | 0/10 | **10/10** | 10/10 | RC |
@@ -41,8 +42,18 @@ Run 2026-09-29, R=10, temperature 1.0. Hosted models only.
   `drive` --- so the cell replicates, but replication of one condition does not create
   cohort membership. Baseline at minimum, and preferably all nine conditions, would be
   needed for that.
-- `Claude Sonnet 5` returned one empty string (sample 6), leaving 9/10 and a
-  non-reproducible state rather than reproducible correctness. A re-run is pending.
+- `Claude Sonnet 5` returned one empty string in the first run (sample 9). The cause is
+  in the record: `stop_reason: max_tokens`, 80 output tokens of which 80 were extended
+  reasoning, so the whole budget went to thinking and no answer text was emitted. That
+  is a truncation by the harness, not a model declining to name an action, and it falls
+  in the same class as the transport-error reissues. `sonnet5_rerun_2026-09-29.jsonl`
+  reissues all ten samples and returns `Drive` ten times, so the cell is reproducibly
+  correct. Sonnet 5 is the only model in the corpus that emits reasoning tokens, and it
+  does so variably on identical inputs (0 tokens on some samples, 17--80 on others),
+  which is why `max_tokens = 80` was close enough to the ceiling to clip one sample.
+- Three further truncations exist in the corpus, all Sonnet 5 under the substrate
+  (samples 3, 8, 9). Each begins `**Drive**` before the cut, so the recorded action is
+  unaffected.
 - The console log shows `RateLimitError` retries before two Mistral samples. The rows
   carry no attempt counter, so those retries are not reconstructable from the log.
 

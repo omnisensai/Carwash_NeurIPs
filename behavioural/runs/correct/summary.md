@@ -33,9 +33,14 @@ Run 2026-09-29, R=10, temperature 1.0. Hosted models only.
   every one `RuntimeError: MISTRAL_API_KEY not set`, no responses. The usable Mistral
   arm is `Mistral Large` (slug `mistralai/mistral-large`) via OpenRouter, which
   returned `walk` on all ten. The failed rows are kept in the log and excluded here.
-- `GPT-4o-mini` has no baseline or substrate row anywhere in `behavioural/runs/`, so it
-  is not one of the 23 models of the study population and cannot be placed in a
-  transition.
+- `GPT-4o-mini` has been run under `correct_answer` only. It has no baseline, no
+  substrate and none of the seven conventional conditions anywhere in
+  `behavioural/runs/`, so it is not one of the 23 models of the study population and
+  cannot be placed in a transition. `gpt4omini_rerun_2026-09-29.jsonl` repeats the
+  condition independently and reproduces it exactly --- same ten sample indices, ten
+  `drive` --- so the cell replicates, but replication of one condition does not create
+  cohort membership. Baseline at minimum, and preferably all nine conditions, would be
+  needed for that.
 - `Claude Sonnet 5` returned one empty string (sample 6), leaving 9/10 and a
   non-reproducible state rather than reproducible correctness. A re-run is pending.
 - The console log shows `RateLimitError` retries before two Mistral samples. The rows

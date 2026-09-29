@@ -74,6 +74,7 @@ def main():
     ap.add_argument("--label", default=None, help="model label stored in the json")
     ap.add_argument("--baseline", default="baseline.txt")
     ap.add_argument("--substrate", default="substrate.txt")
+    ap.add_argument("--seed", type=int, default=0, help="seed for the random-direction control")
     args = ap.parse_args()
 
     out = Path(args.out)
@@ -89,7 +90,7 @@ def main():
 
     base_p = parse_prompt((PROMPTS / args.baseline).read_text())
     base_text = render(tok, base_p, args.raw)
-    _, base_m = resid_stack(model, tok, base_text, cap, aid)
+    base_stack, base_m = resid_stack(model, tok, base_text, cap, aid)
     base_M = base_m["M_sum"]
 
     res = {
@@ -108,6 +109,7 @@ def main():
     }
 
     n_layers = None
+    sub_resid = None
     for f in sorted(PROMPTS.glob("*.txt")):
         name = f.stem
         p = parse_prompt(f.read_text())
@@ -135,11 +137,46 @@ def main():
                 ph.remove()
             row.append(margin_from_logits(lg, aid)["M_sum"])
         res["grid"][name] = row
+        if name == Path(args.substrate).stem:
+            sub_resid = st.clone()
         cross = next((l for l, v in enumerate(row) if v > 0), None)
         print(f"  {name:24s} source M={src_m['M_sum']:+8.3f}  patched "
               f"{row[0]:+8.3f} -> {row[-1]:+8.3f}  max={max(row):+8.3f}  "
               f"cross={'L%d' % cross if cross is not None else '--'}", flush=True)
-        del st
+        if name != Path(args.substrate).stem:
+            del st
+
+    # --- random matched-norm control
+    # Replace the baseline residual with baseline + a random vector carrying the
+    # norm of (substrate - baseline) at that layer. Same magnitude of
+    # perturbation as the real transplant, no semantic content: if the
+    # substrate row crosses zero and this one does not, the crossing is not
+    # "any large enough nudge to the residual".
+    sub_stack_row = res["grid"].get(Path(args.substrate).stem)
+    if sub_stack_row is not None and sub_resid is not None:
+        gen = torch.Generator().manual_seed(args.seed)
+        row = []
+        for l in range(n_layers):
+            d_l = sub_resid[l + 1] - base_stack[l + 1]
+            noise = torch.randn(d_l.shape, generator=gen)
+            noise = noise / noise.norm() * d_l.norm()
+            ph = Patch(model, l, base_stack[l + 1] + noise)
+            try:
+                _, lg, _ = forward(model, tok, base_text, None, want_attn=False)
+            finally:
+                ph.remove()
+            row.append(margin_from_logits(lg, aid)["M_sum"])
+        res["random_direction"] = {
+            "M_sum": row, "seed": args.seed,
+            "note": "baseline run, residual at the answer position replaced by "
+                    "baseline + a random direction carrying the norm of "
+                    "(substrate - baseline) at that layer",
+            "max_abs_dM": max(abs(v - base_M) for v in row)}
+        rx = next((l for l, v in enumerate(row) if v > 0), None)
+        sx = next((l for l, v in enumerate(sub_stack_row) if v > 0), None)
+        print(f"random-direction control: max|dM| = {res['random_direction']['max_abs_dM']:.4f}, "
+              f"crosses {'L%d' % rx if rx is not None else 'never'} "
+              f"(substrate {'L%d' % sx if sx is not None else 'never'})", flush=True)
 
     # the self-patch control has to come back flat, or the hook is in the wrong place
     sp = res["grid"].get(Path(args.baseline).stem)

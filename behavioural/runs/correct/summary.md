@@ -20,7 +20,6 @@ reissued, the cell is read from the later run, keyed on (model, sample index).
 | GPT-4.1 | 0/10 | **0/10** | 10/10 | RI |
 | GPT-4.1-mini | 0/10 | **10/10** | 10/10 | RC |
 | GPT-4o | 0/10 | **0/10** | 10/10 | RI |
-| GPT-4o-mini | -- | **10/10** | -- | RC |
 | Kimi K2 | 4/10 | **8/10** | 10/10 | NR |
 | Llama 3.1-8B | 0/10 | **10/10** | 7/10 | RC |
 | Llama 3.2-3B | 3/10 | **10/10** | 8/10 | RC |
@@ -34,14 +33,10 @@ reissued, the cell is read from the later run, keyed on (model, sample index).
   every one `RuntimeError: MISTRAL_API_KEY not set`, no responses. The usable Mistral
   arm is `Mistral Large` (slug `mistralai/mistral-large`) via OpenRouter, which
   returned `walk` on all ten. The failed rows are kept in the log and excluded here.
-- `GPT-4o-mini` has been run under `correct_answer` only. It has no baseline, no
-  substrate and none of the seven conventional conditions anywhere in
-  `behavioural/runs/`, so it is not one of the 23 models of the study population and
-  cannot be placed in a transition. `gpt4omini_rerun_2026-09-29.jsonl` repeats the
-  condition independently and reproduces it exactly --- same ten sample indices, ten
-  `drive` --- so the cell replicates, but replication of one condition does not create
-  cohort membership. Baseline at minimum, and preferably all nine conditions, would be
-  needed for that.
+- `GPT-4o-mini` appeared in the runner's model list for this condition only. It has no
+  baseline and so was never screened for the study population. Its rows have been
+  removed rather than carried as an unplaceable cell. Note that it is a different model
+  from `GPT-4.1-mini`, which is in the population and has all ten conditions.
 - `Claude Sonnet 5` returned one empty string in the first run (sample 9). The cause is
   in the record: `stop_reason: max_tokens`, 80 output tokens of which 80 were extended
   reasoning, so the whole budget went to thinking and no answer text was emitted. That

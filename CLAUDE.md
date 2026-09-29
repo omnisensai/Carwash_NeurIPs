@@ -75,7 +75,15 @@ numbers move by ~0.6 nats between bf16 and nf4. Run under `tmux` or `nohup`
 so a dropped SSH session does not kill the run.
 
 Sanity check against `internals/RESULTS.md`: Llama 3.2-3B should give
-M = −0.50 at baseline and +0.18 under the substrate, transplant at L13.
+M = −0.38 at baseline and +0.17 under the substrate, transplant at L13
+(29 Sep run; the September pass gave −0.50 / +0.18 for the same two cells).
+
+`scripts/patch_grid.py` patches *every* condition into the baseline, not only
+the substrate, and writes `patch_grid.json` beside `internals.json`. Run it
+after `runpod_margins.sh` on the same pod — it cross-checks its own substrate
+row against that file's `patching` array, and the check only means anything if
+the two are from the same pass. `scripts/runpod_patchgrid.sh` is the driver and
+`scripts/plot_patch_grid.py` draws the figure.
 
 ## Things that went wrong before (so you do not repeat them)
 
@@ -88,6 +96,20 @@ M = −0.50 at baseline and +0.18 under the substrate, transplant at L13.
   actually lands.
 - `device_map="auto"` on a shared single card spills layers to CPU and
   bitsandbytes refuses; the script forces `{"": 0}` on one card.
-- Two runs of the same model on different pods differ in the second decimal
-  (Qwen3-8B: −14.0745 vs −14.0627). Cite one run per model; do not take the
-  baseline from one and an ablation from another.
+- Two runs of the same model on different pods differ, and by more than the
+  second decimal: between the September pass and the 29 Sep re-run Qwen3-8B's
+  baseline moved −14.07 → −13.66 and Llama 3.2-3B's −0.50 → −0.38, on identical
+  prompts, torch and transformers. Signs, crossings and transplant layers did
+  not move. Cite one run per model; do not take the baseline from one and an
+  ablation from another. The 29 Sep run is the canonical one.
+- `analyse_prompt` builds `_stack` *after* calling `decision_margin`, which
+  fires the `Capture` hooks again. It is only correct because every real cell
+  decides at step 0, so the last hook firing is still a full-prompt pass whose
+  last position is the answer position. If a model ever returns
+  `decision.step` other than 0, that run's `patching`, `diff`, `lens` and `dla`
+  are captured at a *generated* token instead and must not be cited. Check
+  `decision.step` before citing anything derived from the residual stream.
+- `lens.final_row_matches_model` is the script's own check that the logit lens
+  reproduces the model's logits at the last row. It is False for
+  qwen2.5-1.5b/baseline and qwen3-8b/substrate in the 29 Sep run. Nothing in
+  the paper rests on the lens, but do not start citing it without looking.

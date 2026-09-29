@@ -46,6 +46,19 @@ declare -A HF=(
   # is all it takes there. On one card it will OOM; that is the intended
   # failure, not something to work around by quantizing.
   [llama-3.3-70b]=unsloth/Llama-3.3-70B-Instruct
+  # Not in the default sweep. Dense, bf16, single 80 GB card; they extend the
+  # Qwen2.5 and Qwen3 ladders past the 4B threshold the paper reports. They have
+  # no behavioural counterpart, so their margins cannot be checked against an
+  # RC/NR/RI state -- report them as a scale supplement, not as fleet members.
+  # Qwen3-30B-A3B is deliberately absent: patching a residual into a
+  # mixture-of-experts run does not transplant the routing, so it is a different
+  # experiment from the one these scripts implement.
+  [qwen2.5-14b]=Qwen/Qwen2.5-14B-Instruct
+  [qwen2.5-32b]=Qwen/Qwen2.5-32B-Instruct
+  [qwen3-14b]=Qwen/Qwen3-14B
+  [qwen3-32b]=Qwen/Qwen3-32B
+  # 145 GB in bf16: needs more than one card, like llama-3.3-70b.
+  [qwen2.5-72b]=Qwen/Qwen2.5-72B-Instruct
 )
 MODELS=${*:-llama-3.2-3b llama-3.1-8b qwen2.5-0.5b qwen2.5-1.5b qwen2.5-3b qwen2.5-7b qwen3-0.6b qwen3-4b-2507 qwen3-8b}
 

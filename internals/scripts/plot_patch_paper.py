@@ -5,7 +5,9 @@ One panel per model. Each curve is M at the answer position of the BASELINE run
 with one condition's residual transplanted at layer l. The substrate is heavy
 red, the control dashed blue (an oracle: it states the answer, and is plotted
 for completeness, not as a comparison), the seven conventional conditions thin
-and coloured, and the baseline self-patch is the flat dotted reference.
+and coloured, The dotted horizontal line is the unpatched baseline margin. The self-patch
+check (baseline as its own donor) is flat on that line by construction and is
+reported in the text rather than plotted.
 
     python scripts/plot_patch_paper.py                 # -> patch_paper.png
     python scripts/plot_patch_paper.py --out ../paper/fig_patching.pdf
@@ -28,7 +30,9 @@ for ax,(mid,title) in zip(axes,models):
     d=json.load(open(HERE/f"results/{mid}/bf16/patch_grid.json"))
     g=d["grid"]; n=d["n_layers"]; b=d["baseline_M_sum"]; x=list(range(n))
     ax.axhline(0,color="0.4",lw=1.0)
-    ax.plot(x,g["baseline"],color="0.45",lw=1.4,ls=(0,(1,2)),label="baseline (self-patch)")
+    # the self-patch (baseline donor) is flat at the baseline margin by
+    # construction; it is a validity check, reported in the text, not a curve
+    ax.axhline(b,color="0.45",lw=1.0,ls=(0,(1,3)),zorder=1)
     for i,(k,lab) in enumerate(CONV):
         ax.plot(x,g[k],lw=1.2,color=plt.cm.tab20(i*2+1),alpha=.95,label=lab)
     ax.plot(x,g["benchmark_correct"],color="#1f77b4",lw=2.0,ls="--",label="control: answer stated (oracle)")

@@ -47,11 +47,14 @@ for ax,(mid,title) in zip(axes,models):
                     xytext=(10,-16),fontsize=9,color="#d62728",weight="bold")
     ax.set_title(f"{title}: baseline prompt, donor residual patched at layer $l$",fontsize=11)
     ax.set_xlabel("layer $l$ at which the residual is replaced",fontsize=10)
-    ax.set_ylabel("M = log P(drive) − log P(walk)   [nats]",fontsize=10)
+    # every point is the model's FINAL output margin under one intervention,
+    # not a logit-lens reading of layer l
+    ax.set_ylabel("final-output M = log P(drive) − log P(walk)   [nats]",fontsize=10)
     ax.tick_params(labelsize=9); ax.margins(x=.01)
 axes[0].legend(fontsize=9,loc="upper left",framealpha=.95,ncol=1)
-fig.suptitle("Patching every condition into the baseline run. No donor text is present in the patched pass.",
-             fontsize=12)
+fig.suptitle("Patching every condition into the baseline run. Each point is one full forward pass:\n"
+             "the donor residual replaces the baseline's at layer $l$, and M is read at the model's output.",
+             fontsize=11.5)
 ap=argparse.ArgumentParser()
 ap.add_argument("--out",default="patch_paper.png")
 args=ap.parse_args()

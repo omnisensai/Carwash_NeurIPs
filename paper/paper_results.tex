@@ -253,11 +253,14 @@ prompts tested only the substrate's state carries the reversal.
 \centering
 \includegraphics[width=\textwidth]{fig_patching}
 \caption{Every condition patched into the baseline run, on the two models with
-both a reproducibly incorrect baseline and a substrate reversal. Each curve is
-the decision margin $M$ at the answer position of the \emph{baseline} run when
-the residual stream at that position is replaced, after layer $l$, with the
-residual of one donor condition at the same position and layer. No donor text is
-present in the patched forward pass. The dashed grey line is the baseline
+both a reproducibly incorrect baseline and a substrate reversal. Each point is one complete forward
+pass of the \emph{baseline} prompt in which the residual stream at the answer
+position is replaced, after layer $l$, with the residual of one donor condition
+at the same position and layer; $M$ is then read from the model's output logits.
+The abscissa is therefore where the intervention was made, not where the
+quantity is read: every point on every curve is a final-output margin, not a
+logit-lens reading of layer $l$. No donor text is present in the patched forward
+pass. The dashed grey line is the baseline
 patched with its own residual, flat at the unpatched margin by construction. The
 substrate crosses zero at L15 and L24; no conventional donor crosses at any
 layer, and several end below the unpatched baseline. The control condition,

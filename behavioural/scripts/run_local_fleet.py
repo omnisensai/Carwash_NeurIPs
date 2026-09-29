@@ -141,6 +141,12 @@ CONDITIONS: dict[str, dict] = {
         intervention="threat", description="threat",
         sha="d853a7fe5ff079a99415ae67e58fb0cda508e06d9e3d22317700e0bf62cb8d85",
         sys_sha="NONE"),
+    "correct": dict(
+        file="benchmark_correct.txt", role="user", max_tokens=80,
+        intervention="correct_answer",
+        description="correct answer explicitly stated in prompt",
+        sha="0b8320cfb2df8522a27549d5b2a450d816737d4cd0e03cff07b5eabc9db07d9b",
+        sys_sha="NONE"),
     "encourage": dict(
         file="benchmark_encourage.txt", role="user", max_tokens=80,
         intervention="encouragement", description="encouragement",
@@ -309,7 +315,7 @@ def main() -> None:
     ap.add_argument("--device", default="cuda", help="local backend only: cuda or cpu")
     ap.add_argument("--seed", type=int, default=0,
                     help="base seed; sample i of a cell uses seed + i")
-    ap.add_argument("--outdir", default=None, help="default: runs/qwen/")
+    ap.add_argument("--outdir", default=None, help="default: behavioural/runs/local/")
     ap.add_argument("--dry-run", action="store_true",
                     help="check the prompts against the published shas and stop")
     args = ap.parse_args()
@@ -349,7 +355,7 @@ def main() -> None:
         import torch, transformers
         versions = {"torch": torch.__version__, "transformers": transformers.__version__}
 
-    outdir = Path(args.outdir) if args.outdir else REPO / "runs" / "local"
+    outdir = Path(args.outdir) if args.outdir else REPO / "behavioural" / "runs" / "local"
     outdir.mkdir(parents=True, exist_ok=True)
     stamp = _dt.date.today().isoformat()
 

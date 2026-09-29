@@ -46,10 +46,20 @@ for p in sorted(PROMPTS.glob("*.txt")):
         if not txt:
             continue
         h = hashlib.sha256(txt.encode()).hexdigest()
-        mark = "ok  " if h in recorded else "NOT IN BEHAVIOURAL RUNS"
-        if h not in recorded:
+        if h in recorded:
+            print(f"   ok   {p.name:30} {part:6} {h[:8]}")
+            continue
+        # run_internals strips trailing whitespace before hashing; the
+        # behavioural runs sent some files with their trailing newline. Same
+        # text, two digests -- match on the stripped form and say so.
+        hit = next((rh for rh, rtxt in recorded.items()
+                    if rtxt.rstrip() == txt.rstrip()), None)
+        if hit:
+            print(f"   ok   {p.name:30} {part:6} {h[:8]}  "
+                  f"(behavioural recorded {hit[:8]}: same text, trailing newline)")
+        else:
+            print(f"   NOT IN BEHAVIOURAL RUNS {p.name:30} {part:6} {h[:8]}")
             fail += 1
-        print(f"   {mark} {p.name:30} {part:6} {h[:8]}")
 
 # --- 2. token sets ----------------------------------------------------------
 print(f"\n2. answer token sets for {args.model}")

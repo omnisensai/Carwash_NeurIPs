@@ -175,10 +175,12 @@ and the effect is not present in models below roughly two billion parameters.
 the intended action. \emph{Best conv.} is the largest shift from baseline
 achieved by any of the seven conventional conditions, chosen per model.
 \emph{Transplant} is the shallowest layer at which patching the substrate-run
-residual into the baseline run reverses the baseline preference; it is undefined
-for the three models that already favour the intended action at baseline. Llama
-3.3-70B was measured before the control condition existed and does not have a
-control margin.}
+residual into the baseline run reverses the baseline preference: \mbox{---}
+means the transplant was run at every layer and none reverses it, while n/a
+means the model already favours the intended action at baseline, so there is no
+preference to reverse. The lower block holds those three models. Llama
+3.3-70B does not fit on one card and has a substrate transplant only; the
+conventional-donor sweep of Figure~\ref{fig:patching} covers the other eight.}
 \label{tab:margins}
 \begin{tabular}{lrrrrrr}
 \toprule

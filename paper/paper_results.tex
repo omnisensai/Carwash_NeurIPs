@@ -169,6 +169,16 @@ Section~\ref{sec:behavioural-results} therefore reflect a shift in the
 distribution the model samples from, not a favourable draw at temperature 1.0,
 and the effect is not present in models below roughly two billion parameters.
 
+A positive margin is not the same as a correct answer. The three models in the
+lower block of Table~\ref{tab:margins} favour the intended action at the answer
+position while remaining non-reproducible when sampled: at $M=+0.50$ the model
+prefers the intended action in roughly $62\%$ of draws, and Qwen2.5-0.5B,
+Qwen2.5-1.5B and Qwen3-0.6B return $7/10$, $6/10$ and $7/10$ at baseline. They
+are therefore part of the 23-model population, which excludes only models that
+are reproducibly correct at baseline. What their margins show is that an
+unreliable model can lean the right way and still fail to act on it, which is
+the state the substrate is asked to remove.
+
 \begin{table}[t]
 \centering
 \caption{Decision margin $M$ in nats at the answer position, bf16; $M>0$ favours

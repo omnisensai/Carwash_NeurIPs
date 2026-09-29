@@ -50,22 +50,28 @@ for m in $MODELS; do
 done
 
 log "verifying the conditions measured match the behavioural protocol"
-python - <<'PY'
-import json, glob, sys
+MODELS="$MODELS" python - <<'PY'
+import json, os, sys
 want = {"baseline","substrate","benchmark_correct","benchmark_CoT","benchmark_encourage",
         "benchmark_expert","benchmark_hallucination","benchmark_nomistakes",
         "benchmark_threat","benchmark_urgency"}
 bad = 0
-for f in sorted(glob.glob("results/*/bf16/internals.json")):
+# only the models this invocation was asked to run; the others still hold their
+# earlier runs and are not this script's business.
+for name in os.environ.get("MODELS", "").split():
+    f = f"results/{name}/bf16/internals.json"
+    if not os.path.exists(f):
+        print(f"  {name:16} NO RESULT WRITTEN"); bad += 1; continue
     d = json.load(open(f)); got = set(d.get("benchmarks", {}))
-    name = f.split("/")[1]
     sha = str(d.get("substrate_sha256"))[:8]
     if got == want and sha == "340228f9":
         print(f"  {name:16} 10 conditions, substrate {sha}")
     else:
         print(f"  {name:16} MISMATCH  missing={sorted(want-got)} extra={sorted(got-want)} sha={sha}")
         bad += 1
-print("  FAIL" if bad else "  every run measures the ten behavioural conditions")
+print("  FAIL" if bad else "  every run in this pass measures the ten behavioural conditions")
+print("  note: llama-3.3-70b is not re-run here (141 GB, needs multi-GPU); its"
+      "\n        September run keeps benchmark_goaloriented and has no control margin.")
 sys.exit(1 if bad else 0)
 PY
 log "done -- commit internals/results/*/bf16/"

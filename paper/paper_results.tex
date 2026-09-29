@@ -167,8 +167,20 @@ Qwen2.5-0.5B the substrate moves the margin the wrong way. On Llama 3.2-3B the
 substrate is ahead by $0.14$ nats, which given the run-to-run variation we
 observe on this model is not a separation we would rely on. The $0/10 \to 10/10$ transitions of
 Section~\ref{sec:behavioural-results} therefore reflect a shift in the
-distribution the model samples from, not a favourable draw at temperature 1.0,
-and the effect is not present in models below roughly two billion parameters.
+distribution the model samples from, not a favourable draw at temperature 1.0.
+
+The nine models divide sharply, and not by size alone. The five at four billion
+parameters and above are all confidently wrong at baseline, with margins from
+$-3.69$ to $-21.75$; the four below are all within $2.25$ nats of indifference,
+between $-0.38$ and $+2.25$. The substrate produces a shift of at least $5.07$
+nats on every model in the first group and at most $2.37$ on every model in the
+second. The intervention therefore requires a model that holds a position to be
+moved off one: below four billion parameters these models have no settled answer
+for a specification to displace, and the measurement has nothing to act on. This
+bounds the claim rather than weakening it. A specification that made a
+half-billion-parameter model reliable would be a claim about replacing scale,
+which is not what we observe or assert; what we observe is that models capable
+enough to be confidently wrong can be moved by specification alone.
 
 A positive margin is not the same as a correct answer. The three models in the
 lower block of Table~\ref{tab:margins} favour the intended action at the answer

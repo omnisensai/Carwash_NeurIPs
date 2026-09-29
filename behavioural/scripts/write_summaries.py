@@ -30,13 +30,15 @@ for folder,cond in FOLDER_COND.items():
             if not ln.strip(): continue
             d=json.loads(ln)
             if str(d.get('error'))!='None': errs[str(d['error'])[:60]]+=1; continue
-            k=(d['model_label'],str(d['sample_index']))
-            if k in rows: reissued[d['model_label']]+=1
+            arm='local' if d.get('backend')=='local' else 'hosted'
+            k=(d['model_label'],arm,str(d['sample_index']))
+            if k in rows: reissued[d['model_label']]+=1  # same arm, same sample
             if k not in rows or d['timestamp']>rows[k]['timestamp']: rows[k]=d
             if d.get('prompt_sha256'): shas.add(d['prompt_sha256'][:8])
             if d.get('system_sha256') and d['system_sha256']!='NONE': sys_shas.add(d['system_sha256'][:8])
     by=collections.defaultdict(list)
-    for (m,i),d in rows.items(): by[m].append(act(d.get('response_text')))
+    for (m,arm,i),d in rows.items():
+        by[(m,arm)].append(act(d.get('response_text')))
     L=[f"# {cond}\n"]
     L.append(f"`prompts/{FILE[cond]}`. {len(files)} files, {len(rows)} usable rows, "
              f"{len(by)} models, R=10, temperature 1.0.\n")
@@ -45,9 +47,10 @@ for folder,cond in FOLDER_COND.items():
     tally=collections.Counter()
     L.append("| model | intended actions | state |")
     L.append("|---|---|---|")
-    for m in sorted(by):
-        d,n,s=state(by[m]); tally[s]+=1
-        L.append(f"| {m} | {d}/{n} | {s} |")
+    for m,arm in sorted(by):
+        d,n,s=state(by[(m,arm)]); tally[s]+=1
+        label=f"{m} ({arm})" if (m,'local' if arm=='hosted' else 'hosted') in by else m
+        L.append(f"| {label} | {d}/{n} | {s} |")
     L.append("")
     L.append(f"RC {tally['RC']} · NR {tally['NR']} · RI {tally['RI']} "
              f"(over all {len(by)} model arms present in this folder, hosted and local counted separately).\n")

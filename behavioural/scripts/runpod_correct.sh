@@ -62,4 +62,7 @@ for m in sorted(seen):
 print("  FAIL" if bad else "  all rows carry prompt 0b8320cf under correct_answer")
 sys.exit(1 if bad else 0)
 PY
-log "done -- commit $OUT/local_*.jsonl"
+log "regenerating the per-condition summaries"
+python behavioural/scripts/write_summaries.py
+
+log "done -- commit $OUT/local_*.jsonl and the refreshed summary.md files"

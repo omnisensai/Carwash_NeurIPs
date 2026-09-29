@@ -1,34 +1,27 @@
-# Expert-role results — 2026-09-19
+# expert_role
 
-Fleet under prompt benchmark_expert.txt
-temperature 1.0, 10 samples per model.
+`prompts/benchmark_expert.txt`. 17 files, 170 usable rows, 17 models, R=10, temperature 1.0.
 
-## Fleet distribution
+Sent-text digest: `54b1a7d6`.
 
-| Model | Walk | Drive | Notes |
-|---|---:|---:|---|
-| Claude Opus 4.7 | 0 | 10 | flipped to drive — was 5/5 |
-| Claude Haiku 4.5 | 1 | 9 | flipped — was 10/0 walk |
-| Claude Sonnet 5 | 0 | 10 | complete flip — was 10/0 walk |
-| Claude Sonnet 4.6 | 5 | 5 | to the boundary — was 10/0 walk |
-| Claude Sonnet 4.5 | 10 | 0 | saturated, unmoved |
-| GPT-4 | 5 | 5 | to the boundary — was 10/0 walk |
-| GPT-4o | 10 | 0 | saturated, unmoved |
-| GPT-4.1 | 10 | 0 | saturated, unmoved |
-| GPT-4.1-mini | 10 | 0 | saturated, unmoved |
-| GPT-3.5-turbo | 1 | 9 | flipped — was 9/1 |
-| Llama 3.2-3B | 5 | 5 | was 7/3 |
-| Llama 3.1-8B | 10 | 0 | saturated, unmoved |
-| Llama 3.3-70B | 10 | 0 | saturated, unmoved |
-| Llama 4-Maverick | 10 | 0 | saturated, unmoved |
-| Mistral Large | 10 | 0 | saturated, unmoved |
-| DeepSeek V3.2 | 10 | 0 | saturated, unmoved |
-| Kimi K2 | 1 | 9 | flipped — was 6/4 |
+| model | intended actions | state |
+|---|---|---|
+| Claude Haiku 4.5 | 9/10 | NR |
+| Claude Opus 4.7 | 10/10 | RC |
+| Claude Sonnet 4.5 | 0/10 | RI |
+| Claude Sonnet 4.6 | 5/10 | NR |
+| Claude Sonnet 5 | 10/10 | RC |
+| DeepSeek V3.2 | 0/10 | RI |
+| GPT-3.5-turbo | 9/10 | NR |
+| GPT-4 | 5/10 | NR |
+| GPT-4.1 | 0/10 | RI |
+| GPT-4.1-mini | 0/10 | RI |
+| GPT-4o | 0/10 | RI |
+| Kimi K2 | 9/10 | NR |
+| Llama 3.1-8B | 0/10 | RI |
+| Llama 3.2-3B | 5/10 | NR |
+| Llama 3.3-70B | 0/10 | RI |
+| Llama 4-Maverick | 0/10 | RI |
+| Mistral Large | 0/10 | RI |
 
-## Aggregate (17 of 17 models measured)
-
-- **108 walk / 62 drive** across 170 samples = **63.5% confidently wrong**
-- **9 models** saturate walk (10/0); **8 models moved**
-- Baseline for comparison: 157 walk / 13 drive across 170 = 92.4%
-- Largest intervention effect measured: 29 points. Encouragement 90.5%, CoT 85.6%
-
+RC 2 · NR 6 · RI 9 (over all 17 model arms present in this folder, hosted and local counted separately).

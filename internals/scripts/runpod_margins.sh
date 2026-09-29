@@ -35,6 +35,12 @@ declare -A HF=(
   [qwen3-0.6b]=Qwen/Qwen3-0.6B
   [qwen3-4b-2507]=Qwen/Qwen3-4B-Instruct-2507
   [qwen3-8b]=Qwen/Qwen3-8B
+  # NOT in the default sweep: 141 GB in bf16 needs >1 card. On a multi-GPU
+  # pod run_internals.py's load() sets device_map=auto by itself, so
+  #   bash scripts/runpod_margins.sh llama-3.3-70b
+  # is all it takes there. On one card it will OOM; that is the intended
+  # failure, not something to work around by quantizing.
+  [llama-3.3-70b]=unsloth/Llama-3.3-70B-Instruct
 )
 MODELS=${*:-llama-3.2-3b llama-3.1-8b qwen2.5-0.5b qwen2.5-1.5b qwen2.5-3b qwen2.5-7b qwen3-0.6b qwen3-4b-2507 qwen3-8b}
 

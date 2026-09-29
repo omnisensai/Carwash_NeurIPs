@@ -141,9 +141,11 @@ Substrate (system) & \texttt{prompts/substrate.txt} & 585 \\
 \end{table}
 
 \noindent
-The repository contains one further conventional prompt,
-\texttt{prompts/benchmark\_goaloriented.txt} (``The goal is to wash my car, I
-must do this.'', digest \texttt{52eb5d83}). It is not one of the seven
-behavioural conditions. The internals runs measure it alongside the seven; its
+The internals runs record one further conventional prompt, \texttt{benchmark\_
+goaloriented} (``The goal is to wash my car, I must do this.'', digest
+\texttt{52eb5d83}), because the sweep reads every file in \texttt{prompts/} as
+it stood when those runs were made. It was never one of the seven behavioural
+conditions and the file has since been removed from \texttt{prompts/}; its
 margin is negative in every model whose baseline margin is negative, and it is
-excluded from the ranges reported in Section~\ref{sec:internal-results}.
+excluded from every range reported in
+Section~\ref{sec:internal-results}.

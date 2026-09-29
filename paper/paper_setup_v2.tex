@@ -117,7 +117,13 @@ correctness. Hosted models are evaluated behaviourally only. For
 open-weight models, we additionally measure next-token preference and
 internal activations using the full output distribution.
 
-At the position predicting the first answer token, we define
+Internal quantities are read at the \emph{answer position}: the final
+token of the prompt once the model's chat template has been applied,
+whose next-token distribution is the model's first answer word. These
+measurements are teacher-forced --- a single forward pass over the
+prompt, with no generation --- so what is measured is the distribution
+the model would sample from rather than a sampled outcome. At that
+position we define
 \begin{equation}
     M(x) = \log \sum_{t \in \mathcal{D}} P(t \mid x)
          - \log \sum_{t \in \mathcal{W}} P(t \mid x),
@@ -125,7 +131,9 @@ At the position predicting the first answer token, we define
 \end{equation}
 where $\mathcal{D}$ and $\mathcal{W}$ contain the measured token forms
 of each action, including case and leading-space variants. Positive
-$M$ favours \texttt{DRIVE}. The effect of intervention $u$ relative
+$M$ favours \texttt{DRIVE}. This is the logit-difference readout
+standard in circuit analysis \citep{wang2023interpretability}, summed
+over surface forms because the casing models emit varies. The effect of intervention $u$ relative
 to the baseline input is
 \begin{equation}
     \Delta M(u) = M(u) - M(\emptyset).
@@ -156,16 +164,32 @@ in Section~\ref{sec:operational-reproducibility} before any internal
 analysis is performed.
 
 Stage two studies the baseline-to-substrate transition in open-weight
-models. At each tested layer, we replace the baseline residual-stream
-state at the first answer-token prediction position with the
-corresponding state from the substrate-conditioned run, leaving all
-other positions unchanged and completing the baseline computation.
-No substrate text is present in the patched context. We then
-measure the final decision margin.
+models by \emph{activation patching}, the causal-mediation technique
+established for language models by \citet{vig2020causal} and
+\citet{meng2022locating} and applied to circuit analysis by
+\citet{wang2023interpretability}. We run the substrate-conditioned
+prompt and record the residual-stream state at the answer position at
+every layer. We then run the baseline prompt and, at one layer, replace
+the residual at that same position with the recorded state, leaving
+every other position and every other layer untouched and completing the
+baseline computation. No substrate text is present in the patched
+context. We read the final decision margin, and repeat the procedure at
+each layer.
+
+Two aspects differ from the most common form of the technique. The
+source and the receiver are two natural prompt conditions rather than a
+clean run and a corrupted one, so no noised or ablated input enters the
+comparison \citep{zhang2024towards}. And the intervention is anchored to
+a behavioural transition established in advance: internals are
+interpreted only for model--condition pairs whose operational state is
+already fixed at both ends by
+Equation~\eqref{eq:reproducible-correctness}, rather than for a single
+successful generation.
 
 A change in margin establishes a causal effect of the transplanted
 state on the measured preference; a sign reversal establishes that the
 state is sufficient, under the remaining baseline computation, to
 reverse that preference. It does not establish reproducibly correct
-behaviour, localise where the decision is formed, or identify the
-effect of an individual constraint.
+behaviour, localise where the decision is formed
+\citep{zhang2024towards}, or identify the effect of an individual
+constraint.

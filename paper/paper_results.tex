@@ -129,104 +129,138 @@ Qwen2.5-0.5B & 7/10 & 3/10 & Non-reproducible $\rightarrow$ non-reproducible \\
 \end{table}
 
 % ============================================================
-\subsection{Internal Causal Results}
+\subsection{Internal Measurements}
 \label{sec:internal-results}
 
-We measured internal quantities on nine of the 23 models, running their weights
-locally, on the same prompt files as the behavioural runs. Eight are the
-locally sampled models of Table~\ref{tab:per-model}; Llama 3.3-70B is sampled
-behaviourally through a hosted API and run locally for this measurement. The
-readout is the decision margin
+The behavioural result counts sampled outputs. This section measures the same
+intervention inside the models whose weights we hold, to establish two things
+the counts cannot: that the change in output corresponds to a large change in
+the underlying decision distribution rather than to favourable sampling, and
+that it is produced by the state the substrate puts the model in rather than by
+the disturbance of supplying some alternative framing.
+
+Nine of the 23 models were run locally in bf16 on the same prompt files as the
+behavioural runs. The readout is the decision margin
 \begin{equation}
 M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t)
 \end{equation}
-in nats, at the position that predicts the first answer token, teacher-forced, under
-the chat template, in bf16; $M > 0$ favours the intended action.
+in nats at the \emph{answer position} --- the final token of the prompt once the
+model's chat template has been applied, whose next-token distribution is the
+model's first answer word. The measurement is teacher-forced: one forward pass
+over the prompt, no generation, so what is measured is the distribution the
+model would sample from rather than a sampled outcome. $M>0$ favours the
+intended action.
 
-\paragraph{Baseline and substrate-conditioned decision preference.}
-Six of the nine prefer the incorrect action at baseline, with margins from $-0.50$
-to $-22.00$ nats (Table~\ref{tab:margins}). The remaining three are
-non-reproducible behaviourally but favour the intended action at the answer position
-and so cannot exhibit a margin reversal. Under the substrate, four of the six cross
-zero.
-
-On Llama 3.3-70B, whose baseline margin is $-13.65$, the seven conventional
-conditions of Table~\ref{tab:conditions} span $-18.21$ to $-5.51$ nats; the
-substrate reaches $+15.01$. On Llama 3.1-8B they span $-4.57$ to $-0.83$ against a
-baseline of $-3.71$; the substrate reaches $+1.51$. No conventional intervention
-crosses zero in either model.
+\paragraph{The behavioural transition is a large distributional shift.}
+Under the substrate the margin moves toward the intended action in eight of the
+nine models, by a median of $5.07$ nats and by as much as $28.67$ on
+Llama 3.3-70B (Table~\ref{tab:margins}). The single exception is Qwen2.5-0.5B, at
+$-0.93$. Against this, the \emph{best} of the seven conventional conditions,
+selected per model and so favouring them, moves the margin by a median of
+$1.35$ nats. The substrate exceeds the best conventional condition in seven of
+the nine, and the separation widens with model size: on the three largest it is
+$28.67$ against $8.15$, $21.16$ against $5.19$, and $8.62$ against $0.62$ nats.
+Both exceptions are among the three smallest models: on Qwen2.5-1.5B the best
+conventional condition is marginally ahead ($+1.35$ against $+1.12$), and on
+Qwen2.5-0.5B the substrate moves the margin the wrong way. On Llama 3.2-3B the
+substrate is ahead by $0.14$ nats, which given the run-to-run variation we
+observe on this model is not a separation we would rely on. The $0/10 \to 10/10$ transitions of
+Section~\ref{sec:behavioural-results} therefore reflect a shift in the
+distribution the model samples from, not a favourable draw at temperature 1.0,
+and the effect is not present in models below roughly two billion parameters.
 
 \begin{table}[t]
 \centering
-\caption{Decision margin $M$ in nats at the answer position; $M>0$ favours the
-intended action. \emph{Transplant} is the shallowest layer at which patching the
-substrate-run residual into the baseline run reverses the baseline preference. The
-lower block lists the three models that favour the intended action at the answer
-position at baseline and so cannot exhibit a margin reversal.}
+\caption{Decision margin $M$ in nats at the answer position, bf16; $M>0$ favours
+the intended action. \emph{Best conv.} is the largest shift from baseline
+achieved by any of the seven conventional conditions, chosen per model.
+\emph{Transplant} is the shallowest layer at which patching the substrate-run
+residual into the baseline run reverses the baseline preference; it is undefined
+for the three models that already favour the intended action at baseline. Llama
+3.3-70B was measured before the control condition existed and does not have a
+control margin.}
 \label{tab:margins}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-Model & Layers & Baseline & Substrate & Transplant \\
+Model & Layers & Baseline & Substrate & Shift & Best conv. & Transplant \\
 \midrule
-Llama 3.2-3B   & 28 & $-0.50$  & $+0.18$  & L13 \\
-Llama 3.1-8B   & 32 & $-3.71$  & $+1.51$  & L15 \\
-Llama 3.3-70B  & 80 & $-13.65$ & $+15.01$ & L38 \\
-Qwen3-8B       & 36 & $-14.07$ & $+7.25$  & L24 \\
-Qwen2.5-7B     & 28 & $-10.50$ & $-1.50$  & --- \\
-Qwen3-4B-2507  & 36 & $-22.00$ & $-5.50$  & --- \\
+Llama 3.3-70B  & 80 & $-13.65$ & $+15.01$ & $+28.67$ & $+8.15$ & L38 \\
+Qwen3-8B       & 36 & $-13.66$ & $+7.50$  & $+21.16$ & $+5.19$ & L24 \\
+Llama 3.1-8B   & 32 & $-3.69$  & $+1.39$  & $+5.07$  & $+2.75$ & L15 \\
+Llama 3.2-3B   & 28 & $-0.38$  & $+0.17$  & $+0.55$  & $+0.41$ & L13 \\
+Qwen3-4B-2507  & 36 & $-21.75$ & $-5.75$  & $+16.00$ & $+7.37$ & --- \\
+Qwen2.5-7B     & 28 & $-10.50$ & $-1.87$  & $+8.62$  & $+0.62$ & --- \\
 \midrule
-Qwen2.5-0.5B   & 24 & $+0.75$  & $-0.47$  & n/a \\
-Qwen2.5-1.5B   & 28 & $+1.53$  & $+2.02$  & n/a \\
-Qwen3-0.6B     & 28 & $+2.25$  & $+4.37$  & n/a \\
+Qwen3-0.6B     & 28 & $+2.25$  & $+4.62$  & $+2.37$  & $+0.25$ & n/a \\
+Qwen2.5-1.5B   & 28 & $+0.90$  & $+2.02$  & $+1.12$  & $+1.35$ & n/a \\
+Qwen2.5-0.5B   & 24 & $+0.50$  & $-0.43$  & $-0.93$  & $+0.62$ & n/a \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\paragraph{Activation transplantation.}
-We run the baseline prompt and replace the residual stream at the answer position,
-at a single layer, with the residual from the substrate run at the same position and
-layer. No substrate token is present in the patched forward pass. In each of the
-four models whose preference the substrate reverses, this transplant alone reverses
-the baseline preference.
+\paragraph{The effect is carried by one state, and it is not generic.}
+We run the \emph{baseline} prompt and replace the residual stream at the answer
+position, at a single layer, with the residual from the substrate run at the
+same position and layer. No substrate token is present anywhere in the patched
+forward pass. On the three models that the substrate reverses behaviourally and
+that prefer the incorrect action at the answer position, this transplant alone
+reverses the preference: from layer 15 of 32 on Llama 3.1-8B, 24 of 36 on
+Qwen3-8B and 38 of 80 on Llama 3.3-70B. Below those layers the patched margin
+stays within half a nat of its unpatched value; above them the patched run
+selects the intended action. Patching a run with its own residual gives
+$\Delta M = 0.0000$ at every layer of every model, so the procedure introduces
+nothing by itself.
 
-Three controls were run. Patching a run with its own residual gives $\Delta M =
-0.00$ in all 96 cells per model. Patching a random direction of matched norm gives a
-maximum $|\Delta M|$ of $0.87$, $0.39$ and $2.00$ nats on Llama 3.3-70B,
-Llama 3.1-8B and Qwen3-8B, against $1.90$, $1.98$ and $14.50$ nats for the real
-substrate-minus-baseline difference of that same norm in the same runs. Removing every constraint line and retaining
-only the substrate's section headers gives $-4.07$ against a baseline of $-3.71$ on
-Llama 3.1-8B, $-14.92$ against $-13.65$ on Llama 3.3-70B, and $-13.50$ against
-$-14.07$ on Qwen3-8B.
+We then repeated the transplant with each of the seven conventional conditions
+as the donor, at the same position and the same layers
+(Figure~\ref{fig:patching}). This sweep covers the eight models that fit on one
+card; Llama 3.3-70B requires more than one and has a substrate transplant only.
+Across the five of those eight that prefer the incorrect action at baseline, no
+conventional donor reverses the preference at any layer, with one marginal
+exception: expert role on Llama 3.2-3B, which reaches $+0.10$ nats on the model
+whose entire decision spans $0.55$. The donors are not inert: they move the
+margin by up to $58\%$ of the substrate's own displacement. But the movement
+does not carry the decision, and its direction depends on the donor --- on
+Qwen3-8B five of the seven move the margin \emph{further} from the intended
+action, chain-of-thought by $4.3$ nats, and on Llama 3.1-8B the threat condition
+ends below the unpatched baseline. Overwriting the residual at this position
+therefore does not produce a generic drift toward the intended action; what the
+patched model decides depends on which state is transplanted, and among the
+prompts tested only the substrate's state carries the reversal.
 
-\paragraph{Layerwise causal effects.}
-The transplant is effective from layer 13 of 28, 15 of 32, 38 of 80 and 24 of 36,
-that is at $0.46$, $0.47$, $0.48$ and $0.67$ of depth. Below the layer at which the
-patched margin first departs from its baseline value it stays within half a nat of
-that value on the three Llama models and within two nats on Qwen3-8B; above the
-crossing the patched run selects the intended action.
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_patching}
+\caption{Every condition patched into the baseline run, on the two models with
+both a reproducibly incorrect baseline and a substrate reversal. Each curve is
+the decision margin $M$ at the answer position of the \emph{baseline} run when
+the residual stream at that position is replaced, after layer $l$, with the
+residual of one donor condition at the same position and layer. No donor text is
+present in the patched forward pass. The dashed grey line is the baseline
+patched with its own residual, flat at the unpatched margin by construction. The
+substrate crosses zero at L15 and L24; no conventional donor crosses at any
+layer, and several end below the unpatched baseline. The control condition,
+which states the answer outright, is an oracle rather than a prompt technique
+and is not plotted; its margins are reported in
+Section~\ref{sec:behavioural-results}.}
+\label{fig:patching}
+\end{figure}
 
-On the three Llama models the departure falls at $0.39$, $0.41$ and $0.40$ of depth
-and the crossing at $0.46$, $0.47$ and $0.48$, across a $2.9\times$ range in layer
-count: the sign change completes within a tenth of depth of the departure in each
-case. The margin then continues to rise to its final value across the remaining
-layers rather than settling at the crossing. Qwen3-8B departs at $0.61$ and crosses
-at $0.67$, and is the only Qwen in the set that crosses.
+\paragraph{What these measurements do not establish.}
+They locate the substrate's effect and rule out one alternative explanation for
+it. They do not identify a mechanism. We do not establish what the transplanted
+state encodes, which part of the substrate produces it, or why a task
+specification produces it where a conventional framing does not: the transplant
+operates on whole prompts and so attributes the effect to the substrate as a
+whole. Nor is the depth of the transition a property of the substrate. Patching
+the control condition, which states the correct answer outright, reaches its
+halfway point at the same layer as the substrate in four of the five models
+where the comparison is defined (not plotted), so that depth is better read as
+where these models settle the decision than as where the substrate acts.
+Llama 3.2-3B is reported but excluded from the causal claim: its entire decision
+spans $0.55$ nats, small enough that the transplant cannot be distinguished from
+a perturbation large enough to tip a nearly balanced state. Finally, the nine
+models measured here contain none of the six on which the control fails
+behaviourally, so they cannot speak to the models where stating the answer is
+insufficient.
 
-\paragraph{Successful and unsuccessful preference reversals.}
-Four of the six models that prefer the incorrect action at baseline cross zero under
-the substrate; two do not. Qwen2.5-7B moves from $-10.50$ to $-1.50$, a displacement
-of $9.0$ nats, and Qwen3-4B-2507 from $-22.00$ to $-5.50$, a displacement of $16.5$
-nats. Their layerwise curves rise monotonically across the back half of the stack
-and terminate short of zero at the final layer. Both emit the incorrect action on
-all ten samples under the substrate.
-
-\paragraph{Relationship between internal and behavioural measurements.}
-Treating $\sigma(M)$ as a predicted count of intended actions in ten samples,
-predicted and observed counts agree within $1.5$ samples in 14 of the 18
-model--condition cells measured both ways, with a maximum discrepancy of $2.2$
-samples. Two of the four larger discrepancies are toward greater determinism than
-the margin predicts, Qwen2.5-7B under the substrate ($1.8$ predicted against $0$
-observed) and Llama 3.1-8B under the substrate ($8.2$ against $10$), and two toward
-less, Qwen2.5-1.5B and Qwen3-0.6B at baseline ($8.2$ against $6$ and $9.1$ against
-$7$). In one cell the margin and the samples fall on opposite sides of the midpoint:
-Llama 3.2-3B under the substrate, margin $+0.18$ against $4/10$.

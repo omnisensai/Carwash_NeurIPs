@@ -1,6 +1,6 @@
 # substrate_llama_v3
 
-`prompts/substrate.txt (system) + baseline.txt (user)`. 17 files, 170 usable rows, 17 models, R=10, temperature 1.0.
+`prompts/substrate.txt (system) + baseline.txt (user)`. 26 files, 260 usable rows, 26 models, R=10, temperature 1.0.
 
 Sent-text digest: `f9ac23fb`; system `5b56feb3`.
 
@@ -18,10 +18,19 @@ Sent-text digest: `f9ac23fb`; system `5b56feb3`.
 | GPT-4.1-mini | 10/10 | RC |
 | GPT-4o | 10/10 | RC |
 | Kimi K2 | 10/10 | RC |
-| Llama 3.1-8B | 7/10 | NR |
-| Llama 3.2-3B | 8/10 | NR |
+| Llama 3.1-8B (hosted) | 7/10 | NR |
+| Llama 3.1-8B (local) | 10/10 | RC |
+| Llama 3.2-3B (hosted) | 8/10 | NR |
+| Llama 3.2-3B (local) | 4/10 | NR |
 | Llama 3.3-70B | 10/10 | RC |
 | Llama 4-Maverick | 10/10 | RC |
 | Mistral Large | 10/10 | RC |
+| Qwen2.5-0.5B | 3/10 | NR |
+| Qwen2.5-1.5B | 8/10 | NR |
+| Qwen2.5-3B | 10/10 | RC |
+| Qwen2.5-7B | 0/10 | RI |
+| Qwen3-0.6B | 10/10 | RC |
+| Qwen3-4B-2507 | 0/10 | RI |
+| Qwen3-8B | 10/10 | RC |
 
-RC 14 · NR 3 · RI 0 (over all 17 model arms present in this folder, hosted and local counted separately).
+RC 18 · NR 6 · RI 2 (over all 26 model arms present in this folder, hosted and local counted separately).

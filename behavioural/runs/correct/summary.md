@@ -1,6 +1,6 @@
 # correct_answer
 
-`prompts/benchmark_correct.txt`. 11 files, 260 usable rows, 26 models, R=10, temperature 1.0.
+`prompts/benchmark_correct.txt`. 20 files, 260 usable rows, 26 models, R=10, temperature 1.0.
 
 Sent-text digest: `0b8320cf`.
 

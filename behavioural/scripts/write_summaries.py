@@ -22,14 +22,24 @@ def act(t):
 def state(v):
     d=sum(1 for x in v if x=='drive')
     return d,len(v),('RC' if d==len(v) else ('RI' if d==0 else 'NR'))
+# The nine locally-served models were sampled in one pass that wrote every
+# condition into runs/local/, instead of one file per condition folder. Without
+# these, each condition summary counts only the 17 hosted arms.
+LOCAL=sorted(glob.glob('behavioural/runs/local/*.jsonl'))
+
 for folder,cond in FOLDER_COND.items():
-    files=sorted(glob.glob(f'behavioural/runs/{folder}/*.jsonl'))
+    files=sorted(glob.glob(f'behavioural/runs/{folder}/*.jsonl'))+LOCAL
     rows={}; errs=collections.Counter(); reissued=collections.Counter(); shas=set(); sys_shas=set()
     for f in files:
         for ln in open(f):
             if not ln.strip(): continue
             d=json.loads(ln)
             if str(d.get('error'))!='None': errs[str(d['error'])[:60]]+=1; continue
+            # a runs/local/ file carries every condition; keep only this one's.
+            # Hosted files are already one condition per folder and name the
+            # condition differently, so this test applies to local files only.
+            if f in LOCAL and str(d.get('condition','')).lower()!=folder.lower():
+                continue
             arm='local' if d.get('backend')=='local' else 'hosted'
             k=(d['model_label'],arm,str(d['sample_index']))
             if k in rows: reissued[d['model_label']]+=1  # same arm, same sample

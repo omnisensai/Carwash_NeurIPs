@@ -2,6 +2,128 @@
 % Titles, authors, venues and years verified against the published
 % proceedings; arXiv identifiers included for accessibility.
 
+% Non-determinism and reproducibility of LLM outputs.
+
+@article{Ouyang_2025,
+  title   = {An Empirical Study of the Non-determinism of {ChatGPT} in Code
+             Generation},
+  author  = {Ouyang, Shuyin and Zhang, Jie M. and Harman, Mark and Wang, Meng},
+  journal = {ACM Transactions on Software Engineering and Methodology},
+  volume  = {34},
+  number  = {2},
+  pages   = {1--28},
+  month   = jan,
+  year    = {2025},
+  issn    = {1557-7392},
+  doi     = {10.1145/3697010},
+  url     = {http://dx.doi.org/10.1145/3697010}
+}
+
+@misc{atil2025nondeterminismdeterministicllmsettings,
+  title        = {Non-determinism of ``Deterministic'' {LLM} Settings},
+  author       = {Atil, Berk and Aykent, Sarp and Chittams, Alexa and Fu, Lisheng
+                  and Passonneau, Rebecca J. and Radcliffe, Evan and
+                  Rajagopal, Guru Rajan and Sloan, Adam and Tudrej, Tomasz and
+                  Ture, Ferhan and Wu, Zhe and Xu, Lixinyu and Baldwin, Breck},
+  year         = {2025},
+  eprint       = {2408.04667},
+  archivePrefix = {arXiv},
+  url          = {https://arxiv.org/abs/2408.04667}
+}
+
+@article{he2025nondeterminism,
+  title   = {Defeating Nondeterminism in {LLM} Inference},
+  author  = {He, Horace and {Thinking Machines Lab}},
+  journal = {Thinking Machines Lab: Connectionism},
+  year    = {2025},
+  doi     = {10.64434/tml.20250910},
+  url     = {https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/}
+}
+
+% Prompt sensitivity and prompt-level control.
+
+@misc{bhargava2024whatsmagicwordcontrol,
+  title        = {What's the Magic Word? A Control Theory of {LLM} Prompting},
+  author       = {Bhargava, Aman and Witkowski, Cameron and Looi, Shi-Zhuo and
+                  Thomson, Matt},
+  year         = {2024},
+  eprint       = {2310.04444},
+  archivePrefix = {arXiv},
+  url          = {https://arxiv.org/abs/2310.04444}
+}
+
+@inproceedings{chen2025stability,
+  title     = {Prompt Stability Matters: Evaluating and Optimizing
+               Auto-Generated Prompt in General-Purpose Systems},
+  author    = {Chen, Ke and Yu, Xucheng and Zhou, Yufei and Wang, Haohan},
+  booktitle = {Conference on Parsimony and Learning},
+  series    = {Proceedings of Machine Learning Research},
+  volume    = {328},
+  pages     = {360--374},
+  publisher = {PMLR},
+  year      = {2026},
+  url       = {https://proceedings.mlr.press/v328/chen26b.html}
+}
+
+@article{mizrahi-etal-2024-state,
+  title   = {State of What Art? A Call for Multi-Prompt {LLM} Evaluation},
+  author  = {Mizrahi, Moran and Kaplan, Guy and Malkin, Dan and Dror, Rotem and
+             Shahaf, Dafna and Stanovsky, Gabriel},
+  journal = {Transactions of the Association for Computational Linguistics},
+  volume  = {12},
+  pages   = {933--949},
+  year    = {2024},
+  doi     = {10.1162/tacl_a_00681},
+  url     = {https://aclanthology.org/2024.tacl-1.52/}
+}
+
+@misc{srikanth2024errorsnaturallanguagereasoning,
+  title        = {How Often Are Errors in Natural Language Reasoning Due to
+                  Paraphrastic Variability?},
+  author       = {Srikanth, Neha and Carpuat, Marine and Rudinger, Rachel},
+  year         = {2024},
+  eprint       = {2404.11717},
+  archivePrefix = {arXiv},
+  url          = {https://arxiv.org/abs/2404.11717}
+}
+
+% Interventions at other levels of the stack.
+
+@misc{tian2023finetuninglanguagemodelsfactuality,
+  title        = {Fine-tuning Language Models for Factuality},
+  author       = {Tian, Katherine and Mitchell, Eric and Yao, Huaxiu and
+                  Manning, Christopher D. and Finn, Chelsea},
+  year         = {2023},
+  eprint       = {2311.08401},
+  archivePrefix = {arXiv},
+  url          = {https://arxiv.org/abs/2311.08401}
+}
+
+@inproceedings{loula2025syntactic,
+  title     = {Syntactic and Semantic Control of Large Language Models via
+               Sequential Monte Carlo},
+  author    = {Loula, Jo{\~a}o and LeBrun, Benjamin and Du, Li and Lipkin, Ben
+               and Pasti, Clemente and Grand, Gabriel and Liu, Tianyu and
+               Emara, Yahya and Freedman, Marjorie and Eisner, Jason and
+               Cotterell, Ryan and Mansinghka, Vikash and Lew, Alexander K.
+               and Vieira, Tim and O'Donnell, Timothy J.},
+  booktitle = {International Conference on Learning Representations},
+  year      = {2025},
+  url       = {https://proceedings.iclr.cc/paper_files/paper/2025/hash/a2d537e69a6c6638a3630eef835f07de-Abstract-Conference.html}
+}
+
+@misc{ahmed2025semanticprobabilisticcontrollanguage,
+  title        = {Semantic Probabilistic Control of Language Models},
+  author       = {Ahmed, Kareem and Belem, Catarina G. and Smyth, Padhraic and
+                  Singh, Sameer},
+  year         = {2025},
+  eprint       = {2505.01954},
+  archivePrefix = {arXiv},
+  url          = {https://arxiv.org/abs/2505.01954}
+}
+
+% Activation patching / causal mediation.
+
 @inproceedings{vig2020causal,
   title     = {Investigating Gender Bias in Language Models Using Causal
                Mediation Analysis},
@@ -112,4 +234,17 @@
   publisher = {Addison-Wesley},
   year      = {2002},
   isbn      = {9780321143068}
+}
+
+% The paper's own earlier work. It renders as "Anonymous author, 2026" in the
+% current build, which tells a reviewer it is a self-citation while giving them
+% nothing to check. Decide before submission: cite it in the third person if it
+% is public, or drop it -- Section 2 defines Substrate Engineering from this
+% paper's own criterion and does not depend on it.
+@misc{nguyen2026substrates,
+  title  = {Substrates: Specification-Conditioned Interpretation Drift in
+            Language Models},
+  author = {{Anonymous author}},
+  year   = {2026},
+  note   = {Under review; anonymized for double-blind submission}
 }

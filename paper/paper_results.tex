@@ -188,19 +188,21 @@ would be a claim about replacing scale, which is not what we assert.
 
 \begin{table}[t]
 \centering
-\caption{Decision margin at the answer position, bf16. $M$ is the log-probability
-of the intended action minus that of the unintended one, so $M>0$ means the model
+\caption{Decision margin at the answer position, bf16. $M$ is the log-probability of
+the intended action minus that of the unintended one, so $M>0$ means the model
 prefers the intended action; $\Delta M$ is the change from the baseline input.
 \emph{Best conv.} is, per model, whichever of the seven conventional conditions
-reaches the highest margin on that model --- the most favourable comparison
-available to them. \emph{Reversed} records whether the condition carries $M$ from
-negative to positive, which is the point at which the model's preferred action
-changes; it is undefined for the three models below the rule, whose baseline margin
-is already positive. Rows are ordered by the substrate's shift.}
+reaches the highest margin on that model --- the most favourable comparison available
+to them. The last two columns record whether $M>0$ \emph{under} that condition. For
+the eleven models above the rule the baseline margin is negative, so a ``yes'' is a
+reversal of the model's preferred action; for the three below it the baseline is
+already positive, so a ``yes'' is that preference surviving and a ``no'' is its loss
+--- which happens once, to Qwen2.5-0.5B under the substrate. Rows are ordered by the
+substrate's shift.}
 \label{tab:margins}
 \begin{tabular}{lrrrcc}
 \toprule
-& & \multicolumn{2}{c}{$\Delta M$ from baseline} & \multicolumn{2}{c}{reversed?} \\
+& & \multicolumn{2}{c}{$\Delta M$ from baseline} & \multicolumn{2}{c}{$M>0$ after?} \\
 \cmidrule(lr){3-4}\cmidrule(lr){5-6}
 Model & $M$ baseline & Substrate & Best conv. & Substrate & Best conv. \\
 \midrule
@@ -216,9 +218,11 @@ Qwen2.5-7B       & $-10.50$ & $+8.62$ & $+0.62$ &  no &  no \\
 Llama 3.1-8B     & $-3.69$ & $+5.07$ & $+2.75$ & yes &  no \\
 Llama 3.2-3B     & $-0.38$ & $+0.55$ & $+0.41$ & yes & yes \\
 \midrule
-Qwen3-0.6B       & $+2.25$ & $+2.37$ & $+0.25$ & --- & --- \\
-Qwen2.5-1.5B     & $+0.90$ & $+1.12$ & $+1.35$ & --- & --- \\
-Qwen2.5-0.5B     & $+0.50$ & $-0.93$ & $+0.62$ & --- & --- \\
+\multicolumn{6}{@{}l}{\emph{Baseline margin already positive: a ``yes'' here is a preference kept, not reversed.}} \\
+\addlinespace
+Qwen3-0.6B       & $+2.25$ & $+2.37$ & $+0.25$ & yes & yes \\
+Qwen2.5-1.5B     & $+0.90$ & $+1.12$ & $+1.35$ & yes & yes \\
+Qwen2.5-0.5B     & $+0.50$ & $-0.93$ & $+0.62$ &  no & yes \\
 \bottomrule
 \end{tabular}
 \end{table}

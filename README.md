@@ -5,7 +5,7 @@ One binary operational decision, measured two ways on the same prompt texts.
 ```
 prompts/        the experiment: baseline question, seven conventional prompts,
                 the substrate. Never edited.
-behavioural/    what the models emit. scripts/ + runs/ (one .jsonl per model
+behavioural/    what the models emit. workbench/ + runs/ (one .jsonl per model
                 per condition, ten samples each) + summary.md
 internals/      what changes inside the open-weight models. scripts/ +
                 results/<model>/bf16/ + README.md, RESULTS.md
@@ -22,7 +22,7 @@ tree; they are in git history before `efbc195`.
 Behavioural, open-weight models (needs a GPU):
 
 ```bash
-python behavioural/scripts/run_local_fleet.py --help
+python behavioural/workbench/run_local_fleet.py --help
 ```
 
 Internals, one model (needs a GPU):
@@ -43,8 +43,8 @@ reissued against any provider.
 
 `behavioural/summary.md` — operational state of every model at baseline, under
 the control and under the substrate. Regenerate with
-`python behavioural/scripts/write_summaries.py`.
-`behavioural/scripts/paper_numbers.py` — every population-dependent count the
+`python behavioural/workbench/write_summaries.py`.
+`behavioural/workbench/paper_numbers.py` — every population-dependent count the
 paper cites, computed from the runs.
 `internals/RESULTS.md` — decision margins, transplant layers and controls.
 `paper/paper_results.tex` — both, as reported.

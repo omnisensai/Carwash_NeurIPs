@@ -9,14 +9,14 @@
 # Llama 3.3-70B is not here: its population row is the hosted one, already run.
 #
 #   cd /workspace/Carwash_NeurIPs
-#   bash behavioural/scripts/runpod_correct.sh qwen3-0.6b     # one model, ~2 min
-#   nohup bash behavioural/scripts/runpod_correct.sh > correct.log 2>&1 &
+#   bash behavioural/workbench/runpod_correct.sh qwen3-0.6b     # one model, ~2 min
+#   nohup bash behavioural/workbench/runpod_correct.sh > correct.log 2>&1 &
 #
 # Pod: one 24 GB card is enough (Qwen3-8B at ~17 GB is the largest).
 # Volume: ~74 GB of weights across the nine, so >= 150 GB at /workspace.
 # Ten short samples per model: the downloads dominate, the compute is seconds.
 set -uo pipefail
-HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"      # behavioural/scripts
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"      # behavioural/workbench
 REPO="$(cd "$HERE/../.." && pwd)"
 cd "$REPO"
 export HF_HOME=${HF_HOME:-/workspace/hf} HF_HUB_ENABLE_HF_TRANSFER=1 TOKENIZERS_PARALLELISM=false
@@ -31,14 +31,14 @@ python -c "import torch, transformers" 2>/dev/null || \
 # The prompt must hash to what the hosted rows recorded, or the local rows are
 # not comparable to them. Refuse to sample anything if it does not.
 log "checking the prompt against the published rows"
-python behavioural/scripts/run_local_fleet.py --dry-run --conditions correct || {
+python behavioural/workbench/run_local_fleet.py --dry-run --conditions correct || {
   log "FATAL: benchmark_correct.txt does not reproduce 0b8320cf -- not sampling"; exit 1; }
 
 for m in $MODELS; do
   done_file=$(ls "$OUT"/local_${m}_local_*.jsonl 2>/dev/null | head -1)
   if [ -n "$done_file" ]; then log "skip $m -- already in $done_file"; continue; fi
   log "=== $m ==="
-  python behavioural/scripts/run_local_fleet.py \
+  python behavioural/workbench/run_local_fleet.py \
       --models "$m" --conditions correct --n 10 --outdir "$OUT" || log "FAILED: $m"
 done
 
@@ -63,6 +63,6 @@ print("  FAIL" if bad else "  all rows carry prompt 0b8320cf under correct_answe
 sys.exit(1 if bad else 0)
 PY
 log "regenerating the per-condition summaries"
-python behavioural/scripts/write_summaries.py
+python behavioural/workbench/write_summaries.py
 
 log "done -- commit $OUT/local_*.jsonl and the refreshed summary.md files"

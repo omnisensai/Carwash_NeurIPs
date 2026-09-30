@@ -5,7 +5,7 @@ The paper states roughly two dozen counts that all move together when a model
 is added or an arm changes. This prints them in one place so the paper can be
 diffed against the data instead of audited by hand.
 
-    python behavioural/scripts/paper_numbers.py
+    python behavioural/workbench/paper_numbers.py
 """
 import collections
 import glob

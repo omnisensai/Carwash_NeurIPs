@@ -4,7 +4,8 @@ Reproducibility bundle for one binary operational decision, measured two ways.
 
 ```
 prompts/        the experiment. Never edited.
-behavioural/    scripts/ + runs/ + summary.md — what models emit
+behavioural/    workbench/ + runs/ + summary.md — what models emit
+                (workbench/ holds the tooling; scripts/ is kept empty)
 internals/      scripts/ + results/ + README.md, RESULTS.md — what changes inside
 paper/          LaTeX sources and bibliography
 ```
@@ -50,7 +51,7 @@ Read `internals/README.md` for what each readout means and
   is excluded *and its runs are removed* — Qwen2.5-3B was, in `d6746f6`. Do not
   write "24 measured, 23 reported"; screen a new model on the baseline condition
   alone before sampling the other nine.
-  `behavioural/scripts/paper_numbers.py` asserts this and names any model that
+  `behavioural/workbench/paper_numbers.py` asserts this and names any model that
   breaks it. It also prints every population-dependent count the paper cites —
   run it after any change to `runs/` and diff the paper against it rather than
   re-checking counts by hand.

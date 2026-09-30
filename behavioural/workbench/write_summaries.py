@@ -3,7 +3,7 @@
 
 Reads only the .jsonl records. No GPU, no keys.
 
-    python behavioural/scripts/write_summaries.py
+    python behavioural/workbench/write_summaries.py
 """
 import collections
 import glob

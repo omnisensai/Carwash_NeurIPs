@@ -54,7 +54,7 @@ import re
 import sys
 from pathlib import Path
 
-REPO = Path(__file__).resolve().parent.parent.parent   # this file lives in behavioural/scripts/
+REPO = Path(__file__).resolve().parent.parent.parent   # this file lives in behavioural/workbench/
 PROMPTS = REPO / "prompts"
 
 # Provenance lines appended to some prompt files; not part of the prompt.

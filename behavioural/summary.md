@@ -16,10 +16,8 @@ Every arm sampled, read from the `.jsonl` records in `runs/`. R = 10 single-pass
 | GPT-4.1-mini | OpenAI | RI 0/10 | RC 10/10 | RC 10/10 |
 | GPT-4o | OpenAI | RI 0/10 | RI 0/10 | RC 10/10 |
 | Kimi K2 | OpenRouter | NR 4/10 | NR 8/10 | RC 10/10 |
-| Llama 3.1-8B (hosted) | OpenRouter | RI 0/10 | RC 10/10 | NR 7/10 |
-| Llama 3.1-8B (local) | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
-| Llama 3.2-3B (hosted) | OpenRouter | NR 3/10 | RC 10/10 | NR 8/10 |
-| Llama 3.2-3B (local) | RunPod (local) | NR 4/10 | RC 10/10 | NR 4/10 |
+| Llama 3.1-8B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
+| Llama 3.2-3B | RunPod (local) | NR 4/10 | RC 10/10 | NR 4/10 |
 | Llama 3.3-70B | OpenRouter | RI 0/10 | NR 1/10 | RC 10/10 |
 | Llama 4-Maverick | OpenRouter | RI 0/10 | RC 10/10 | RC 10/10 |
 | Mistral Large | OpenRouter | RI 0/10 | RI 0/10 | RC 10/10 |

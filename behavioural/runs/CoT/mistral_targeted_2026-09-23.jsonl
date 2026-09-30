@@ -1,2 +1,0 @@
-{"timestamp": "2026-09-23T12:45:03.026501+00:00", "intervention": "cot", "sample_index": 7, "model_label": "Mistral Large", "model_slug": "mistralai/mistral-large", "response_text": "walk", "targeted_rerun": true, "reason": "transport_failure_reissue"}
-{"timestamp": "2026-09-23T12:46:04.121746+00:00", "intervention": "cot", "sample_index": 8, "model_label": "Mistral Large", "model_slug": "mistralai/mistral-large", "response_text": "walk", "targeted_rerun": true, "reason": "transport_failure_reissue"}

@@ -3,7 +3,9 @@
 Reproducibility bundle for one binary operational decision, measured two ways.
 
 ```
-prompts/        the experiment. Never edited.
+prompts/        the experiment. Never edited. summary.md maps each file to
+                the condition name in the runs (substrate.txt is recorded
+                as substrate_llama_v3).
 behavioural/    workbench/ + runs/ + summary.md — what models emit
                 (workbench/ holds the tooling; scripts/ is kept empty)
 internals/      scripts/ + results/ + README.md, RESULTS.md — what changes inside

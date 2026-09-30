@@ -4,7 +4,8 @@ One binary operational decision, measured two ways on the same prompt texts.
 
 ```
 prompts/        the experiment: baseline question, seven conventional prompts,
-                the substrate. Never edited.
+                the control, the substrate. Never edited. summary.md maps each
+                file to the condition name the runs record.
 behavioural/    what the models emit. workbench/ + runs/ (one .jsonl per model
                 per condition, ten samples each) + summary.md
 internals/      what changes inside the open-weight models. scripts/ +

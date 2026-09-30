@@ -1,36 +1,32 @@
-# Fleet results — 2026-09-19
+# Behavioural runs
 
-17 models × 9 conditions × 10 samples, temperature 1.0.
-Per-condition detail in `runs/<condition>/summary.md`; the model table with
-requested slugs, served snapshots and upstream providers is `models.md`.
+Every arm sampled, read from the `.jsonl` records in `runs/`. R = 10 single-pass samples per cell, temperature 1.0. RC = reproducibly correct, RI = reproducibly incorrect, NR = non-reproducible.
 
-The task has one correct answer, **drive**: the car has to be at the car wash.
-
-Rates are over usable executions. Eight of nine conditions are complete at n=170;
-encouragement stands at n=169, where one Llama 3.1-8B response (`Walker`) contains no
-action token and is recorded as invalid.
-
-## All conditions
-
-| Condition | correct (drive) | p vs baseline | models 10/10 correct |
-|---|---:|---:|---:|
-| **substrate** | **95.9%** | **9.0e-13** | **14 / 17** |
-| expert role | 36.5% | 9.4e-11 | 2 / 17 |
-| objective emphasis | 19.4% | 0.0023 | 1 / 17 |
-| chain of thought | 14.1% | 0.081 | 1 / 17 |
-| anti-hallucination | 11.8% | 0.27 | 1 / 17 |
-| threat | 10.0% | 0.57 | 0 / 17 |
-| encouragement | 9.5% | 0.57 | 1 / 17 |
-| error-avoidance | 8.8% | 0.84 | 0 / 17 |
-| baseline | 7.6% | — | 0 / 17 |
-
-## The flip
-
-| | |
-|---|---|
-| Samples answering drive | **163 / 170 (95.9%)**, up from 13/170 |
-| Models unanimous for drive (10/10) | **14 of 17** |
-| Models that moved toward drive | **17 of 17** |
-| Models that moved away, or didn't move | **0** |
-| Fisher two-sided | **p = 9.0e-13** |
-
+| Model | Host | Baseline | Control | Substrate |
+|---|---|---|---|---|
+| Claude Haiku 4.5 | Anthropic | RI 0/10 | RI 0/10 | RC 10/10 |
+| Claude Opus 4.7 | Anthropic | NR 5/10 | RC 10/10 | RC 10/10 |
+| Claude Sonnet 4.5 | Anthropic | RI 0/10 | RI 0/10 | RC 10/10 |
+| Claude Sonnet 4.6 | Anthropic | RI 0/10 | RI 0/10 | RC 10/10 |
+| Claude Sonnet 5 | Anthropic | RI 0/10 | RC 10/10 | RC 10/10 |
+| DeepSeek V3.2 | OpenRouter | RI 0/10 | RC 10/10 | NR 8/10 |
+| GPT-3.5-turbo | OpenAI | NR 1/10 | RC 10/10 | RC 10/10 |
+| GPT-4 | OpenAI | RI 0/10 | RC 10/10 | RC 10/10 |
+| GPT-4.1 | OpenAI | RI 0/10 | RI 0/10 | RC 10/10 |
+| GPT-4.1-mini | OpenAI | RI 0/10 | RC 10/10 | RC 10/10 |
+| GPT-4o | OpenAI | RI 0/10 | RI 0/10 | RC 10/10 |
+| Kimi K2 | OpenRouter | NR 4/10 | NR 8/10 | RC 10/10 |
+| Llama 3.1-8B (hosted) | OpenRouter | RI 0/10 | RC 10/10 | NR 7/10 |
+| Llama 3.1-8B (local) | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
+| Llama 3.2-3B (hosted) | OpenRouter | NR 3/10 | RC 10/10 | NR 8/10 |
+| Llama 3.2-3B (local) | RunPod (local) | NR 4/10 | RC 10/10 | NR 4/10 |
+| Llama 3.3-70B | OpenRouter | RI 0/10 | NR 1/10 | RC 10/10 |
+| Llama 4-Maverick | OpenRouter | RI 0/10 | RC 10/10 | RC 10/10 |
+| Mistral Large | OpenRouter | RI 0/10 | RI 0/10 | RC 10/10 |
+| Qwen2.5-0.5B | RunPod (local) | NR 7/10 | NR 8/10 | NR 3/10 |
+| Qwen2.5-1.5B | RunPod (local) | NR 6/10 | RC 10/10 | NR 8/10 |
+| Qwen2.5-3B | RunPod (local) | RC 10/10 | RC 10/10 | RC 10/10 |
+| Qwen2.5-7B | RunPod (local) | RI 0/10 | RC 10/10 | RI 0/10 |
+| Qwen3-0.6B | RunPod (local) | NR 7/10 | RC 10/10 | RC 10/10 |
+| Qwen3-4B-2507 | RunPod (local) | RI 0/10 | RC 10/10 | RI 0/10 |
+| Qwen3-8B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |

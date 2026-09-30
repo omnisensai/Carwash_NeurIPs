@@ -7,33 +7,34 @@
 \label{sec:behavioural-results}
 
 The question is whether a model that fails this decision can be moved to
-reproducible correctness. We measured 23 models that fail it at baseline, either
+reproducible correctness. We measured 28 models that fail it at baseline, either
 confidently wrong or unreliable: each names the wrong action on all ten baseline
-samples, or names different actions across them. Fifteen are sampled
-through hosted APIs and eight are open-weight models sampled locally in bf16 with a
-per-sample seed recorded. Every model receives byte-identical prompt text, $R=10$
-samples per condition, giving 230 executions per condition. The baseline prompt,
+samples, or names different actions across them. Fourteen are sampled
+through hosted APIs and fourteen are open-weight models sampled locally in bf16 with
+a per-sample seed recorded. Every model receives byte-identical prompt text, $R=10$
+samples per condition, giving 280 executions per condition. The baseline prompt,
 the control, the seven conventional prompts and the substrate are reproduced
 verbatim in Appendix~\ref{app:prompts}, each with the sha256 digest recorded with
 every execution.
 
 \paragraph{Baseline operational state.}
-Sixteen of the 23 models are reproducibly incorrect, naming the wrong action on all
-ten samples. Seven are non-reproducible. Thirty-four of 230 executions name the
+Twenty-one of the 28 models are reproducibly incorrect, naming the wrong action on
+all ten samples. Seven are non-reproducible. Thirty-four of 280 executions name the
 intended action.
 
 \paragraph{Control: the answer stated in the prompt.}
 A control condition states the intended action outright --- ``The correct answer is
 drive.'' --- inserted where the conventional lines go. It is a control rather than a
 prompting technique: an operator who already knows the answer has no decision to
-delegate. Fourteen of the 23 models are reproducibly correct under it, three are
-non-reproducible and six are reproducibly incorrect; 157 of 230 executions name the
-intended action. Nine of the sixteen models reproducibly incorrect at baseline and
-five of the seven non-reproducible ones reach reproducible correctness. Six remain
-reproducibly incorrect, naming the wrong action on all ten samples while the prompt
-states the right one: Claude Haiku 4.5, Claude Sonnet 4.5, Claude Sonnet 4.6,
-GPT-4.1, GPT-4o and Mistral Large. All six are reproducibly correct under the
-substrate, whose text does not contain the word naming the intended action.
+delegate. Eighteen of the 28 models are reproducibly correct under it, three are
+non-reproducible and seven are reproducibly incorrect; 197 of 280 executions name the
+intended action. Thirteen of the twenty-one models reproducibly incorrect at baseline
+and five of the seven non-reproducible ones reach reproducible correctness. Seven
+remain reproducibly incorrect, naming the wrong action on all ten samples while the
+prompt states the right one: Claude Haiku 4.5, Claude Sonnet 4.5, Claude Sonnet 4.6,
+GPT-4.1, GPT-4o, Llama 3.3-70B and Mistral Large. All seven are reproducibly correct
+under the substrate, whose text does not contain the word naming the intended
+action.
 
 \paragraph{Effects of conventional prompt interventions.}
 Seven conventional interventions were applied to the same question under the same
@@ -42,39 +43,39 @@ anti-hallucination instruction, threat, encouragement, and error-avoidance
 instruction. Each adds a single line to the baseline prompt, inserted between the
 question and the answer instruction, except expert role assignment, which precedes
 the question; the texts are reproduced verbatim in Appendix~\ref{app:prompts}.
-Table~\ref{tab:conditions} gives the operational state of the 23 models under every
+Table~\ref{tab:conditions} gives the operational state of the 28 models under every
 condition, abbreviated RC for reproducibly correct, NR for non-reproducible and RI
 for reproducibly incorrect. Expert role assignment converts one of the
-sixteen reproducibly incorrect models to reproducible correctness; no conventional
+twenty-one reproducibly incorrect models to reproducible correctness; no conventional
 condition converts more than one, and across all seven the converted model is the
-same one. Four of the seven leave at least fifteen of the sixteen reproducibly
+same one. Four of the seven leave at least twenty of the twenty-one reproducibly
 incorrect. Five of the seven move a non-reproducible model to reproducible
 incorrectness: one each under anti-hallucination, chain-of-thought, error avoidance
 and threat, and two under encouragement.
 
 \paragraph{Substrate-conditioned operational state.}
 Under the substrate, supplied as a system message with the question unchanged,
-seventeen of the 23 models are reproducibly correct, four are non-reproducible, and
+twenty-two of the 28 models are reproducibly correct, four are non-reproducible, and
 two are reproducibly incorrect (Qwen2.5-7B and Qwen3-4B-2507);
-Table~\ref{tab:per-model} gives every model's count at all three conditions. One
-hundred and ninety-three of 230 executions name the intended action. Thirteen of the
-sixteen models that are reproducibly incorrect at baseline and four of the seven that
-are non-reproducible reach reproducible correctness, in a single pass with the
+Table~\ref{tab:per-model} gives every model's count at all three conditions. Two
+hundred and forty-three of 280 executions name the intended action. Eighteen of the
+twenty-one models that are reproducibly incorrect at baseline and four of the seven
+that are non-reproducible reach reproducible correctness, in a single pass with the
 question unchanged and no sampling, voting or retry. No model moves to reproducible
 incorrectness. One model names the intended action less often than at baseline
 (Qwen2.5-0.5B, 7/10 to 3/10) without leaving the non-reproducible state, and one is
 unchanged sample for sample (Llama 3.2-3B, 4/10 at both conditions, the same four
 sample indices).
 
-The substrate and the control are not nested. Nine models are reproducibly correct
-under both, five under the control alone, eight under the substrate alone, and one
-(Qwen2.5-0.5B) under neither; the union is 22 of 23. The two models the substrate
+The substrate and the control are not nested. Thirteen models are reproducibly correct
+under both, five under the control alone, nine under the substrate alone, and one
+(Qwen2.5-0.5B) under neither; the union is 27 of 28. The two models the substrate
 leaves reproducibly incorrect are both reproducibly correct under the control, so
 neither is unable to name the intended action on this task.
 
 \begin{table}[h]
 \centering
-\caption{Operational state of the 23 models under each condition. Rows sum to 23.}
+\caption{Operational state of the 28 models under each condition. Rows sum to 28.}
 \label{tab:conditions}
 \small
 \begin{tabular}{@{}lp{7.4cm}ccc@{}}
@@ -82,26 +83,26 @@ neither is unable to name the intended action on this task.
 Condition & Added text & RC & NR & RI \\
 \midrule
 Baseline & \emph{unmodified task (Appendix A.1)}
-& 0 & 7 & 16 \\
+& 0 & 7 & 21 \\
 \addlinespace
 \midrule
 \addlinespace
-Control & ``The correct answer is drive.'' & 14 & 3 & 6 \\
+Control & ``The correct answer is drive.'' & 18 & 3 & 7 \\
 \addlinespace
 \midrule
 \addlinespace
-Expert role & ``You are a carwash expert.'' & 2 & 9 & 12 \\
-Objective emphasis & ``I MUST WASH MY CAR! IT MUST BE CLEAN!'' & 1 & 8 & 14 \\
-Chain of thought & ``Let's think step by step!'' & 1 & 8 & 14 \\
-Anti-hallucination & ``Do not hallucinate.'' & 1 & 6 & 16 \\
-Encouragement & ``Answer correctly. You can do it, believe in yourself!'' & 1 & 5 & 17 \\
-Error avoidance & ``Be consistent and make no mistakes!'' & 0 & 7 & 16 \\
-Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
+Expert role & ``You are a carwash expert.'' & 2 & 9 & 17 \\
+Objective emphasis & ``I MUST WASH MY CAR! IT MUST BE CLEAN!'' & 1 & 8 & 19 \\
+Chain of thought & ``Let's think step by step!'' & 1 & 8 & 19 \\
+Anti-hallucination & ``Do not hallucinate.'' & 1 & 6 & 21 \\
+Encouragement & ``Answer correctly. You can do it, believe in yourself!'' & 1 & 5 & 22 \\
+Error avoidance & ``Be consistent and make no mistakes!'' & 0 & 7 & 21 \\
+Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 21 \\
 \addlinespace
 \midrule
 \addlinespace
 \textbf{Substrate} & \emph{Appendix A.3}
-& \textbf{17} & 4 & \textbf{2} \\
+& \textbf{22} & 4 & \textbf{2} \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -127,9 +128,14 @@ GPT-4.1 & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ re
 GPT-4.1-mini & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 GPT-4o & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 Llama 3.1-8B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Llama 3.3-70B & 0/10 & 1/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Llama 3.3-70B & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 Llama 4-Maverick & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 Mistral Large & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Qwen2.5-14B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Qwen2.5-32B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Qwen2.5-72B & 0/10 & 1/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Qwen3-14B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Qwen3-32B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 Qwen3-8B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 \midrule
 Claude Opus 4.7 & 5/10 & \textbf{10/10} & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\

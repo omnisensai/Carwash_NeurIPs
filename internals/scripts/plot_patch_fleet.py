@@ -47,10 +47,49 @@ FLEET = [("qwen2.5-0.5b", "Qwen2.5-0.5B", 0.5), ("qwen3-0.6b", "Qwen3-0.6B", 0.6
          ("qwen2.5-32b", "Qwen2.5-32B", 32), ("qwen3-32b", "Qwen3-32B", 32),
          ("llama-3.3-70b", "Llama 3.3-70B", 70), ("qwen2.5-72b", "Qwen2.5-72B", 72)]
 
-SUBSTRATE, CONTROL = "#e34948", "#2a78d6"
+CONTROL = "#2a78d6"
+# The substrate curve is coloured by the model's SAMPLED state under the substrate,
+# read from behavioural/runs/ so the figure cannot drift from the table. Reserved
+# status hues: good / warning / critical. Red and green are 4.1 dE apart under
+# deuteranopia, so the state is also written into each panel title -- the colour
+# reinforces it and never carries it alone.
+STATE_COLOUR = {"RC": "#0ca30c", "NR": "#fab219", "RI": "#d03b3b"}
 GREY_CONV, GREY_BASE, INK = "#9a988f", "#3d3c38", "#2b2a27"
 # seven-hue set for --style coloured; documented above as not CVD-safe
 HUES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3aa7"]
+
+def sampled_state(label):
+    """(state, drive, usable) for one model under the substrate, or None."""
+    import json as _json, re as _re
+    best = {}
+    for f in (HERE.parent / "behavioural/runs").glob("*/*.jsonl"):
+        for ln in open(f):
+            if not ln.strip():
+                continue
+            d = _json.loads(ln)
+            if d.get("model_label") != label or d.get("condition") != "substrate":
+                continue
+            if str(d.get("error")) != "None":
+                continue
+            k = d["sample_index"]
+            if k not in best or d["timestamp"] > best[k][0]:
+                best[k] = (d["timestamp"], d.get("response_text") or "")
+    if not best:
+        return None
+    acts = []
+    for _ts, txt in best.values():
+        m = _re.match(r'\s*[\*\_"\'\#\-\s]*\b(walk|drive)\w*\b', txt, _re.I)
+        if not m:
+            ms = _re.findall(r"\b(walk|drive)\w*\b", txt, _re.I)
+            m = None if not ms else ms[-1]
+            acts.append(m.lower() if m else None)
+        else:
+            acts.append(m.group(1).lower())
+    drive = sum(1 for a in acts if a == "drive")
+    usable = sum(1 for a in acts if a in ("drive", "walk"))
+    state = "RC" if usable and drive == usable else ("RI" if usable and drive == 0 else "NR")
+    return state, drive, usable
+
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--style", choices=("grouped", "coloured"), default="grouped")
@@ -97,7 +136,10 @@ for ax, (mid, title, _b) in zip(axes, have):
     if "benchmark_correct" in g:
         ax.plot(x, g["benchmark_correct"], color=CONTROL, lw=1.6,
                 ls=(0, (1, 1.6)), zorder=6)
-    ax.plot(x, g["substrate"], color=SUBSTRATE, lw=2.6, zorder=9)
+    st = sampled_state(title)
+    key = st[0] if st else "RC"
+    col = STATE_COLOUR[key]
+    ax.plot(x, g["substrate"], color=col, lw=2.6, zorder=9)
 
     # A crossing only means something when the model is on the wrong side to
     # begin with. Where the baseline margin is already positive there is nothing
@@ -105,15 +147,18 @@ for ax, (mid, title, _b) in zip(axes, have):
     # it would read as a transplant reversal that never happened.
     c = next((l for l, v in enumerate(g["substrate"]) if v > 0), None) if base < 0 else None
     if c is not None:
-        ax.plot([c], [g["substrate"][c]], "o", ms=8, color=SUBSTRATE,
+        ax.plot([c], [g["substrate"][c]], "o", ms=8, color=col,
                 mec="white", mew=1.4, zorder=10)
         # below-right normally; above-right when the curve sits near zero and the
         # label would land on the zero rule (Llama 3.2-3B spans half a nat)
         span = max(g["substrate"]) - min(g["substrate"])
         dy = 9 if abs(g["substrate"][c]) < .08 * span else -13
         ax.annotate(f"L{c}/{n}", (c, g["substrate"][c]), textcoords="offset points",
-                    xytext=(8, dy), fontsize=9, color=SUBSTRATE, weight="bold")
-    ax.set_title(f"{title}   ({n} layers)", fontsize=10.5, color=INK)
+                    xytext=(8, dy), fontsize=9, color=col, weight="bold")
+    # The sampled state is written out, not left to the colour: red and green are
+    # not separable under deuteranopia.
+    tag = f"   substrate {st[1]}/{st[2]} {st[0]}" if st else ""
+    ax.set_title(f"{title}   ({n} layers){tag}", fontsize=10.5, color=INK)
     ax.tick_params(labelsize=8, colors=INK)
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
@@ -129,7 +174,12 @@ for r in range(nrow):
     axes[r * ncol].set_ylabel("final-output $M$  [nats]", fontsize=9, color=INK)
 
 from matplotlib.lines import Line2D
-handles = [Line2D([], [], color=SUBSTRATE, lw=2.6, label="SUBSTRATE"),
+handles = [Line2D([], [], color=STATE_COLOUR["RC"], lw=2.6,
+                  label="SUBSTRATE \u2014 reproducibly correct (10/10)"),
+           Line2D([], [], color=STATE_COLOUR["NR"], lw=2.6,
+                  label="SUBSTRATE \u2014 non-reproducible"),
+           Line2D([], [], color=STATE_COLOUR["RI"], lw=2.6,
+                  label="SUBSTRATE \u2014 reproducibly incorrect (0/10)"),
            Line2D([], [], color=CONTROL, lw=1.6, ls=(0, (1, 1.6)),
                   label="control (prompt states the answer)"),
            Line2D([], [], color=GREY_BASE, lw=1.4, ls=(0, (4, 2)),

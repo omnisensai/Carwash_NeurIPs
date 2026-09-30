@@ -12,7 +12,6 @@ import pathlib
 import re
 
 FOLDERS = ["baseline", "correct", "substrate"]
-LOCAL = sorted(glob.glob("behavioural/runs/local/*.jsonl"))
 HOST = {"openai": "OpenAI", "anthropic": "Anthropic", "openrouter": "OpenRouter"}
 
 
@@ -34,22 +33,22 @@ def cell(v):
 
 rows = collections.defaultdict(dict)
 host = {}
-for folder in FOLDERS:
-    for f in sorted(glob.glob(f"behavioural/runs/{folder}/*.jsonl")) + LOCAL:
-        for ln in open(f):
-            if not ln.strip():
-                continue
-            d = json.loads(ln)
-            if str(d.get("error")) != "None":
-                continue
-            # a runs/local/ file carries every condition; keep only this one's
-            if f in LOCAL and str(d.get("condition", "")).lower() != folder.lower():
-                continue
-            arm = "local" if d.get("backend") == "local" else "hosted"
-            key = (d["model_label"], arm)
-            host[key] = ("RunPod (local)" if arm == "local"
-                         else HOST.get(d.get("family"), d.get("family") or "?"))
-            rows[key].setdefault(folder, {})[d["sample_index"]] = act(d.get("response_text"))
+# runs/ is organised by host; every record names its own condition
+for f in sorted(glob.glob("behavioural/runs/*/*.jsonl")):
+    for ln in open(f):
+        if not ln.strip():
+            continue
+        d = json.loads(ln)
+        if str(d.get("error")) != "None":
+            continue
+        cond = str(d.get("condition", "")).lower()
+        if cond not in FOLDERS:
+            continue
+        arm = "local" if d.get("backend") == "local" else "hosted"
+        key = (d["model_label"], arm)
+        host[key] = ("RunPod (local)" if arm == "local"
+                     else HOST.get(d.get("family"), d.get("family") or "?"))
+        rows[key].setdefault(cond, {})[d["sample_index"]] = act(d.get("response_text"))
 
 dual = {m for m, a in rows if (m, "local") in rows and (m, "hosted") in rows}
 

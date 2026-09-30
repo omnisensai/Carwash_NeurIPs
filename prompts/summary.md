@@ -8,8 +8,10 @@ bare 64-hex line, and anything else in the file is both hashed and sent to the
 model as part of the prompt. That is why this note is a separate file; the
 scripts glob `prompts/*.txt` and never see it.
 
-The condition names in the `.jsonl` records do not match the file names. The
-mapping is fixed by `CONDITIONS` in `behavioural/workbench/run_local_fleet.py`:
+The condition names in the `.jsonl` records do not match the file names. Each
+record carries its own `condition` field — `runs/` is organised by host, not by
+condition — and the mapping is fixed by `CONDITIONS` in
+`behavioural/workbench/run_local_fleet.py`:
 
 | file | sent as | name in the runs | paper's name | sent-text sha256 |
 |---|---|---|---|---|

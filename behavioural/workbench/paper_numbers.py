@@ -21,7 +21,6 @@ LABEL = {"baseline": "baseline", "expert": "expert role",
          "hallucination": "anti-hallucination", "encourage": "encouragement",
          "nomistakes": "error avoidance", "threat": "threat",
          "correct": "control", "substrate": "SUBSTRATE"}
-LOCALF = set(glob.glob("behavioural/runs/local/*.jsonl"))
 
 
 def act(t):
@@ -34,15 +33,15 @@ def act(t):
 
 
 cells, host = {}, {}
+# runs/ is organised by host; every record names its own condition
 for f in sorted(glob.glob("behavioural/runs/*/*.jsonl")):
-    folder = f.split("/")[2]
     for ln in open(f):
         if not ln.strip():
             continue
         d = json.loads(ln)
         if str(d.get("error")) != "None":
             continue
-        c = str(d.get("condition", "")).lower() if f in LOCALF else folder.lower()
+        c = str(d.get("condition", "")).lower()
         if c not in COND:
             continue
         k = (d["model_label"], c, d["sample_index"])

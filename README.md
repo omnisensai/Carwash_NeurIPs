@@ -6,8 +6,10 @@ One binary operational decision, measured two ways on the same prompt texts.
 prompts/        the experiment: baseline question, seven conventional prompts,
                 the control, the substrate. Never edited. summary.md maps each
                 file to the condition name the runs record.
-behavioural/    what the models emit. workbench/ + runs/ (one .jsonl per model
-                per condition, ten samples each) + summary.md
+behavioural/    what the models emit. workbench/ + scripts/ + summary.md +
+                runs/<host>/ — Anthropic, OpenAI, OpenRouter, RunPod. Every
+                record names its own condition, model and prompt digest, so a
+                file can be read without reference to where it sits.
 internals/      what changes inside the open-weight models. scripts/ +
                 results/<model>/bf16/ + README.md, RESULTS.md
 paper/          the LaTeX sources and the bibliography

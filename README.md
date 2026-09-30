@@ -35,7 +35,7 @@ python scripts/plot_internals.py results/llama-3.2-3b/*/
 ```
 
 The hosted-API conditions in `behavioural/runs/` were sampled through provider
-APIs; their driver is not in this repo. Each row records the provider, model
+APIs; their driver is `behavioural/scripts/run_interventions_public.py`. Each row records the provider, model
 slug, temperature, and the sha256 of the text sent, so the conditions can be
 reissued against any provider.
 

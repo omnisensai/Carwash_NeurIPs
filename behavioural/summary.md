@@ -23,7 +23,12 @@ Every arm sampled, read from the `.jsonl` records in `runs/`. R = 10 single-pass
 | Mistral Large | OpenRouter | RI 0/10 | RI 0/10 | RC 10/10 |
 | Qwen2.5-0.5B | RunPod (local) | NR 7/10 | NR 8/10 | NR 3/10 |
 | Qwen2.5-1.5B | RunPod (local) | NR 6/10 | RC 10/10 | NR 8/10 |
+| Qwen2.5-14B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
+| Qwen2.5-32B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
+| Qwen2.5-72B | RunPod (local) | RI 0/10 | NR 1/10 | RC 10/10 |
 | Qwen2.5-7B | RunPod (local) | RI 0/10 | RC 10/10 | RI 0/10 |
 | Qwen3-0.6B | RunPod (local) | NR 7/10 | RC 10/10 | RC 10/10 |
+| Qwen3-14B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
+| Qwen3-32B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
 | Qwen3-4B-2507 | RunPod (local) | RI 0/10 | RC 10/10 | RI 0/10 |
 | Qwen3-8B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |

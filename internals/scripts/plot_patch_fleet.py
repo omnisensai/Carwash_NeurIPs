@@ -58,6 +58,8 @@ ap.add_argument("--models", default="",
                 help="space-separated result folder names; default is every model "
                      "with a grid, in size order")
 ap.add_argument("--ncol", type=int, default=4)
+ap.add_argument("--dpi", type=int, default=200,
+                help="raster output only; PDF is vector and ignores it")
 ap.add_argument("--out", default="patch_fleet.png")
 args = ap.parse_args()
 
@@ -157,5 +159,5 @@ fig.suptitle("Every condition patched into the baseline run, one panel per model
              "The donor residual replaces the baseline's after layer $l$; "
              "$M$ is then read at the model's output.",
              fontsize=12.5, color=INK)
-fig.savefig(args.out, dpi=170, bbox_inches="tight", facecolor="white")
+fig.savefig(args.out, dpi=args.dpi, bbox_inches="tight", facecolor="white")
 print("wrote", args.out)

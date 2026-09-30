@@ -93,6 +93,15 @@ MODELS: dict[str, dict] = {
     "qwen3-0.6b":    dict(hf="Qwen/Qwen3-0.6B",              label="Qwen3-0.6B",     gb=2, openrouter=None),
     "qwen3-4b-2507": dict(hf="Qwen/Qwen3-4B-Instruct-2507",  label="Qwen3-4B-2507",  gb=8, openrouter=None),
     "qwen3-8b":      dict(hf="Qwen/Qwen3-8B",                label="Qwen3-8B",       gb=17, openrouter="qwen/qwen3-8b"),
+    # Larger dense Qwens, added 30 Sep to extend both ladders past the 4B
+    # threshold. No hosted counterpart is used for these: they are local only.
+    # Qwen3-30B-A3B is deliberately absent -- patching a residual into a
+    # mixture-of-experts run does not transplant the routing.
+    "qwen2.5-14b":   dict(hf="Qwen/Qwen2.5-14B-Instruct",  label="Qwen2.5-14B",  gb=28,  openrouter=None),
+    "qwen2.5-32b":   dict(hf="Qwen/Qwen2.5-32B-Instruct",  label="Qwen2.5-32B",  gb=64,  openrouter=None),
+    "qwen2.5-72b":   dict(hf="Qwen/Qwen2.5-72B-Instruct",  label="Qwen2.5-72B",  gb=145, openrouter=None),
+    "qwen3-14b":     dict(hf="Qwen/Qwen3-14B",             label="Qwen3-14B",    gb=28,  openrouter=None),
+    "qwen3-32b":     dict(hf="Qwen/Qwen3-32B",             label="Qwen3-32B",    gb=64,  openrouter=None),
 }
 
 # The nine conditions of the published fleet, with the `intervention` and

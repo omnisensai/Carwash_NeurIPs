@@ -4,7 +4,7 @@ Reproducibility bundle for one binary operational decision, measured two ways.
 
 ```
 prompts/        the experiment. Never edited.
-behavioural/    scripts/ + runs/ + models.md, summary.md — what models emit
+behavioural/    scripts/ + runs/ + summary.md — what models emit
 internals/      scripts/ + results/ + README.md, RESULTS.md — what changes inside
 paper/          LaTeX sources and bibliography
 ```
@@ -45,6 +45,23 @@ Read `internals/README.md` for what each readout means and
   `plot_internals.py`** to make a run pass. If something fails, fix the
   environment or report the traceback; a small compatibility patch is fine if
   it is clearly explained in the commit message.
+- **The behavioural population is 23 models, and that is the only number to
+  quote.** A model reproducibly correct at baseline has nothing to rescue, so it
+  is excluded *and its runs are removed* — Qwen2.5-3B was, in `d6746f6`. Do not
+  write "24 measured, 23 reported"; screen a new model on the baseline condition
+  alone before sampling the other nine.
+  `behavioural/scripts/paper_numbers.py` asserts this and names any model that
+  breaks it. It also prints every population-dependent count the paper cites —
+  run it after any change to `runs/` and diff the paper against it rather than
+  re-checking counts by hand.
+- **Two Llamas were sampled both hosted and locally; the local arm is the one
+  kept.** Its precision, device and per-sample seed are recorded, the hosted
+  Llama runs were routed across up to five upstream providers within a single
+  ten-sample run, and the internals were measured on the local weights. The
+  hosted 8B and 3B rows were removed in `4fe2da5`; before that they disagreed
+  with the local arm in five of twenty condition cells, including substrate
+  7/10 hosted against 10/10 local on Llama 3.1-8B. Llama 3.3-70B and
+  Llama 4-Maverick have no local runs and stay hosted.
 - Commit messages: one short line, no trailers.
 - Report what actually ran. If a step was skipped or errored, say so; do not
   paraphrase numbers you did not measure.

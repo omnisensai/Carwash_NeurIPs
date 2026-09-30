@@ -1,9 +1,16 @@
 # Fleet
 
-The 17 models behind `runs/`. Every value below is read from the `.jsonl`
-records themselves — `model_slug` and `family` as requested, `response_raw.model`
-as served, `response_raw.provider` as routed. All 17 ran all 8 conditions at
-temperature 1.0, 10 samples each.
+The 17 hosted models behind `runs/`. Every value below is read from the
+`.jsonl` records themselves — `model_slug` and `family` as requested,
+`response_raw.model` as served, `response_raw.provider` as routed. All 17 ran
+all 10 conditions at temperature 1.0, 10 samples each.
+
+Nine further models were served locally in bf16 and are not listed here:
+Llama 3.1-8B, Llama 3.2-3B, Qwen2.5-0.5B/1.5B/3B/7B and Qwen3-0.6B/4B-2507/8B.
+Llama 3.1-8B and Llama 3.2-3B therefore appear twice across `runs/`, once
+hosted and once local; the 26 arms reduce to 24 models, and the 23-model
+population of the paper drops the two hosted duplicates and Qwen2.5-3B, which
+is reproducibly correct at baseline.
 
 | # | Model | API | Requested slug | Served as | Upstream |
 |---|---|---|---|---|---|
@@ -69,7 +76,7 @@ sampling.
 
 **OpenAI (5)** — GPT-4, GPT-4o, GPT-4.1, GPT-4.1-mini, GPT-3.5-turbo
 
-**Meta / Llama (3)** — Llama 3.1-8B, Llama 3.3-70B *(9/10 behavioural, M = +6 nats)*, Llama 4-Maverick
+**Meta / Llama (3)** — Llama 3.1-8B, Llama 3.3-70B *(10/10 behavioural under the substrate, M = +15.01 nats)*, Llama 4-Maverick
 
 **Other open-source (3)** — Mistral Large, DeepSeek V3.2, Kimi K2
 

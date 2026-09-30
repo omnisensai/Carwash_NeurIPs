@@ -322,7 +322,7 @@ def main() -> None:
     ap.add_argument("--device", default="cuda", help="local backend only: cuda or cpu")
     ap.add_argument("--seed", type=int, default=0,
                     help="base seed; sample i of a cell uses seed + i")
-    ap.add_argument("--outdir", default=None, help="default: behavioural/runs/local/")
+    ap.add_argument("--outdir", default=None, help="default: behavioural/runs/RunPod/")
     ap.add_argument("--dry-run", action="store_true",
                     help="check the prompts against the published shas and stop")
     args = ap.parse_args()
@@ -362,7 +362,8 @@ def main() -> None:
         import torch, transformers
         versions = {"torch": torch.__version__, "transformers": transformers.__version__}
 
-    outdir = Path(args.outdir) if args.outdir else REPO / "behavioural" / "runs" / "local"
+    # runs/ is organised by host; locally served models are RunPod
+    outdir = Path(args.outdir) if args.outdir else REPO / "behavioural" / "runs" / "RunPod"
     outdir.mkdir(parents=True, exist_ok=True)
     stamp = _dt.date.today().isoformat()
 
@@ -458,6 +459,8 @@ def main() -> None:
         note = f" ({errors} with no action token or errored)" if errors else ""
         print(f"  wrote {rows} rows -> {out}{note}\n")
 
+    # per-folder summaries were consolidated into behavioural/summary.md;
+    # regenerate that with behavioural/workbench/write_summaries.py
     write_summary(outdir, keys, conds, counts, args)
 
 

@@ -10,12 +10,14 @@ behavioural/    workbench/ + scripts/ + runs/<host>/ + summary.md — what
                 models emit. runs/ is split by host (Anthropic, OpenAI,
                 OpenRouter, RunPod), not by condition: every record carries its
                 own `condition` field, so never infer a condition from a path.
-internals/      scripts/ + results/ + README.md, RESULTS.md — what changes inside
+internals/      scripts/ + results/<model>/bf16/ — what changes inside
 paper/          LaTeX sources and bibliography
 ```
 
-Read `internals/README.md` for what each readout means and
-`internals/RESULTS.md` for the current numbers.
+The current numbers live in `internals/results/<model>/bf16/internals.json`
+(margins, the substrate transplant) and `patch_grid.json` (every condition
+patched into the baseline). `behavioural/workbench/paper_numbers.py` prints the
+behavioural counts.
 
 ## Ground rules
 
@@ -105,7 +107,7 @@ The script picks precision from the GPU memory it finds and records it as
 numbers move by ~0.6 nats between bf16 and nf4. Run under `tmux` or `nohup`
 so a dropped SSH session does not kill the run.
 
-Sanity check against `internals/RESULTS.md`: Llama 3.2-3B should give
+Sanity check: Llama 3.2-3B should give
 M = −0.38 at baseline and +0.17 under the substrate, transplant at L13
 (29 Sep run; the September pass gave −0.50 / +0.18 for the same two cells).
 

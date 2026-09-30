@@ -52,11 +52,12 @@ behavioural counts.
   `plot_internals.py`** to make a run pass. If something fails, fix the
   environment or report the traceback; a small compatibility patch is fine if
   it is clearly explained in the commit message.
-- **The behavioural population is 23 models, and that is the only number to
-  quote.** A model reproducibly correct at baseline has nothing to rescue, so it
-  is excluded *and its runs are removed* — Qwen2.5-3B was, in `d6746f6`. Do not
-  write "24 measured, 23 reported"; screen a new model on the baseline condition
-  alone before sampling the other nine.
+- **The behavioural population is 28 models, and that is the only number to
+  quote.** It was 23 until the five larger dense Qwens (14B, 32B and 72B classes)
+  were added on 30 Sep in `8ce0533`. A model reproducibly correct at baseline has
+  nothing to rescue, so it is excluded *and its runs are removed* — Qwen2.5-3B
+  was, in `d6746f6`. Do not write "24 measured, 23 reported"; screen a new model
+  on the baseline condition alone before sampling the other nine.
   `behavioural/workbench/paper_numbers.py` asserts this and names any model that
   breaks it. It also prints every population-dependent count the paper cites —
   run it after any change to `runs/` and diff the paper against it rather than

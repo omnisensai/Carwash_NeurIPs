@@ -49,6 +49,17 @@ for folder,cond in FOLDER_COND.items():
     by=collections.defaultdict(list)
     for (m,arm,i),d in rows.items():
         by[(m,arm)].append(act(d.get('response_text')))
+
+    # Llama 3.1-8B and Llama 3.2-3B were sampled both ways. The paper reports the
+    # local arm: its precision, device and per-sample seed are recorded, the
+    # hosted Llama runs were routed across up to five upstream providers within a
+    # single ten-sample run, and the internals were measured on the local weights,
+    # so the behavioural and internal results describe the same system. The hosted
+    # rows are kept here and marked; they are not in the 23-model population.
+    superseded = {(m,'local' if a=='hosted' else 'hosted')
+                  for (m,a) in by if (m,'local' if a=='hosted' else 'hosted') in by
+                  and a=='local'}
+    excluded = {m for m,_ in superseded} | {'Qwen2.5-3B'}
     L=[f"# {cond}\n"]
     L.append(f"`prompts/{FILE[cond]}`. {len(files)} files, {len(rows)} usable rows, "
              f"{len(by)} models, R=10, temperature 1.0.\n")
@@ -57,13 +68,26 @@ for folder,cond in FOLDER_COND.items():
     tally=collections.Counter()
     L.append("| model | intended actions | state |")
     L.append("|---|---|---|")
+    pop=collections.Counter()
     for m,arm in sorted(by):
         d,n,s=state(by[(m,arm)]); tally[s]+=1
-        label=f"{m} ({arm})" if (m,'local' if arm=='hosted' else 'hosted') in by else m
-        L.append(f"| {label} | {d}/{n} | {s} |")
+        dual=(m,'local' if arm=='hosted' else 'hosted') in by
+        label=f"{m} ({arm})" if dual else m
+        note=""
+        if dual and arm=='hosted':
+            note=" · superseded by the local arm"
+        elif m=='Qwen2.5-3B':
+            note=" · reproducibly correct at baseline"
+        else:
+            pop[s]+=1
+        L.append(f"| {label} | {d}/{n} | {s}{note} |")
     L.append("")
-    L.append(f"RC {tally['RC']} · NR {tally['NR']} · RI {tally['RI']} "
-             f"(over all {len(by)} model arms present in this folder, hosted and local counted separately).\n")
+    L.append(f"**Population (23 models):** RC {pop['RC']} · NR {pop['NR']} · RI {pop['RI']}. "
+             f"This is what the paper reports.\n")
+    L.append(f"All {len(by)} arms in this folder, hosted and local counted separately: "
+             f"RC {tally['RC']} · NR {tally['NR']} · RI {tally['RI']}. The difference is the "
+             f"two superseded hosted Llama arms and Qwen2.5-3B, which is reproducibly correct "
+             f"at baseline and so outside the population.\n")
     notes=[]
     if errs:
         for e,n in errs.items(): notes.append(f"- {n} rows carry `{e}` and produce no response; excluded above.")

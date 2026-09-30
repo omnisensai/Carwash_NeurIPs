@@ -24,8 +24,8 @@ is reproducibly correct at baseline.
 | 8 | GPT-4o | openai | `gpt-4o` | `gpt-4o-2024-08-06` | — |
 | 9 | GPT-4 | openai | `gpt-4` | `gpt-4-0613` | — |
 | 10 | GPT-3.5-turbo | openai | `gpt-3.5-turbo` | `gpt-3.5-turbo-0125` | — |
-| 11 | Llama 3.2-3B | openrouter | `meta-llama/llama-3.2-3b-instruct` | same | Cloudflare, Parasail |
-| 12 | Llama 3.1-8B | openrouter | `meta-llama/llama-3.1-8b-instruct` | same | DeepInfra, Groq, Novita |
+| 11 | Llama 3.2-3B † | openrouter | `meta-llama/llama-3.2-3b-instruct` | same | Cloudflare, Parasail |
+| 12 | Llama 3.1-8B † | openrouter | `meta-llama/llama-3.1-8b-instruct` | same | DeepInfra, Groq, Novita |
 | 13 | Llama 3.3-70B | openrouter | `meta-llama/llama-3.3-70b-instruct` | same | AkashML, DeepInfra, Groq, Novita, Parasail |
 | 14 | Llama 4-Maverick | openrouter | `meta-llama/llama-4-maverick` | same | DeepInfra, DigitalOcean, Novita, Parasail |
 | 15 | Mistral Large | openrouter | `mistralai/mistral-large` | same | Mistral |
@@ -56,6 +56,42 @@ OpenAI rows are single-source and carry no such term. Per-sample routing is
 recorded in `response_raw.provider` of every record, so any row can be split by
 backend after the fact. Pinning a provider on future OpenRouter runs would
 remove the term.
+
+## † Which arm the paper reports for the two duplicated Llamas
+
+Llama 3.1-8B and Llama 3.2-3B were sampled through both paths on byte-identical
+prompt text. **The paper reports the local bf16 arm and excludes the hosted
+one**, for three reasons decided on the configuration rather than the outcome:
+
+1. The local arm records its precision, device and per-sample seed; the hosted
+   arm records none of these, and the provider is chosen per sample.
+2. The hosted Llama runs were routed across several upstream providers within a
+   single ten-sample run, so their within-condition spread carries a
+   between-backend term (see above).
+3. The internal measurements in `internals/` were made on the local weights, so
+   reporting the local arm keeps the behavioural and internal results describing
+   the same system.
+
+**The two arms do not agree.** The operational state differs in five of the
+twenty condition cells:
+
+| model | condition | hosted | local |
+|---|---|---|---|
+| Llama 3.1-8B | chain of thought | 1/10 NR | 0/10 RI |
+| Llama 3.1-8B | encouragement | 1/10 NR | 0/10 RI |
+| Llama 3.1-8B | objective emphasis | 0/10 RI | 4/10 NR |
+| Llama 3.1-8B | **substrate** | **7/10 NR** | **10/10 RC** |
+| Llama 3.2-3B | anti-hallucination | 0/10 RI | 4/10 NR |
+
+The disagreement is not systematic in direction: local serving favours the
+substrate on Llama 3.1-8B (7/10 to 10/10) and disfavours it on Llama 3.2-3B
+(8/10 hosted to 4/10 local, both non-reproducible). Choosing the local arm moves
+the substrate row of the population from RC 16 to RC 17 of 23 — one model, and
+no claim in the paper turns on it. An operational state is a property of a model
+as served, not of its weights alone.
+
+Llama 3.3-70B and Llama 4-Maverick have no local runs, so no choice arises for
+them; both are reported hosted.
 
 **`max_tokens` was 80 everywhere except** the CoT condition (500) and Kimi K2
 (2000 throughout — its budget is consumed by reasoning tokens that OpenRouter

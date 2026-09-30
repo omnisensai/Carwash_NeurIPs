@@ -1,3 +1,5 @@
+\end{itemize}
+
 \section{Experimental Setup}
 \label{sec:experimental-setup}
 
@@ -58,12 +60,11 @@ Because the prompt requests a single word, most replies are one word
 and the operational outcome is that word. Where a model returns prose
 instead, we take the action it commits to: the leading action word
 when the reply opens with one, and otherwise the final action word,
-since such replies restate the question before answering it. Five of
-the 207 cells in the study population contain replies whose leading
-and final action words differ; in three of the five the resulting
-operational state differs between the two extraction positions. In
-the remaining 202 cells both positions yield the same action in every
-reply.
+since such replies restate the question before answering it. Five
+model--condition cells contain replies whose leading and final action
+words differ; in three of the five the resulting operational state
+differs between the two extraction positions. In every other cell both
+positions yield the same action in every reply.
 
 \begin{table}[h]
 \centering
@@ -189,7 +190,11 @@ successful generation.
 A change in margin establishes a causal effect of the transplanted
 state on the measured preference; a sign reversal establishes that the
 state is sufficient, under the remaining baseline computation, to
-reverse that preference. It does not establish reproducibly correct
+reverse that preference. The intervention is restricted to one token
+position, rather than swept over positions as in the canonical
+causal-tracing map \citep{meng2022locating}: a state that mattered only
+through the question span, or through several positions jointly, would
+not be detected by it. It does not establish reproducibly correct
 behaviour, localise where the decision is formed
 \citep{zhang2024towards}, or identify the effect of an individual
 constraint.

@@ -236,9 +236,16 @@ def load_local(hf_id: str, dtype: str, device: str):
     from transformers import AutoModelForCausalLM, AutoTokenizer
 
     tok = AutoTokenizer.from_pretrained(hf_id)
+    # One card: force everything onto it, since accelerate's "auto" spills to
+    # CPU when another process holds part of the card. Several cards: spread,
+    # or a 141 GB model cannot be loaded at all. Same rule as
+    # internals/scripts/run_internals.py:load().
+    if device == "cuda":
+        device_map = "auto" if torch.cuda.device_count() > 1 else {"": 0}
+    else:
+        device_map = None
     model = AutoModelForCausalLM.from_pretrained(
-        hf_id, dtype=getattr(torch, dtype),
-        device_map={"": 0} if device == "cuda" else None)
+        hf_id, dtype=getattr(torch, dtype), device_map=device_map)
     if device != "cuda":
         model.to(device)
     model.eval()

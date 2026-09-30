@@ -1,78 +1,0 @@
-loading Qwen/Qwen2.5-3B-Instruct (default dtype, cuda) ...
-Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
-Fetching 2 files:   0%|          | 0/2 [00:00<?, ?it/s]Fetching 2 files:  50%|█████     | 1/2 [00:05<00:05,  5.89s/it]Fetching 2 files: 100%|██████████| 2/2 [00:06<00:00,  2.52s/it]Fetching 2 files: 100%|██████████| 2/2 [00:06<00:00,  3.03s/it]
-Loading weights:   0%|          | 0/434 [00:00<?, ?it/s]Loading weights:  43%|████▎     | 187/434 [00:00<00:00, 1863.28it/s]Loading weights:  86%|████████▌ | 374/434 [00:00<00:00, 1425.65it/s]Loading weights: 100%|██████████| 434/434 [00:00<00:00, 1499.72it/s]
-answer token ids: {'drive': [6541, 31967, 16150, 32457, 95787], 'walk': [4227, 19059, 12554, 48849]}
-baseline ...
-substrate ...
-  baseline   M_sum=+4.500  M_first=+4.500 p(drive)=0.989 p(walk)=0.011 greedy='drive<|im_end|>'
-  substrate  M_sum=+12.875  M_first=+12.875 p(drive)=1.000 p(walk)=0.000 greedy='drive<|im_end|>'
-patching ...
-  patch L00: M_sum=+4.750
-  patch L01: M_sum=+5.000
-  patch L02: M_sum=+5.000
-  patch L03: M_sum=+5.000
-  patch L04: M_sum=+5.000
-  patch L05: M_sum=+5.250
-  patch L06: M_sum=+4.750
-  patch L07: M_sum=+5.250
-  patch L08: M_sum=+5.000
-  patch L09: M_sum=+5.250
-  patch L10: M_sum=+5.250
-  patch L11: M_sum=+5.000
-  patch L12: M_sum=+4.750
-  patch L13: M_sum=+5.000
-  patch L14: M_sum=+5.000
-  patch L15: M_sum=+5.250
-  patch L16: M_sum=+5.000
-  patch L17: M_sum=+5.250
-  patch L18: M_sum=+5.000
-  patch L19: M_sum=+5.000
-  patch L20: M_sum=+4.750
-  patch L21: M_sum=+4.750
-  patch L22: M_sum=+5.750
-  patch L23: M_sum=+6.750
-  patch L24: M_sum=+8.874
-  patch L25: M_sum=+8.000
-  patch L26: M_sum=+9.500
-  patch L27: M_sum=+9.500
-  patch L28: M_sum=+10.875
-  patch L29: M_sum=+10.250
-  patch L30: M_sum=+9.750
-  patch L31: M_sum=+8.250
-  patch L32: M_sum=+10.250
-  patch L33: M_sum=+13.250
-  patch L34: M_sum=+13.000
-  patch L35: M_sum=+12.875
-ablations ...
-  loo_line1      M_sum=+13.250
-  loo_line2      M_sum=+12.125
-  loo_line3      M_sum=+15.375
-  loo_line4      M_sum=+13.625
-  loo_line5      M_sum=+13.375
-  loo_line6      M_sum=+13.875
-  loo_line7      M_sum=+13.875
-  loo_line8      M_sum=+14.625
-  loo_line9      M_sum=+14.500
-  only_line1     M_sum=+9.000
-  only_line2     M_sum=+8.500
-  only_line3     M_sum=+10.000
-  only_line4     M_sum=+10.125
-  only_line5     M_sum=+10.250
-  only_line6     M_sum=+9.000
-  only_line7     M_sum=+14.000
-  only_line8     M_sum=+16.125
-  only_line9     M_sum=+12.250
-  headers_only   M_sum=+7.250
-benchmarks ...
-  baseline                 M_sum=+4.500 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=4.5
-  benchmark_CoT            M_sum=+4.250 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=4.25
-  benchmark_encourage      M_sum=+4.250 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=4.25
-  benchmark_expert         M_sum=+3.750 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=3.75
-  benchmark_goaloriented   M_sum=+6.500 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=6.5
-  benchmark_hallucination  M_sum=+7.253 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=7.253
-  benchmark_nomistakes     M_sum=+4.753 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=4.753
-  benchmark_threat         M_sum=+5.000 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=5.0
-  benchmark_urgency        M_sum=+7.500 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=7.5
-  substrate                M_sum=+12.875 argmax='drive' greedy='drive<|im_end|>'  decision@0: M=12.875
-wrote results/qwen2.5-3b/bf16/internals.json in 28.4 s

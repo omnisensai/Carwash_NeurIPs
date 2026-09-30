@@ -63,14 +63,16 @@ def state(m, c):
     return "RC" if d == n else "RI" if d == 0 else "NR"
 
 
+# The population is every model that fails the task at baseline. Models
+# reproducibly correct at baseline are not measured against an intervention
+# and their runs are not kept, so MODELS and POP are the same set.
 POP = [m for m in MODELS if state(m, "baseline") != "RC"]
-EXCL = [m for m in MODELS if m not in POP]
 R = 10
 N = len(POP)
+assert len(POP) == len(MODELS), \
+    f"reproducibly correct at baseline, remove the runs: {set(MODELS)-set(POP)}"
 
-print(f"MEASURED         {len(MODELS)} models")
-print(f"EXCLUDED         {len(EXCL)} ({', '.join(EXCL)}) -- reproducibly correct at baseline")
-print(f"POPULATION       {N} models"
+print(f"MODELS           {N}"
       f"  ({sum(1 for m in POP if host[m]=='hosted')} hosted,"
       f" {sum(1 for m in POP if host[m]=='local')} local)")
 print(f"EXECUTIONS       R={R}, {N*R} per condition, {N*R*len(COND)} in total\n")
@@ -79,7 +81,7 @@ b = collections.Counter(state(m, "baseline") for m in POP)
 print(f"BASELINE         RI {b['RI']}, NR {b['NR']}, "
       f"{sum(counts(m,'baseline')[0] for m in POP)}/{N*R} executions name the intended action\n")
 
-print("TABLE 2 — operational state per condition (rows sum to the population)")
+print(f"TABLE 2 — operational state per condition (rows sum to {N})")
 print(f"  {'condition':22s}{'RC':>4}{'NR':>4}{'RI':>4}{'intended':>12}{'RI@base->RC':>13}")
 baseRI = [m for m in POP if state(m, "baseline") == "RI"]
 for c in COND:

@@ -226,7 +226,12 @@ With the substrate as donor, the transplant alone reverses the baseline
 preference on all three reversal models that fit the measurement: after layer 15
 of 32 on Llama 3.1-8B, 24 of 36 on Qwen3-8B, 38 of 80 on Llama 3.3-70B.
 Figure~\ref{fig:patching} repeats it with each of the seven conventional
-conditions as donor. None reverses the preference at any layer. The donors are
+conditions as donor. This sweep covers the eight models that fit on one card;
+Llama 3.3-70B needs more than one and has a substrate transplant only. Across
+the five of those eight that prefer the incorrect action at baseline, no
+conventional donor reverses the preference at any layer, with one marginal
+exception: expert role on Llama 3.2-3B, reaching $+0.10$ nats on the model whose
+entire decision spans $0.55$. The donors are
 not inert --- they move the margin by up to $58\%$ of the substrate's
 displacement --- but the movement does not carry the decision, and its direction
 depends on the donor: on Qwen3-8B five of the seven move the margin

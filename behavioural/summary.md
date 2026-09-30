@@ -18,6 +18,7 @@ Every arm sampled, read from the `.jsonl` records in `runs/`. R = 10 single-pass
 | Kimi K2 | OpenRouter | NR 4/10 | NR 8/10 | RC 10/10 |
 | Llama 3.1-8B | RunPod (local) | RI 0/10 | RC 10/10 | RC 10/10 |
 | Llama 3.2-3B | RunPod (local) | NR 4/10 | RC 10/10 | NR 4/10 |
+| Llama 3.3-70B | RunPod (local) | RI 0/10 | RI 0/10 | RC 10/10 |
 | Llama 4-Maverick | OpenRouter | RI 0/10 | RC 10/10 | RC 10/10 |
 | Mistral Large | OpenRouter | RI 0/10 | RI 0/10 | RC 10/10 |
 | Qwen2.5-0.5B | RunPod (local) | NR 7/10 | NR 8/10 | NR 3/10 |

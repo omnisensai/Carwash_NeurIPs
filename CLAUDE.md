@@ -53,16 +53,7 @@ behavioural counts.
   environment or report the traceback; a small compatibility patch is fine if
   it is clearly explained in the commit message.
 - **The behavioural population is 23 models, and that is the only number to
-  quote — but it is 22 right now.** Llama 3.3-70B was removed from
-  `behavioural/runs/` and `internals/results/` pending a re-run that gives it a
-  local behavioural arm, a margins pass on the current prompts and a patch grid
-  from that same pass. Until those land, every count this file and the paper
-  quote is short by one model: do not publish a number generated in this
-  window. Re-populate with
-  `run_local_fleet.py --models llama-3.3-70b`, then `runpod_margins.sh
-  llama-3.3-70b`, then `runpod_patchgrid.sh llama-3.3-70b` — in that order,
-  because the grid cross-checks the margins file and fails if they are from
-  different passes. A model reproducibly correct at baseline has nothing to rescue, so it
+  quote.** A model reproducibly correct at baseline has nothing to rescue, so it
   is excluded *and its runs are removed* — Qwen2.5-3B was, in `d6746f6`. Do not
   write "24 measured, 23 reported"; screen a new model on the baseline condition
   alone before sampling the other nine.
@@ -76,8 +67,11 @@ behavioural counts.
   ten-sample run, and the internals were measured on the local weights. The
   hosted 8B and 3B rows were removed in `4fe2da5`; before that they disagreed
   with the local arm in five of twenty condition cells, including substrate
-  7/10 hosted against 10/10 local on Llama 3.1-8B. Llama 3.3-70B and
-  Llama 4-Maverick have no local runs and stay hosted.
+  7/10 hosted against 10/10 local on Llama 3.1-8B. **Llama 3.3-70B is now local
+  too** (30 Sep, 2x A100): its hosted rows were replaced, and the control moved
+  1/10 hosted to 0/10 local, so it is reproducibly incorrect under the control
+  rather than non-reproducible. Llama 4-Maverick has no local run and stays
+  hosted.
 - Commit messages: one short line, no trailers.
 - Report what actually ran. If a step was skipped or errored, say so; do not
   paraphrase numbers you did not measure.

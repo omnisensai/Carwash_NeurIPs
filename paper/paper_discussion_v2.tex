@@ -192,6 +192,29 @@ a caveat attached to a general claim; it is the form the claim takes. Sufficienc
 established for particular pairs on a particular task, and neither a universal
 specification nor transfer to other tasks is demonstrated by these results.
 
+That the same text is applied unchanged to every model is the point of the design,
+not an economy. A specification tuned per model would very likely rescue more of the
+twenty-eight, and would confound the two things the experiment separates: a
+per-model input makes every cell differ in both the model and the text, so nothing
+can be attributed to either. Held constant, the specification is a control variable,
+and the population's response to it is a measurement of the population. The same
+$585$ characters move the decision margin by $-0.93$ nats on Qwen2.5-0.5B and by
+$+31.75$ on Qwen2.5-14B --- an identical question, an identical specification, and
+$32.68$ nats of spread in the response.
+
+That spread is the substantive result of applying one text to many models, and it is
+not the result that a larger conversion count would give. Under the baseline these
+models fail in ways that resist comparison, because each is failing at something
+different: twenty-one are uniformly wrong and seven are unstable, and the wrongness
+has no common form. Under a specification held fixed, twenty-two converge on
+identical output --- on this decision they are interchangeable --- and six do not, in
+four distinguishable ways. Two remain uniformly wrong on margin shifts of $+8.63$ and
+$+16.00$ nats that are large but land short of the boundary; two reach eight of ten;
+one is unmoved; one is driven away from the intended action. Where models converge
+under a fixed specification, the specification is what governs the decision; where
+they diverge, the model is, and that divergence is invisible to a protocol that
+adjusts the prompt until each model passes.
+
 
 \subsection{A Behavioural Reference for Causal Analysis}
 \label{sec:behavioural-reference}

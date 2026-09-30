@@ -14,12 +14,15 @@ into a reproducibly incorrect one --- making its failure both worse and harder t
 detect. One shared substrate, written once and applied unchanged to every model,
 converts $18$ of the $21$ and reaches reproducible correctness on $22$ of the $28$.
 
+We do not offer that text as a remedy. It is held fixed so that something else can
+be read off: with the input constant across every model, what varies is the model.
+
 The substrate never names the correct action. It states the object, the service
 location, the objective, and the relations that make the incorrect action fail to
 achieve it. The condition that does name the correct action is not a stronger version
 of this: it leaves seven models reproducibly incorrect, on all of which the substrate
 is reproducibly correct. Specifying the task and asserting the answer are different
-interventions with different results, and on these models the weaker-looking one wins.
+interventions with different results on the same models.
 
 In the $14$ open-weight models we can measure inside, the behavioural transition has
 an internal counterpart. Transplanting the substrate-conditioned residual at the
@@ -32,6 +35,20 @@ own residual moves the margin by $0.0000$ nats at every layer of every model; th
 substrate's scaffolding with its constraint lines removed crosses zero on none of
 those nine.
 
+Read as an instrument rather than a remedy, the fixed specification measures the
+population it is applied to. The same $585$ characters move the decision margin by
+$-0.93$ nats on Qwen2.5-0.5B and by $+31.75$ on Qwen2.5-14B: one text, an identical
+question, and $32.68$ nats of spread in how the models answer it. Thirteen of the
+$14$ move toward the intended action and one moves away. Behaviourally the same
+split appears: $22$ of the $28$ converge on identical output and six do not, and the
+six differ from each other in kind --- two stay uniformly wrong on a margin shift
+that is large but insufficient, two reach $8/10$, one is unmoved, one is made worse.
+Under an underspecified input these models fail in ways that are hard to compare,
+because each is failing at a different thing. Under a specification held constant
+they become comparable, and the residual divergence is a property of the models.
+Varying the prompt per model to maximise each one's score would remove exactly the
+contrast that makes this visible.
+
 What these results establish is narrow and we state it as such. Sufficiency is
 established for particular model--condition pairs on one task, not for a universal
 specification and not for transfer. Six models are not rescued, two of them not at
@@ -42,11 +59,20 @@ line is necessary across the population nor sufficient across it. A reversed mar
 is not reproducibly correct behaviour, which is established by sampling rather than
 by a forward pass.
 
-The contribution is a method and a reference rather than a prompt. The
-model--condition pair, tested against a criterion that admits no partial credit, is a
-unit that carries a reliability claim where an aggregate score does not; and a
-verified behavioural transition --- reproducibly incorrect under one declared input,
-reproducibly correct under another --- is a stable object for internal analysis in a
-way that a single successful generation is not. What such a specification must
-contain, whether it transfers across tasks, and why a model rejects an asserted
-answer it accepts as a stated relation, are open.
+The contribution is therefore a criterion and a control variable, not a prompt. The
+model--condition pair, tested against a requirement that admits no partial credit, is
+a unit that carries a reliability claim where an aggregate score does not; and a
+specification that can be written once, hashed, and applied unchanged across models
+is an experimental control, which is what makes a verified behavioural transition ---
+reproducibly incorrect under one declared input, reproducibly correct under another
+--- a stable object for internal analysis where a single successful generation is
+not.
+
+Nothing here suggests that a sufficient specification makes the choice of model
+unimportant. The measurements point the other way: holding the input fixed is what
+exposes how unlike each other these models are on one binary decision, and six of
+them are not brought to the declared target state by the specification that suffices
+for twenty-two. What such a specification must contain, whether any of this transfers
+to another task, why a model rejects an asserted answer it accepts as a stated
+relation, and what distinguishes the models that converge under a fixed
+specification from those that do not, are open.

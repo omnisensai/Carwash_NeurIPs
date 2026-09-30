@@ -154,3 +154,92 @@ Qwen2.5-0.5B & 7/10 & 8/10 & 3/10 & Non-reproducible $\rightarrow$ non-reproduci
 \bottomrule
 \end{tabular}
 \end{table}
+
+\subsection{The Decision Margin}
+\label{sec:internal-results}
+
+Fourteen of the 28 models were run locally in bf16 on the same prompt files as the
+behavioural runs. The readout is the decision margin
+\begin{equation}
+M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t)
+\end{equation}
+in nats at the \emph{answer position} --- the final token of the prompt once the
+chat template has been applied --- teacher-forced, with no generation, so what
+is measured is the distribution the model would sample from rather than a
+sampled outcome. $M>0$ favours the intended action.
+
+Table~\ref{tab:margins} gives the result. Two things follow from it. The
+$0/10 \to 10/10$ transitions of Section~\ref{sec:behavioural-results} correspond
+to shifts of $5$ to $32$ nats, so they are changes in the underlying
+distribution and not favourable draws at temperature 1.0. And the fourteen models
+divide at four billion parameters: the ten at or above it are confidently
+wrong at baseline ($-3.69$ to $-21.75$) and the substrate shifts every one by at
+least $5.07$ nats, while the four below sit within $2.25$ nats of indifference
+and shift by at most $2.37$. The intervention needs a model that holds a
+position in order to move it off one. This bounds the claim rather than
+weakening it: a specification that made a half-billion-parameter model reliable
+would be a claim about replacing scale, which is not what we assert.
+
+\begin{table}[t]
+\centering
+\caption{Decision margin $M$ in nats at the answer position, bf16; $M>0$ favours
+the intended action. \emph{Best conv.} is the conventional condition with the
+highest margin on that model, chosen from the seven per model. Rows are ordered
+by the substrate's shift; the rule above the last three rows separates the models
+that already favour the intended action at baseline.}
+\label{tab:margins}
+\begin{tabular}{lrrrrr}
+\toprule
+& \multicolumn{3}{c}{margin $M$} & \multicolumn{2}{c}{shift from baseline} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-6}
+Model & Baseline & Substrate & Best conv. & Substrate & Best conv. \\
+\midrule
+Qwen2.5-14B      & $-15.75$ & $+16.00$ & $-10.00$ & $+31.75$ & $+5.75$ \\
+Qwen2.5-32B      & $-17.75$ & $+13.75$ & $-14.75$ & $+31.50$ & $+3.00$ \\
+Llama 3.3-70B    & $-13.78$ & $+14.87$ & $-5.01$ & $+28.65$ & $+8.77$ \\
+Qwen3-14B        & $-16.25$ & $+12.00$ & $-14.50$ & $+28.25$ & $+1.75$ \\
+Qwen3-8B         & $-13.66$ & $+7.50$ & $-8.47$ & $+21.16$ & $+5.19$ \\
+Qwen2.5-72B      & $-9.37$ & $+7.87$ & $-5.62$ & $+17.25$ & $+3.75$ \\
+Qwen3-4B-2507    & $-21.75$ & $-5.75$ & $-14.37$ & $+16.00$ & $+7.37$ \\
+Qwen3-32B        & $-8.49$ & $+6.86$ & $-3.00$ & $+15.35$ & $+5.49$ \\
+Qwen2.5-7B       & $-10.50$ & $-1.87$ & $-9.87$ & $+8.62$ & $+0.62$ \\
+Llama 3.1-8B     & $-3.69$ & $+1.39$ & $-0.93$ & $+5.07$ & $+2.75$ \\
+Llama 3.2-3B     & $-0.38$ & $+0.17$ & $+0.03$ & $+0.55$ & $+0.41$ \\
+\midrule
+Qwen3-0.6B       & $+2.25$ & $+4.62$ & $+2.50$ & $+2.37$ & $+0.25$ \\
+Qwen2.5-1.5B     & $+0.90$ & $+2.02$ & $+2.25$ & $+1.12$ & $+1.35$ \\
+Qwen2.5-0.5B     & $+0.50$ & $-0.43$ & $+1.12$ & $-0.93$ & $+0.62$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{What margin reproducible correctness requires.}
+The margin and the sampled count are linked by the number of samples the
+protocol demands. Writing $p = \sigma(M)$ for the probability that a single
+draw names the intended action, reproducible correctness over $R$ samples has
+probability $p^{R}$, so the margin needed grows with $R$: at $R=10$, an even
+chance of $10/10$ needs $M \ge +2.63$ nats, a $90\%$ chance needs $+4.55$, and
+$99\%$ needs $+6.90$. Crossing zero is not close --- at $M=0$ the chance of
+$10/10$ is $0.1\%$. Eight of the fourteen models reach $+2.63$ under the substrate.
+This gives a target an intervention must hit rather than merely a direction it
+must move, and it is the sense in which we report reproducibility rather than
+accuracy: a mean over samples is passed by margins that $10/10$ rejects.
+
+The relation is an approximation in two ways. It treats the intended and
+unintended actions as exhausting the distribution, and it assumes draws are
+independent. It holds across these models --- predicted and observed counts
+agree within $1.5$ samples in $26$ of the $28$ model--condition cells measured
+both ways --- with two exceptions. Llama 3.1-8B's substrate margin of $+1.39$
+implies a $10.8\%$ chance of $10/10$ and it returned $10/10$; Qwen3-0.6B's
+baseline margin of $+2.25$ predicts $9.1$ of ten and it returned $7$. Those are
+unlikely draws rather than impossible ones, but with two cells we cannot
+separate chance from a failure of the approximation, and a framework built on
+this relation should be calibrated on more than fourteen models before it is
+relied on.
+
+A positive margin is not a correct answer. The three models below the rule
+favour the intended action at the answer position while remaining
+non-reproducible when sampled --- at $M=+0.50$ the model prefers it in roughly
+$62\%$ of draws, and Qwen2.5-0.5B, Qwen2.5-1.5B and Qwen3-0.6B return $7/10$,
+$6/10$ and $7/10$ at baseline. They are part of the 28-model population, which
+is defined by failing the baseline task, not by failing it confidently.

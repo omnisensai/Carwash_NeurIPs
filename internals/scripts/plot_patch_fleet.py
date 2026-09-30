@@ -54,15 +54,28 @@ HUES = ["#2a78d6", "#eb6834", "#1baf7a", "#eda100", "#e87ba4", "#008300", "#4a3a
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--style", choices=("grouped", "coloured"), default="grouped")
+ap.add_argument("--models", default="",
+                help="space-separated result folder names; default is every model "
+                     "with a grid, in size order")
+ap.add_argument("--ncol", type=int, default=4)
 ap.add_argument("--out", default="patch_fleet.png")
 args = ap.parse_args()
 
-have = [t for t in FLEET if (HERE / f"results/{t[0]}/bf16/patch_grid.json").exists()]
-missing = [t[0] for t in FLEET if t not in have]
+# Vector output for LaTeX: embed TrueType rather than the Type 3 default, which
+# some venues reject at submission.
+matplotlib.rcParams["pdf.fonttype"] = 42
+matplotlib.rcParams["ps.fonttype"] = 42
+
+want = args.models.split()
+fleet = [t for t in FLEET if t[0] in want] if want else FLEET
+if want:
+    fleet.sort(key=lambda t: want.index(t[0]))
+have = [t for t in fleet if (HERE / f"results/{t[0]}/bf16/patch_grid.json").exists()]
+missing = [t[0] for t in fleet if t not in have]
 if missing:
     print("no patch_grid.json for:", ", ".join(missing))
 
-ncol = 4
+ncol = args.ncol
 nrow = -(-len(have) // ncol)
 fig, axes = plt.subplots(nrow, ncol, figsize=(4.0 * ncol, 3.0 * nrow),
                          constrained_layout=True)
@@ -135,8 +148,11 @@ if len(spare):
     lax.legend(handles=handles, loc="center left", ncol=1, fontsize=10,
                frameon=False, handlelength=2.4, labelspacing=.9)
 else:
-    fig.legend(handles=handles, loc="lower center", ncol=min(4, len(handles)),
-               fontsize=9.5, frameon=False, bbox_to_anchor=(.5, -.012))
+    # No spare slot: hang the key below the axes. Anchoring its TOP edge at
+    # y=0 keeps it clear of the bottom row's tick labels, which a plain
+    # "lower center" lands on; bbox_inches="tight" grows the canvas to fit.
+    fig.legend(handles=handles, loc="upper center", ncol=min(4, len(handles)),
+               fontsize=9.5, frameon=False, bbox_to_anchor=(.5, -.02))
 fig.suptitle("Every condition patched into the baseline run, one panel per model.\n"
              "The donor residual replaces the baseline's after layer $l$; "
              "$M$ is then read at the model's output.",

@@ -51,7 +51,16 @@ Read `internals/README.md` for what each readout means and
   environment or report the traceback; a small compatibility patch is fine if
   it is clearly explained in the commit message.
 - **The behavioural population is 23 models, and that is the only number to
-  quote.** A model reproducibly correct at baseline has nothing to rescue, so it
+  quote — but it is 22 right now.** Llama 3.3-70B was removed from
+  `behavioural/runs/` and `internals/results/` pending a re-run that gives it a
+  local behavioural arm, a margins pass on the current prompts and a patch grid
+  from that same pass. Until those land, every count this file and the paper
+  quote is short by one model: do not publish a number generated in this
+  window. Re-populate with
+  `run_local_fleet.py --models llama-3.3-70b`, then `runpod_margins.sh
+  llama-3.3-70b`, then `runpod_patchgrid.sh llama-3.3-70b` — in that order,
+  because the grid cross-checks the margins file and fails if they are from
+  different passes. A model reproducibly correct at baseline has nothing to rescue, so it
   is excluded *and its runs are removed* — Qwen2.5-3B was, in `d6746f6`. Do not
   write "24 measured, 23 reported"; screen a new model on the baseline condition
   alone before sampling the other nine.

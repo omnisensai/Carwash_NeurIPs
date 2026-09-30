@@ -23,22 +23,22 @@ the sample. Sufficiency is a property of the triple (weights, specification, tas
 not of how explicit the specification looks to a reader. The shared substrate
 names the object, the service location, the objective, and the reason the incorrect
 action fails to achieve it. It does not name the correct action anywhere in its
-text. Seventeen of twenty-three models become reproducibly correct under it. Six do
+text. Twenty-two of twenty-eight models become reproducibly correct under it. Six do
 not and remain operationally uncontrolled: two emit the incorrect action on all ten
 samples, two improve without reaching unanimity, one is unchanged from its baseline
 state, and one moves away from the intended action.
 
 Human-legible emphasis is not the same object. The objective-emphasis prompt states
-the goal in capitals and leaves fourteen of the twenty-three models reproducibly
+the goal in capitals and leaves nineteen of the twenty-eight models reproducibly
 incorrect. The substrate states the binding relations among object, location and
 movement, and leaves two. What must be made explicit is the relation that rules out
 the incorrect action, not the intensity of the request.
 
 Reproducibility engineering for a decision module is therefore the cell test after
 the substrate is supplied, including on models for which the same substrate already
-works elsewhere among the twenty-three. We do not claim that a denser substrate would
+works elsewhere among the twenty-eight. We do not claim that a denser substrate would
 control the six residual cells, nor that those models cannot implement the task under
-some other substrate. We claim only that this one, sufficient for seventeen models,
+some other substrate. We claim only that this one, sufficient for twenty-two models,
 is not sufficient for them --- and that recovering a published metric from an
 underspecified prompt is a different protocol from making a decision reproducibly
 correct.
@@ -52,16 +52,16 @@ requirement here is stated in advance and admits no partial credit: under a decl
 condition, every execution names the intended action. Measured against that
 requirement, an improvement in aggregate correctness is not evidence of anything in
 particular. Expert role assignment produces the largest aggregate movement of the
-seven conventional interventions, and converts one of the sixteen reproducibly
-incorrect models. The other fifteen are exactly where they were. An aggregate figure
+seven conventional interventions, and converts one of the twenty-one reproducibly
+incorrect models. The other twenty are exactly where they were. An aggregate figure
 sums over models that changed state and models that did not, and reports a number
 that belongs to neither.
 
 The two conditions in which the aggregate points the wrong way make the objection
 concrete rather than rhetorical. Encouragement yields fewer correct executions than
-no intervention at all, 30 of 230 against 34, while the count of reproducibly
-incorrect models rises from sixteen to seventeen; anti-hallucination yields more
-correct executions, 41 against 34, while that count stays fixed at sixteen and one
+no intervention at all, 30 of 280 against 34, while the count of reproducibly
+incorrect models rises from twenty-one to twenty-two; anti-hallucination yields more
+correct executions, 41 against 34, while that count stays fixed at twenty-one and one
 model moves from inconsistent to consistent error. A practitioner reading either
 figure alone would draw a conclusion the underlying states contradict.
 
@@ -80,8 +80,8 @@ three points on a scale but three operational conditions with different conseque
 The distinction that matters is not how often a model is wrong but whether being
 wrong is detectable. A non-reproducible model discloses its own unreliability to
 the cheapest available check: run the input twice and the answers differ. A
-reproducibly incorrect model passes that check and every repetition of it. Sixteen
-of the twenty-three models in the study population fail in the second way, which
+reproducibly incorrect model passes that check and every repetition of it. Twenty-one
+of the twenty-eight models in the study population fail in the second way, which
 means that the standard deployment-time test certifies the majority of them as
 stable while they are uniformly wrong. An intervention that moves a model from the
 first state to the second has made the system worse in a way no accuracy figure
@@ -89,9 +89,9 @@ will show, and five of the seven conventional interventions do exactly that.
 
 Because the operational state depends on the input text as much as on the weights,
 the unit that can carry a reliability claim is the model--condition pair rather than
-the model. One of the twenty-three illustrates the range. Claude Sonnet 5, on one
-question, across nine wordings, is reproducibly correct under five of them,
-non-reproducible under two, and reproducibly incorrect under two. The weights,
+the model. One of the twenty-eight illustrates the range. Claude Sonnet 5, on one
+question, across nine wordings, is reproducibly correct under six of them,
+non-reproducible under two, and reproducibly incorrect under one. The weights,
 decoding configuration and retry policy are identical throughout; only the
 surrounding text differs. There is no single fact about this model's reliability on
 this decision to report.
@@ -128,8 +128,8 @@ conventional interventions specify a disposition --- how carefully the model sho
 reason, who it should imagine itself to be, what it should avoid, how much the
 outcome matters. The substrate specifies the task: what the object is, where it must
 end up, and which movements do and do not bring it there. Through one channel, with
-the question fixed, the first kind of text leaves fifteen of sixteen reproducibly
-incorrect models where it found them and the second moves thirteen of them to
+the question fixed, the first kind of text leaves twenty of twenty-one reproducibly
+incorrect models where it found them and the second moves eighteen of them to
 reproducible correctness.
 
 Supplying that task content is the intervention under study, not leakage into the
@@ -145,8 +145,27 @@ system operated without one.
 The substrate does not contain the correct action. It names the object, the service
 location, the objective, and the reason the incorrect action fails to achieve the
 objective. The word naming the correct action appears nowhere in its 585 characters;
-the word naming the incorrect action appears twice. Whatever moves thirteen models
+the word naming the incorrect action appears twice. Whatever moves eighteen models
 from ten wrong answers to ten correct ones, it is not the presence of the answer.
+
+The control condition tests that directly, and its result is the reason we do not
+treat it as an upper bound. It is the baseline question with one sentence added:
+\emph{The correct answer is drive.} On eighteen of the twenty-eight models that is
+enough, and on three more it is partly enough. On seven it is not enough at all ---
+Claude Haiku 4.5, Claude Sonnet 4.5, Claude Sonnet 4.6, GPT-4.1, GPT-4o, Mistral
+Large and Llama 3.3-70B read a prompt that contains the correct action and name the
+incorrect one on all ten samples. Qwen2.5-72B names it once in ten. The substrate is
+reproducibly correct on all eight of those models. In the two of them we can measure
+inside, the control leaves the margin at $-4.23$ and $-2.63$ nats while the substrate
+carries it to $+14.88$ and $+7.88$.
+
+Stating the answer is therefore neither necessary --- the substrate does not contain
+it --- nor sufficient, on models where a specification of the task is. This is the
+sharpest available answer to the reading that the substrate is an elaborate way of
+telling the model what to do. On these eight models, telling the model what to do
+does not work, and specifying the task does. We draw no account of why a model
+rejects an asserted answer; the measurement establishes that the two interventions
+are not the same intervention.
 
 The distinction the substrate encodes is between output admissibility and
 interpretive correctness. Both actions are admissible outputs of the question as
@@ -167,7 +186,7 @@ Equation~\eqref{eq:reproducible-correctness} for every pair it is claimed to con
 so that it either locks reproducible correctness or fails where the failure can be
 seen. DeepSeek V3.2 is that second case here, eight samples of ten under the
 substrate: an improvement by any aggregate reading, and no control by the criterion.
-Six of the twenty-three models in this study
+Six of the twenty-eight models in this study
 are not rescued by the substrate reported here, two of them not at all. That is not
 a caveat attached to a general claim; it is the form the claim takes. Sufficiency is
 established for particular pairs on a particular task, and neither a universal
@@ -195,23 +214,40 @@ conditions whose behaviour is already established, rather than what is present
 during one successful generation.
 
 Against that reference, transplantation gives a causal result. Replacing the
-residual stream at the answer position, at one layer, with the state from the
-substrate run reverses the baseline preference in each of the four models whose
+residual stream at the answer position, after a single layer, with the state from the
+substrate run reverses the baseline preference in each of the nine models whose
 preference the substrate reverses, with no substrate token in the patched context.
-Three controls bound it: a run patched with its own residual gives $\Delta M = 0.00$
-in all 96 cells per model; a random direction of matched norm reaches
-$|\Delta M|$ of at most $0.87$, $0.39$ and $2.00$ nats against measured effects of
-$2.29$, $1.99$ and $14.75$; and the substrate's section headers with every
-constraint line removed leave the margin at or below baseline in all three.
+Two controls bound it. A run patched with its own residual gives $\Delta M = 0.0000$
+at every layer of every model, so the procedure is inert when donor and recipient
+coincide. And the substrate's section headers, with every constraint line removed,
+cross zero on none of the nine: the scaffolding alone reverses nothing. The headers are not
+inert --- on three of the nine they move the margin toward the intended action, by
+$8.75$ nats on Qwen2.5-14B --- so what the constraint lines supply is the crossing,
+not the whole displacement.
+
+Where the transplant takes effect is a property of the model rather than of the
+substrate. It falls at $0.46$ to $0.48$ of depth on all three Llamas, which span $28$
+to $80$ layers, and at $0.65$ to $0.80$ on the six Qwens; the two ranges do not
+overlap. No conventional donor crosses zero on any model, but that follows from the
+sign of each donor's own margin and is not independent evidence. We report the
+depths as a measurement and draw no mechanism from them: three models and six models
+on one task do not establish a property of an architecture family.
 
 Four things this does not establish. Showing that a state causally affects the
 measured preference is not identifying the mechanism that produces the preference;
 the transplant relocates an effect without describing the computation that built
 it. Showing that a state is sufficient to reverse the preference is not showing that
-it is necessary, and the ablations indicate it is not: on the three reversing models
-for which we measured leave-one-out effects, no single constraint line is required
---- removing any one costs at most $1.11$, $1.65$ and $2.75$ nats against margins of
-$+1.51$, $+15.01$ and $+7.25$, and the reversal survives every deletion. A reversed
+it is necessary, and the line ablations do not settle necessity in either direction.
+On six of the nine reversing models the reversal survives the deletion of any single
+constraint line. On the other three it does not, and the line whose removal destroys
+it is the same one in each case --- the line stating that transporting a vehicle
+requires operating it --- at a cost of $0.49$, $16.50$ and $21.25$ nats against
+margins of $+0.17$, $+13.75$ and $+12.00$. Single-line sufficiency is mixed in the
+same way: on seven of the nine no single line reverses the preference alone, while on
+two one line very nearly reproduces the full margin, $+1.383$ of $+1.387$ on
+Llama 3.1-8B and $+13.374$ of $+13.750$ on Qwen2.5-32B. No line is necessary across
+the population and none is sufficient across it, and we do not claim which parts of
+the text carry the effect. A reversed
 margin is not reproducibly correct behaviour, which is measured by sampling and not
 by a forward pass. And the shallowest layer at which the transplant takes effect is
 a threshold of that intervention at that position, not the layer at which the
@@ -220,6 +256,5 @@ earlier, later, or across many positions the transplant does not touch.
 
 Internal claims here are therefore scoped to the verified behavioural transition and
 to the specific intervention tested. What the measurements support is that the
-substrate's effect on the decision is present as a state at the answer position, is
-transferable without the text that produced it, and is not reducible to any one of
-the constraint lines that produced it.
+substrate's effect on the decision is present as a state at the answer position and
+is transferable without the text that produced it.

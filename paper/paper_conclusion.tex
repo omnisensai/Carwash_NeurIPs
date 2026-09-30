@@ -1,0 +1,52 @@
+% ============================================================
+\section{Conclusion}
+\label{sec:conclusion}
+% ============================================================
+
+We measured one binary operational decision across $28$ language models, ten input
+conditions and ten single-pass executions per pair: $2{,}800$ executions in which
+weights, decoding configuration and retry policy are fixed and only the text around
+an unchanged question varies. At baseline no model is reproducibly correct; $21$ are
+reproducibly incorrect and seven are non-reproducible. Seven conventional prompt
+interventions, applied through the same channel, convert one reproducibly incorrect
+model between them, and five of the seven convert at least one non-reproducible model
+into a reproducibly incorrect one --- making its failure both worse and harder to
+detect. One shared substrate, written once and applied unchanged to every model,
+converts $18$ of the $21$ and reaches reproducible correctness on $22$ of the $28$.
+
+The substrate never names the correct action. It states the object, the service
+location, the objective, and the relations that make the incorrect action fail to
+achieve it. The condition that does name the correct action is not a stronger version
+of this: it leaves seven models reproducibly incorrect, on all of which the substrate
+is reproducibly correct. Specifying the task and asserting the answer are different
+interventions with different results, and on these models the weaker-looking one wins.
+
+In the $14$ open-weight models we can measure inside, the behavioural transition has
+an internal counterpart. Transplanting the substrate-conditioned residual at the
+answer position, after a single layer, into an otherwise unmodified baseline
+computation reverses the decision margin in each of the nine models whose preference
+the substrate reverses, with no substrate token present in the patched context. The
+transition is localised: the margin sits flat at its baseline value through most of
+the network and then crosses within a narrow band of layers. Patching a run with its
+own residual moves the margin by $0.0000$ nats at every layer of every model; the
+substrate's scaffolding with its constraint lines removed crosses zero on none of
+those nine.
+
+What these results establish is narrow and we state it as such. Sufficiency is
+established for particular model--condition pairs on one task, not for a universal
+specification and not for transfer. Six models are not rescued, two of them not at
+all, and one moves away from the intended action. The transplant shows that a state
+is sufficient to reverse the measured preference; it does not identify the mechanism
+that produces the preference, and the line ablations show that no single constraint
+line is necessary across the population nor sufficient across it. A reversed margin
+is not reproducibly correct behaviour, which is established by sampling rather than
+by a forward pass.
+
+The contribution is a method and a reference rather than a prompt. The
+model--condition pair, tested against a criterion that admits no partial credit, is a
+unit that carries a reliability claim where an aggregate score does not; and a
+verified behavioural transition --- reproducibly incorrect under one declared input,
+reproducibly correct under another --- is a stable object for internal analysis in a
+way that a single successful generation is not. What such a specification must
+contain, whether it transfers across tasks, and why a model rejects an asserted
+answer it accepts as a stated relation, are open.

@@ -30,12 +30,6 @@ condition — and the mapping is fixed by `CONDITIONS` in
 user message. So a substrate row records `prompt_sha256` = `f9ac23fb…` (the
 baseline question) and `system_sha256` = `5b56feb3…` (the substrate itself).
 
-`baseline.txt` ends with its own `SHA-256:` line. That line is part of the file
-but not part of the prompt: the parser drops it before hashing and before
-sending, which is why the raw file hashes to `c9d94481…` while the runs record
-`f9ac23fb…`. Hash the file directly and you will not reproduce the recorded
-digest; apply the parser's rule and you will.
-
 The substrate has two digests, both of the same text:
 
 - `5b56feb3…` — the file as sent behaviourally, trailing newline included.

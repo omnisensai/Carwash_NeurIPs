@@ -3,7 +3,7 @@
 \label{sec:results}
 % ============================================================
 
-\subsection{Behavioural Results}
+\subsection{Sampled Results}
 \label{sec:behavioural-results}
 
 The question is whether a model that fails this decision can be moved to
@@ -13,14 +13,27 @@ samples, or names different actions across them. Fifteen are sampled
 through hosted APIs and eight are open-weight models sampled locally in bf16 with a
 per-sample seed recorded. Every model receives byte-identical prompt text, $R=10$
 samples per condition, giving 230 executions per condition. The baseline prompt,
-the seven conventional prompts and the substrate are reproduced verbatim in
-Appendix~\ref{app:prompts}, each with the sha256 digest recorded with every
-execution.
+the control, the seven conventional prompts and the substrate are reproduced
+verbatim in Appendix~\ref{app:prompts}, each with the sha256 digest recorded with
+every execution.
 
 \paragraph{Baseline operational state.}
 Sixteen of the 23 models are reproducibly incorrect, naming the wrong action on all
 ten samples. Seven are non-reproducible. Thirty-four of 230 executions name the
 intended action.
+
+\paragraph{Control: the answer stated in the prompt.}
+A control condition states the intended action outright --- ``The correct answer is
+drive.'' --- inserted where the conventional lines go. It is a control rather than a
+prompting technique: an operator who already knows the answer has no decision to
+delegate. Fourteen of the 23 models are reproducibly correct under it, three are
+non-reproducible and six are reproducibly incorrect; 157 of 230 executions name the
+intended action. Nine of the sixteen models reproducibly incorrect at baseline and
+five of the seven non-reproducible ones reach reproducible correctness. Six remain
+reproducibly incorrect, naming the wrong action on all ten samples while the prompt
+states the right one: Claude Haiku 4.5, Claude Sonnet 4.5, Claude Sonnet 4.6,
+GPT-4.1, GPT-4o and Mistral Large. All six are reproducibly correct under the
+substrate, whose text does not contain the word naming the intended action.
 
 \paragraph{Effects of conventional prompt interventions.}
 Seven conventional interventions were applied to the same question under the same
@@ -43,18 +56,21 @@ and threat, and two under encouragement.
 Under the substrate, supplied as a system message with the question unchanged,
 seventeen of the 23 models are reproducibly correct, four are non-reproducible, and
 two are reproducibly incorrect (Qwen2.5-7B and Qwen3-4B-2507);
-Table~\ref{tab:per-model} gives every model's count at both conditions. One hundred and
-ninety-three of 230 executions name the intended action. Thirteen of the sixteen
-models that are reproducibly incorrect at baseline and four of the seven that are
-non-reproducible reach reproducible correctness, in a single pass with the question
-unchanged and no sampling, voting or retry. No model moves to reproducible
-incorrectness. One model reproducibly incorrect at baseline reaches the intended
-action on most but not all samples (DeepSeek V3.2, 0/10 to 8/10); it names the
-incorrect action on all ten samples at baseline and under all seven conventional
-conditions. One model names the intended action less often than at baseline
+Table~\ref{tab:per-model} gives every model's count at all three conditions. One
+hundred and ninety-three of 230 executions name the intended action. Thirteen of the
+sixteen models that are reproducibly incorrect at baseline and four of the seven that
+are non-reproducible reach reproducible correctness, in a single pass with the
+question unchanged and no sampling, voting or retry. No model moves to reproducible
+incorrectness. One model names the intended action less often than at baseline
 (Qwen2.5-0.5B, 7/10 to 3/10) without leaving the non-reproducible state, and one is
 unchanged sample for sample (Llama 3.2-3B, 4/10 at both conditions, the same four
 sample indices).
+
+The substrate and the control are not nested. Nine models are reproducibly correct
+under both, five under the control alone, eight under the substrate alone, and one
+(Qwen2.5-0.5B) under neither; the union is 22 of 23. The two models the substrate
+leaves reproducibly incorrect are both reproducibly correct under the control, so
+neither is unable to name the intended action on this task.
 
 \begin{table}[h]
 \centering
@@ -65,8 +81,12 @@ sample indices).
 \toprule
 Condition & Added text & RC & NR & RI \\
 \midrule
-Baseline & \emph{the question and the answer instruction, unmodified}
+Baseline & \emph{unmodified task (Appendix A.1)}
 & 0 & 7 & 16 \\
+\addlinespace
+\midrule
+\addlinespace
+Control & ``The correct answer is drive.'' & 14 & 3 & 6 \\
 \addlinespace
 \midrule
 \addlinespace
@@ -80,7 +100,7 @@ Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
 \addlinespace
 \midrule
 \addlinespace
-\textbf{Substrate} & \emph{two goal lines and seven constraint lines}
+\textbf{Substrate} & \emph{Appendix A.3}
 & \textbf{17} & 4 & \textbf{2} \\
 \bottomrule
 \end{tabular}
@@ -88,184 +108,43 @@ Threat & ``Answer correctly or I WILL SHUT you down!'' & 0 & 7 & 16 \\
 
 \begin{table}[h]
 \centering
-\caption{Per-model operational state at baseline and under the substrate. Cells are
-intended actions out of ten samples: 10/10 is reproducibly correct, 0/10
-reproducibly incorrect, and any other value non-reproducible.}
+\caption{Per-model operational state at baseline, under the control and under the
+substrate. Cells are intended actions out of ten samples: 10/10 is reproducibly
+correct, 0/10 reproducibly incorrect, and any other value non-reproducible. Rows are
+grouped by the baseline-to-substrate transition given in the last column.}
 \label{tab:per-model}
 \footnotesize
-\begin{tabular}{lccl}
+\begin{tabular}{lcccl}
 \toprule
-Model & Baseline & Substrate & Transition \\
+Model & Baseline & Control & Substrate & Transition (baseline to substrate) \\
 \midrule
-Claude Haiku 4.5 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Claude Sonnet 4.5 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Claude Sonnet 4.6 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Claude Sonnet 5 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-GPT-4 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-GPT-4.1 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-GPT-4.1-mini & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-GPT-4o & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Llama 3.1-8B & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Llama 3.3-70B & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Llama 4-Maverick & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Mistral Large & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
-Qwen3-8B & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Claude Haiku 4.5 & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Claude Sonnet 4.5 & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Claude Sonnet 4.6 & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Claude Sonnet 5 & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+GPT-4 & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+GPT-4.1 & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+GPT-4.1-mini & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+GPT-4o & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Llama 3.1-8B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Llama 3.3-70B & 0/10 & 1/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Llama 4-Maverick & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Mistral Large & 0/10 & 0/10 & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
+Qwen3-8B & 0/10 & \textbf{10/10} & \textbf{10/10} & Reproducibly incorrect $\rightarrow$ reproducibly correct \\
 \midrule
-Claude Opus 4.7 & 5/10 & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
-GPT-3.5-turbo & 1/10 & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
-Kimi K2 & 4/10 & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
-Qwen3-0.6B & 7/10 & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
+Claude Opus 4.7 & 5/10 & \textbf{10/10} & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
+GPT-3.5-turbo & 1/10 & \textbf{10/10} & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
+Kimi K2 & 4/10 & 8/10 & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
+Qwen3-0.6B & 7/10 & \textbf{10/10} & \textbf{10/10} & Non-reproducible $\rightarrow$ reproducibly correct \\
 \midrule
-DeepSeek V3.2 & 0/10 & 8/10 & Reproducibly incorrect $\rightarrow$ non-reproducible \\
+DeepSeek V3.2 & 0/10 & \textbf{10/10} & 8/10 & Reproducibly incorrect $\rightarrow$ non-reproducible \\
 \midrule
-Qwen2.5-7B & 0/10 & 0/10 & Reproducibly incorrect $\rightarrow$ reproducibly incorrect \\
-Qwen3-4B-2507 & 0/10 & 0/10 & Reproducibly incorrect $\rightarrow$ reproducibly incorrect \\
+Qwen2.5-7B & 0/10 & \textbf{10/10} & 0/10 & Reproducibly incorrect $\rightarrow$ reproducibly incorrect \\
+Qwen3-4B-2507 & 0/10 & \textbf{10/10} & 0/10 & Reproducibly incorrect $\rightarrow$ reproducibly incorrect \\
 \midrule
-Qwen2.5-1.5B & 6/10 & 8/10 & Non-reproducible $\rightarrow$ non-reproducible \\
-Llama 3.2-3B & 4/10 & 4/10 & Non-reproducible $\rightarrow$ non-reproducible \\
-Qwen2.5-0.5B & 7/10 & 3/10 & Non-reproducible $\rightarrow$ non-reproducible \\
+Qwen2.5-1.5B & 6/10 & \textbf{10/10} & 8/10 & Non-reproducible $\rightarrow$ non-reproducible \\
+Llama 3.2-3B & 4/10 & \textbf{10/10} & 4/10 & Non-reproducible $\rightarrow$ non-reproducible \\
+Qwen2.5-0.5B & 7/10 & 8/10 & 3/10 & Non-reproducible $\rightarrow$ non-reproducible \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-% ============================================================
-\subsection{The Decision Margin}
-\label{sec:internal-results}
-
-Nine of the 23 models were run locally in bf16 on the same prompt files as the
-behavioural runs. The readout is the decision margin
-\begin{equation}
-M \;=\; \log \sum_{t \in \mathcal{D}} P(t) \;-\; \log \sum_{t \in \mathcal{W}} P(t)
-\end{equation}
-in nats at the \emph{answer position} --- the final token of the prompt once the
-chat template has been applied --- teacher-forced, with no generation, so what
-is measured is the distribution the model would sample from rather than a
-sampled outcome. $M>0$ favours the intended action.
-
-Table~\ref{tab:margins} gives the result. Two things follow from it. The
-$0/10 \to 10/10$ transitions of Section~\ref{sec:behavioural-results} correspond
-to shifts of $5$ to $29$ nats, so they are changes in the underlying
-distribution and not favourable draws at temperature 1.0. And the nine models
-divide at four billion parameters: the five at or above it are confidently
-wrong at baseline ($-3.69$ to $-21.75$) and the substrate shifts every one by at
-least $5.07$ nats, while the four below sit within $2.25$ nats of indifference
-and shift by at most $2.37$. The intervention needs a model that holds a
-position in order to move it off one. This bounds the claim rather than
-weakening it: a specification that made a half-billion-parameter model reliable
-would be a claim about replacing scale, which is not what we assert.
-
-\begin{table}[t]
-\centering
-\caption{Decision margin $M$ in nats at the answer position, bf16; $M>0$ favours
-the intended action. \emph{Best conv.} is the conventional condition with the
-highest margin on that model, chosen from the seven per model. The rule above
-the last three rows separates the models that already favour the intended action
-at baseline.}
-\label{tab:margins}
-\begin{tabular}{lrrrrr}
-\toprule
-& \multicolumn{3}{c}{margin $M$} & \multicolumn{2}{c}{shift from baseline} \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-6}
-Model & Baseline & Substrate & Best conv. & Substrate & Best conv. \\
-\midrule
-Llama 3.3-70B    & $-13.65$ & $+15.01$ & $-5.51$  & $+28.67$ & $+8.15$ \\
-Qwen3-4B-2507    & $-21.75$ & $-5.75$  & $-14.37$ & $+16.00$ & $+7.37$ \\
-Qwen3-8B         & $-13.66$ & $+7.50$  & $-8.47$  & $+21.16$ & $+5.19$ \\
-Qwen2.5-7B       & $-10.50$ & $-1.87$  & $-9.87$  & $+8.62$  & $+0.62$ \\
-Llama 3.1-8B     & $-3.69$  & $+1.39$  & $-0.93$  & $+5.07$  & $+2.75$ \\
-Llama 3.2-3B     & $-0.38$  & $+0.17$  & $+0.03$  & $+0.55$  & $+0.41$ \\
-\midrule
-Qwen3-0.6B       & $+2.25$  & $+4.62$  & $+2.50$  & $+2.37$  & $+0.25$ \\
-Qwen2.5-1.5B     & $+0.90$  & $+2.02$  & $+2.25$  & $+1.12$  & $+1.35$ \\
-Qwen2.5-0.5B     & $+0.50$  & $-0.43$  & $+1.12$  & $-0.93$  & $+0.62$ \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{What margin reproducible correctness requires.}
-The margin and the sampled count are linked by the number of samples the
-protocol demands. Writing $p = \sigma(M)$ for the probability that a single
-draw names the intended action, reproducible correctness over $R$ samples has
-probability $p^{R}$, so the margin needed grows with $R$: at $R=10$, an even
-chance of $10/10$ needs $M \ge +2.63$ nats, a $90\%$ chance needs $+4.55$, and
-$99\%$ needs $+6.90$. Crossing zero is not close --- at $M=0$ the chance of
-$10/10$ is $0.1\%$. Three of the nine models reach $+2.63$ under the substrate.
-This gives a target an intervention must hit rather than merely a direction it
-must move, and it is the sense in which we report reproducibility rather than
-accuracy: a mean over samples is passed by margins that $10/10$ rejects.
-
-The relation is an approximation in two ways. It treats the intended and
-unintended actions as exhausting the distribution, and it assumes draws are
-independent. It holds across these models --- predicted and observed counts
-agree within $1.5$ samples in eight of the nine --- with one exception, Llama
-3.1-8B, whose substrate margin of $+1.39$ implies a $10.8\%$ chance of $10/10$
-and which returned $10/10$. That is an unlikely draw rather than an impossible
-one, but with one cell we cannot separate chance from a failure of the
-approximation, and a framework built on this relation should be calibrated on
-more than nine models before it is relied on.
-
-A positive margin is not a correct answer. The three models below the rule
-favour the intended action at the answer position while remaining
-non-reproducible when sampled --- at $M=+0.50$ the model prefers it in roughly
-$62\%$ of draws, and Qwen2.5-0.5B, Qwen2.5-1.5B and Qwen3-0.6B return $7/10$,
-$6/10$ and $7/10$ at baseline. They are part of the 23-model population, which
-excludes only models reproducibly correct at baseline.
-
-\subsection{Activation Transplantation}
-\label{sec:transplant}
-
-A margin shift shows the substrate changes what the model is disposed to
-answer. It does not show the change is carried by the substrate's own state
-rather than by receiving some framing other than the baseline. To separate
-those, we transplant the state itself: we run the \emph{baseline} prompt and
-replace the residual stream at the answer position, after a single layer, with
-the residual of a donor condition at the same position and layer, then read $M$
-from the model's output. No donor text is present in the patched pass.
-
-With the substrate as donor, the transplant alone reverses the baseline
-preference on all three reversal models that fit the measurement: after layer 15
-of 32 on Llama 3.1-8B, 24 of 36 on Qwen3-8B, 38 of 80 on Llama 3.3-70B.
-Figure~\ref{fig:patching} repeats it with each of the seven conventional
-conditions as donor. This sweep covers the eight models that fit on one card;
-Llama 3.3-70B needs more than one and has a substrate transplant only. Across
-the five of those eight that prefer the incorrect action at baseline, no
-conventional donor reverses the preference at any layer, with one marginal
-exception: expert role on Llama 3.2-3B, reaching $+0.10$ nats on the model whose
-entire decision spans $0.55$. The donors are
-not inert --- they move the margin by up to $58\%$ of the substrate's
-displacement --- but the movement does not carry the decision, and its direction
-depends on the donor: on Qwen3-8B five of the seven move the margin
-\emph{further} from the intended action, chain-of-thought by $4.3$ nats.
-Overwriting the residual at this position therefore produces no generic drift
-toward the intended action. Patching a run with its own residual gives
-$\Delta M = 0.0000$ at every layer of every model.
-
-\begin{figure}[t]
-\centering
-\includegraphics[width=\textwidth]{fig_patching}
-\caption{Every condition patched into the baseline run, on the two models with
-both a reproducibly incorrect baseline and a substrate reversal. Each point is
-one complete forward pass of the baseline prompt in which the residual at the
-answer position is replaced, after layer $l$, with the donor's; $M$ is then read
-from the model's output logits. The abscissa is where the intervention was made,
-not where the quantity is read: every point is a final-output margin, not a
-logit-lens reading of layer $l$. The dashed grey line is the baseline patched
-with its own residual, flat by construction. The control condition states the
-answer outright and is an oracle rather than a prompt technique; it is not
-plotted.}
-\label{fig:patching}
-\end{figure}
-
-\paragraph{What Sections~\ref{sec:internal-results} and~\ref{sec:transplant} do not establish.}
-These measurements locate the substrate's effect and rule out one alternative
-explanation for it. They do not identify a mechanism: we do not establish what
-the transplanted state encodes, which part of the substrate produces it, or why
-a specification produces it where a conventional framing does not. Nor is the
-transition depth a property of the substrate --- patching the control reaches
-its halfway point at the same layer in four of the five models where the
-comparison is defined (not plotted), so that depth is where these models settle
-the decision. Llama 3.2-3B is reported but excluded from the causal claim: its
-decision spans $0.55$ nats, too little to distinguish a transplant from any
-perturbation large enough to tip it. Finally, the nine models here include none
-of the six on which the control fails behaviourally, so they cannot speak to
-those.

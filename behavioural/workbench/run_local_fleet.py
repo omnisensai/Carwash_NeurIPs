@@ -221,12 +221,17 @@ def decide(text: str) -> str | None:
 # --------------------------------------------------------------------------
 
 def vram_gb() -> float | None:
-    """Total memory of card 0 in GB, or None when there is no CUDA device."""
+    """Total memory across every visible CUDA device, in GB, or None when
+    there is none. Summed rather than taken from card 0: load_local() sets
+    device_map="auto" when it sees more than one card, so a 141 GB model does
+    fit on 2x80 GB. Reporting card 0 alone made this skip the 70B on a pod
+    that could run it."""
     try:
         import torch
         if not torch.cuda.is_available():
             return None
-        return torch.cuda.get_device_properties(0).total_memory / 1024 ** 3
+        return sum(torch.cuda.get_device_properties(i).total_memory
+                   for i in range(torch.cuda.device_count())) / 1024 ** 3
     except Exception:      # noqa: BLE001 - a cpu-only box has nothing to report
         return None
 
@@ -375,9 +380,11 @@ def main() -> None:
         if args.backend == "local":
             free = vram_gb()
             if free and cfg.get("gb", 0) > free:
+                import torch
+                n = torch.cuda.device_count()
                 print(f"SKIP {cfg['label']}: needs ~{cfg['gb']} GB in {args.dtype}, "
-                      f"card has {free:.0f} GB. Run it on a bigger pod, or take "
-                      f"its row from the API fleet.", file=sys.stderr)
+                      f"{n} card(s) total {free:.0f} GB. Run it on a bigger pod, "
+                      f"or take its row from the API fleet.", file=sys.stderr)
                 continue
             print(f"loading {cfg['hf']} ...", flush=True)
             tok, model = load_local(cfg["hf"], args.dtype, args.device)

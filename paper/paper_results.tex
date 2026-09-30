@@ -257,3 +257,68 @@ non-reproducible when sampled --- at $M=+0.50$ the model prefers it in roughly
 $62\%$ of draws, and Qwen2.5-0.5B, Qwen2.5-1.5B and Qwen3-0.6B return $7/10$,
 $6/10$ and $7/10$ at baseline. They are part of the 28-model population, which
 is defined by failing the baseline task, not by failing it confidently.
+
+
+\subsection{Activation Transplantation}
+\label{sec:transplant}
+
+A margin shift shows the substrate changes what the model is disposed to answer. It
+does not show the change is carried by the substrate's own state rather than by
+receiving some framing other than the baseline. To separate those, we transplant the
+state itself: we run the \emph{baseline} prompt and replace the residual stream at the
+answer position, after a single layer, with the residual of a donor condition at the
+same position and layer, then read $M$ from the model's output. No donor text is
+present in the patched pass.
+
+With the substrate as donor, the transplant alone reverses the baseline preference on
+every one of the nine models whose preference the substrate reverses: after layer 13
+of 28 on Llama 3.2-3B, 15 of 32 on Llama 3.1-8B, 24 of 36 on Qwen3-8B, 26 of 40 on
+Qwen3-14B, 31 of 48 on Qwen2.5-14B, 38 of 80 on Llama 3.3-70B, 47 of 64 on
+Qwen2.5-32B, 51 of 64 on Qwen3-32B and 60 of 80 on Qwen2.5-72B.
+Figure~\ref{fig:patching} repeats the sweep with every other condition as donor, and
+Figure~\ref{fig:patching-fleet} gives it for all fourteen models. Across the eleven
+that prefer the incorrect action at baseline, no conventional donor reverses the
+preference at any layer, with one marginal exception: expert role on Llama 3.2-3B,
+reaching $+0.03$ nats on the model whose entire decision spans $0.55$. The donors are
+not inert --- they move the margin by up to $58\%$ of the substrate's displacement,
+on Llama 3.1-8B --- but the movement does not carry the decision, and its direction
+depends on the donor: on Qwen3-8B all seven push the margin \emph{below} the
+unpatched baseline at some layer, chain-of-thought by $4.34$ nats. Overwriting the
+residual at this position therefore produces no generic drift toward the intended
+action. Patching a run with its own residual gives $\Delta M = 0.0000$ at every layer
+of every model.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{fig_patching.png}
+\caption{Every condition patched into the baseline run, on four models spanning the
+range of outcomes. Each point is one complete forward pass of the baseline prompt in
+which the residual at the answer position is replaced, after layer $l$, with the
+donor's; $M$ is then read from the model's output logits. The abscissa is where the
+intervention was made, not where the quantity is read: every point is a final-output
+margin, not a logit-lens reading of layer $l$. The dashed grey line is the baseline
+patched with its own residual, flat by construction. The substrate curve is coloured
+by that model's sampled state under the substrate --- green reproducibly correct,
+amber non-reproducible, red reproducibly incorrect --- and the state is repeated in
+each panel title, so the colour is never the only carrier. The control is plotted:
+it states the answer outright, but it is not an upper bound, since seven models
+remain reproducibly incorrect under it.}
+\label{fig:patching}
+\end{figure}
+
+\paragraph{What Sections~\ref{sec:internal-results} and~\ref{sec:transplant} do not establish.}
+These measurements locate the substrate's effect and rule out one alternative
+explanation for it. They do not identify a mechanism: we do not establish what the
+transplanted state encodes, which part of the substrate produces it, or why a
+specification produces it where a conventional framing does not. Nor is a crossing
+independent evidence on its own --- a donor crosses zero when its own margin is
+positive, and no cell in the sweep departs from that rule, so what the figure adds is
+the depth at which the substrate's transplant crosses and the shape of the approach,
+not the fact of crossing. Llama 3.2-3B is reported but excluded from the causal
+claim: its decision spans $0.55$ nats, too little to distinguish a transplant from
+any perturbation large enough to tip it, and its sampled behaviour is unchanged
+between the two conditions at $4/10$. That model is the clearest case for reading
+the two measurements separately --- an internal preference reversal is not
+reproducibly correct behaviour. One of the seven models on which the control fails
+behaviourally is in this set: Llama 3.3-70B, whose control margin is $-4.23$ nats
+against a substrate margin of $+14.88$.

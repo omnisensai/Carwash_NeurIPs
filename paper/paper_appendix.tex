@@ -1,3 +1,4 @@
+\label{app:prompts}
 Every execution records the sha256 digest of the text it was sent. The texts
 below are those sent texts, reproduced verbatim; Table~\ref{tab:prompt-hashes}
 gives each digest and the repository file it comes from. The question is
@@ -130,6 +131,28 @@ Substrate (system) & \texttt{prompts/substrate.txt} & 585 \\
 \end{table}
 
 \noindent
+
+
+
+\subsection{The transplant sweep on every model}
+\label{app:patch-fleet}
+
+Figure~\ref{fig:patching-fleet} gives the sweep of
+Section~\ref{sec:transplant} for all fourteen open-weight models, ordered by
+parameter count.
+
+\begin{figure}[p]
+\centering
+\includegraphics[width=\textwidth]{fig_patching_fleet.png}
+\caption{Every condition patched into the baseline run, one panel per model with a
+patch grid. Conventions as in Figure~\ref{fig:patching}: the heavy line is the
+substrate, coloured by that model's sampled state under it and named in the panel
+title; the thin grey lines are the seven conventional conditions; the dotted blue
+line is the control; the dashed line is the baseline patched with its own residual.
+The crossing layer is marked only where the baseline margin is negative --- where it
+is already positive there is no reversal to locate.}
+\label{fig:patching-fleet}
+\end{figure}
 
 
 \end{document}

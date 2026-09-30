@@ -6,8 +6,8 @@ case and emits an action that determines what a system does next. Under stochast
 decoding, repeated executions of the same input can produce different actions
 \citep{Ouyang_2025,atil2025nondeterminismdeterministicllmsettings}. Operational
 reliability therefore depends not only on whether a decision is correct, but whether
-that decision recurs. Consider an accounts-payable system in which a model decides whether an invoice satisfies an approval policy. When the exact same invoice can be labeled as \texttt{approve} on one run and \texttt{reject} on next, the decision become non-reproducible. Whereas repeatedly issuing the
-same incorrect decision yield a reproducible but wrong system. In agentic systems, these failures can propagate through tool selection, workflow branching, and downstream context. Aggregate accuracy alone cannot distinguish these failure modes apart.
+that decision recurs. Consider an accounts-payable system in which a model decides whether an invoice satisfies an approval policy. When the exact same invoice is labelled \texttt{approve} on one run and \texttt{reject} on the next, the decision is non-reproducible; repeatedly issuing the
+same incorrect decision yields a reproducible but wrong system. In agentic systems, these failures can propagate through tool selection, workflow branching, and downstream context. Aggregate accuracy alone cannot distinguish these failure modes.
 
 Existing approaches intervene at different parts of the stack. Batch-invariant kernels remove numerical sources of run-to-run variation
 \citep{he2025nondeterminism}; fine-tuning changes learned behaviour
@@ -31,8 +31,8 @@ of improving model behaviour incrementally.
 Earlier work introduced \emph{interpretation drift} and showed that an explicit natural language task specification moved four frontier models from $30\%$ consistency (40 distinct hashes) to byte-identical
 classifications (1 hash) across 40 runs
 (Anonymous author, 2026). Here we extend that investigation to operational action selection using the car-wash prompt,\footnote{I need to wash my car, the car wash
-is only 50 metres away, should I walk or drive there?} a public stress test used in multi-model comparisons and regularly highlighted as an example of jagged LLM capability. We define \texttt{DRIVE} as the ground-truth action and repeat the same task for ten independent single-pass executions per model--input condition. Of the 23 models measured at baseline, sixteen are \emph{reproducibly incorrect}, producing \texttt{WALK} in all ten executions, and seven are \emph{non-reproducible}, producing both \texttt{DRIVE} and \texttt{WALK} across
-the ten executions. Adding a natural-language task specification to the identical task moves 17 of these 23 failing model--input conditions to 10/10 executions producing \texttt{DRIVE}. Conventional interventions produce substantially fewer such transitions and can also move non-reproducible models into reproducible incorrectness. In a separate experiment on ten open-weight models, activation transplantation shows that whenever the specification reverses the final \texttt{DRIVE}--\texttt{WALK} preference, transferring the corresponding
+is only 50 metres away, should I walk or drive there?} a public stress test used in multi-model comparisons and regularly highlighted as an example of jagged LLM capability. We define \texttt{DRIVE} as the ground-truth action and repeat the same task for ten independent single-pass executions per model--input condition. Of the 28 models measured at baseline, twenty-one are \emph{reproducibly incorrect}, producing \texttt{WALK} in all ten executions, and seven are \emph{non-reproducible}, producing both \texttt{DRIVE} and \texttt{WALK} across
+the ten executions. Adding a natural-language task specification to the identical task moves 22 of these 28 failing model--input conditions to 10/10 executions producing \texttt{DRIVE}. Conventional interventions produce substantially fewer such transitions and can also move non-reproducible models into reproducible incorrectness. A further condition states the correct action outright; it leaves seven models reproducibly incorrect, every one of which is reproducibly correct under the specification, so specifying the task and asserting the answer are not the same intervention. In a separate experiment on fourteen open-weight models, activation transplantation shows that whenever the specification reverses the final \texttt{DRIVE}--\texttt{WALK} preference, transferring the corresponding
 specification-conditioned answer-position state into the untreated computation is sufficient to reverse that preference without the specification text being present
 in the patched forward pass.
 
@@ -44,7 +44,7 @@ in the patched forward pass.
 We show that input-level intervention need not be limited to improving average
 performance. We define reproducible correctness as an operational criterion and
 demonstrate that explicit task specification can move failing model--input
-conditions to satisfy it across repeated single-pass executions. On the car-wash task, one shared specification moves 17 of 23 baseline-failing
+conditions to satisfy it across repeated single-pass executions. On the car-wash task, one shared specification moves 22 of 28 baseline-failing
 conditions to 10/10 executions producing the intended action; all seven conventional
 prompt interventions together move 2.
 
@@ -68,9 +68,9 @@ does not claim to identify a globally minimal specification; it establishes a re
 We contribute a methodology that anchors internal causal analysis to an
 experimentally verified behavioural transition rather than to an isolated successful
 response. This fixes the behavioural object before asking what internal state is
-causally responsible for changing it. In three open-weight models, the substrate produces a verified transition from ten
+causally responsible for changing it. In eight open-weight models, the substrate produces a verified transition from ten
 incorrect executions to ten correct ones; in each, activation transplantation shows
 that the conditioned answer-position state is sufficient, under the remaining
 untreated computation, to reverse the measured action preference without the
-specification text being present in the patched forward pass. A fourth model reverses that preference internally while its sampled behaviour remains unchanged---four of
+specification text being present in the patched forward pass. A ninth model reverses that preference internally while its sampled behaviour remains unchanged---four of
 ten executions name the intended action under both conditions. This dissociation shows why the behavioural reference matters: an internal preference reversal is not equivalent to reproducibly correct behaviour.

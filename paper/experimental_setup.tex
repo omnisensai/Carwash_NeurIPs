@@ -30,7 +30,11 @@ used. Three samples across two cells were reissued after upstream
 transport errors that produced no model response. Each reissue used
 the cell's declared configuration and replaced the failed attempt at
 the same sample index; these are infrastructure retries rather than
-response-dependent model retries.
+response-dependent model retries. One further cell was reissued in
+whole: the control condition on Claude Sonnet 5 returned an empty
+response at one sample index, and all ten samples of that cell were
+redrawn under the same declared configuration. Both draws are retained
+in the released records and the analysis uses the later one.
 
 For each fixed model--input condition we draw $R=10$ single-pass
 samples. Temperature $1.0$ is requested on every execution;
@@ -39,7 +43,9 @@ is of the requested configuration rather than a provider
 confirmation. Locally sampled models additionally use
 $\mathrm{top}_p=1.0$ with a per-sample seed recorded; other sampling
 parameters for hosted models remain at provider defaults. Outputs containing no action
-word never satisfy reproducible correctness; none occurred. The
+word never satisfy reproducible correctness; the one such response,
+in the reissued cell noted above, is not among the executions
+analysed. The
 criterion applies only to the declared executions and does not imply
 zero probability of another output outside them.
 
@@ -62,7 +68,7 @@ instead, we take the action it commits to: the leading action word
 when the reply opens with one, and otherwise the final action word,
 since such replies restate the question before answering it. Five
 model--condition cells contain replies whose leading and final action
-words differ; in three of the five the resulting operational state
+words differ; in two of the five the resulting operational state
 differs between the two extraction positions. In every other cell both
 positions yield the same action in every reply.
 
@@ -107,7 +113,13 @@ either establishes reproducible correctness or is recorded as failing to.
 We treat the input text as the experimental variable. All
 interventions modify only the model input: conventional prompts request
 reasoning procedures, expertise, or emphasis, whereas the substrate
-specifies relations among the task objective and action semantics.
+specifies relations among the task objective and action semantics. A
+tenth condition serves as a control: it appends the single sentence
+\emph{The correct answer is drive.} to the baseline question. It is not
+a prompting technique but a test of whether the decision is reachable
+by assertion, and it is reported alongside the others rather than
+treated as an upper bound, because it does not establish reproducible
+correctness on every model.
 Condition text is hashed and recorded with each execution, and the
 three reissued samples inherit their cell's declared text and hash;
 exact texts, model identifiers, access levels, and inference
@@ -151,16 +163,17 @@ the $R$ emitted actions.
 \subsection{Two-Stage Design}
 \label{sec:two-stage-design}
 
-The primary behavioural analysis is a transition study over 23 models
+The primary behavioural analysis is a transition study over 28 models
 that fail the baseline task: under the baseline condition each is
 either reproducibly incorrect, naming the wrong action on all ten
 samples, or non-reproducible, naming different actions across them.
 Cohort membership is fixed from the baseline condition before any
 intervention is evaluated.
 
-Stage one evaluates the baseline task, seven conventional prompt
-interventions, and one shared substrate through repeated single-pass
-executions. Each model--input condition is classified by the criterion
+Stage one evaluates ten conditions through repeated single-pass
+executions: the baseline task, seven conventional prompt
+interventions, one shared substrate, and a control that states the
+correct action in the prompt. Each model--input condition is classified by the criterion
 in Section~\ref{sec:operational-reproducibility} before any internal
 analysis is performed.
 

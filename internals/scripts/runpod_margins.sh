@@ -89,8 +89,8 @@ for name in os.environ.get("MODELS", "").split():
         print(f"  {name:16} MISMATCH  missing={sorted(want-got)} extra={sorted(got-want)} sha={sha}")
         bad += 1
 print("  FAIL" if bad else "  every run in this pass measures the ten behavioural conditions")
-print("  note: llama-3.3-70b is not re-run here (141 GB, needs multi-GPU); its"
-      "\n        September run keeps benchmark_goaloriented and has no control margin.")
+print("  note: llama-3.3-70b needs 141 GB in bf16, so it runs only on a pod with"
+      "\n        more than one card; load() spreads it automatically there.")
 sys.exit(1 if bad else 0)
 PY
 log "done -- commit internals/results/*/bf16/"

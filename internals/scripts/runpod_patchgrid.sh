@@ -100,7 +100,8 @@ for name in os.environ.get("MODELS", "").split():
         print(f"  {name:16} 10 conditions x {d['n_layers']} layers, substrate {sha}, "
               f"self-patch {sp:.4f}, vs internals.json {dev:.4f}")
 print("  FAIL" if bad else "  every grid in this pass is on the behavioural prompts and self-consistent")
-print("  note: llama-3.3-70b has no grid (141 GB, needs multi-GPU).")
+print("  note: llama-3.3-70b needs 141 GB in bf16 and a pod with more than one"
+      "\n        card; it is in the map but not in the default sweep.")
 sys.exit(1 if bad else 0)
 PY
 log "done -- commit internals/results/*/bf16/patch_grid.json"

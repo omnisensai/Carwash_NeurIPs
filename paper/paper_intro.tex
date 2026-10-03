@@ -32,7 +32,7 @@ Earlier work introduced \emph{interpretation drift} and showed that an explicit 
 classifications (1 hash) across 40 runs
 (Anonymous author, 2026). Here we extend that investigation to operational action selection using the car-wash prompt,\footnote{I need to wash my car, the car wash
 is only 50 metres away, should I walk or drive there?} a public stress test used in multi-model comparisons and regularly highlighted as an example of jagged LLM capability. We define \texttt{DRIVE} as the ground-truth action and repeat the same task for ten independent single-pass executions per model--input condition. Of the 28 models measured at baseline, twenty-one are \emph{reproducibly incorrect}, producing \texttt{WALK} in all ten executions, and seven are \emph{non-reproducible}, producing both \texttt{DRIVE} and \texttt{WALK} across
-the ten executions. Adding a natural-language task specification to the identical task moves 22 of these 28 failing model--input conditions to 10/10 executions producing \texttt{DRIVE}. Conventional interventions produce substantially fewer such transitions and can also move non-reproducible models into reproducible incorrectness. A further condition states the correct action outright; it leaves seven models reproducibly incorrect, every one of which is reproducibly correct under the specification, so specifying the task and asserting the answer are not the same intervention. In a separate experiment on fourteen open-weight models, activation transplantation shows that whenever the specification reverses the final \texttt{DRIVE}--\texttt{WALK} preference, transferring the corresponding
+the ten executions. Adding a natural-language task specification to the identical task moves 22 of these 28 failing model--input conditions to \emph{reproducible correctness}: 10/10 executions producing \texttt{DRIVE}. Conventional interventions produce substantially fewer such transitions and can also move non-reproducible models into reproducible incorrectness. A further condition states the correct action outright; it leaves seven models reproducibly incorrect, every one of which is reproducibly correct under the specification, so specifying the task and asserting the answer are not the same intervention. In a separate experiment on fourteen open-weight models, activation transplantation shows that whenever the specification reverses the final \texttt{DRIVE}--\texttt{WALK} preference, transferring the corresponding
 specification-conditioned answer-position state into the untreated computation is sufficient to reverse that preference without the specification text being present
 in the patched forward pass.
 
@@ -42,11 +42,19 @@ in the patched forward pass.
 
 \item \textbf{From statistical improvement to engineered convergence.}
 We show that input-level intervention need not be limited to improving average
-performance. We define reproducible correctness as an operational criterion and
-demonstrate that explicit task specification can move failing model--input
-conditions to satisfy it across repeated single-pass executions. On the car-wash task, one shared specification moves 22 of 28 baseline-failing
-conditions to 10/10 executions producing the intended action; all seven conventional
-prompt interventions together move 2.
+performance. We adopt a criterion that admits no partial credit and sorts every
+model--input condition into one of three operational states: \emph{reproducibly
+correct} when all $R$ executions name the intended action, \emph{reproducibly
+incorrect} when all $R$ name the same wrong one, and \emph{non-reproducible} when
+the decision varies across them. The three are not points on a scale. A
+reproducibly incorrect condition passes the cheapest check available at deployment
+--- run the input twice and compare --- while being uniformly wrong, whereas a
+non-reproducible one discloses its own unreliability to that same check. On the
+car-wash task one shared specification moves $22$ of $28$ baseline-failing
+conditions to reproducible correctness; the seven conventional prompt interventions
+together move $2$, and five of the seven push at least one non-reproducible model
+into reproducible incorrectness --- making its failure more consistent and harder to
+detect at once.
 
 \item \textbf{Substrate Engineering: natural language specification as a first-class engineering primitive.}
 We introduce \emph{Substrate Engineering} as the practice of constructing and

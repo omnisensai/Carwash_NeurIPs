@@ -234,7 +234,13 @@ draw names the intended action, reproducible correctness over $R$ samples has
 probability $p^{R}$, so the margin needed grows with $R$: at $R=10$, an even
 chance of $10/10$ needs $M \ge +2.63$ nats, a $90\%$ chance needs $+4.55$, and
 $99\%$ needs $+6.90$. Crossing zero is not close --- at $M=0$ the chance of
-$10/10$ is $0.1\%$. Eight of the fourteen models reach $+2.63$ under the substrate.
+$10/10$ is $0.1\%$. Eight of the fourteen models reach $+2.63$ under the substrate. Those are not
+quite the eight whose sampled behaviour the substrate verifiably reverses
+(Section~\ref{sec:transplant}); seven models are in both sets. Qwen3-0.6B clears
+the margin but was non-reproducible rather than reproducibly incorrect at
+baseline, so it has no $0/10 \to 10/10$ transition to verify, and Llama 3.1-8B
+shows that transition on a margin the relation says should produce it only one
+time in nine.
 This gives a target an intervention must hit rather than merely a direction it
 must move, and it is the sense in which we report reproducibility rather than
 accuracy: a mean over samples is passed by margins that $10/10$ rejects.
@@ -245,10 +251,15 @@ independent. It holds across these models --- predicted and observed counts
 agree within $1.5$ samples in $26$ of the $28$ model--condition cells measured
 both ways --- with two exceptions. Llama 3.1-8B's substrate margin of $+1.39$
 implies a $10.8\%$ chance of $10/10$ and it returned $10/10$; Qwen3-0.6B's
-baseline margin of $+2.25$ predicts $9.1$ of ten and it returned $7$. Those are
-unlikely draws rather than impossible ones, but with two cells we cannot
-separate chance from a failure of the approximation, and a framework built on
-this relation should be calibrated on more than fourteen models before it is
+baseline margin of $+2.25$ predicts $9.1$ of ten and it returned $7$. Neither is a decoding
+artefact: both are locally sampled arms whose records carry temperature $1.0$,
+$\mathrm{top}_p = 1.0$ and a per-sample seed, and on Llama 3.1-8B the two actions
+hold $0.995$ of the probability mass at the answer position, so the two-outcome
+assumption is not the slack either. They are unlikely draws rather than impossible
+ones --- at one cell in nine, seeing one across $28$ cells is unremarkable --- but
+$R=10$ cannot separate $p=0.80$ from $p=0.95$, so no single cell distinguishes
+chance from a failure of the approximation. A framework built on this relation
+should be calibrated at larger $R$, and on more than fourteen models, before it is
 relied on.
 
 A positive margin is not a correct answer. The three models below the rule

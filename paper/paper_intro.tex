@@ -58,11 +58,22 @@ establish reproducible correctness for one model--condition while remaining
 insufficient for another. Reliability is therefore established for the
 model--specification--task configuration, not attributed to the model in isolation.
 
-\item \textbf{Reframing capability as a specification problem.}
-This changes the engineering question from whether a model is ``capable'' of a task
-under an arbitrary wording to what semantic structure must be supplied for a chosen
-model--task pair to satisfy the required operational criterion. The present work
-does not claim to identify a globally minimal specification; it establishes a reproducibility criterion in which that minimum can be searched for, tested, and compared experimentally.
+\item \textbf{Under-specification as a measured quantity, not a verdict on the model.}
+Reading a failure as evidence about the model presumes the input stated the task. We
+make that assumption testable by turning the reliability requirement into a number.
+Writing $p = \sigma(M)$ for the probability that a single draw names the intended
+action, reproducible correctness over $R$ draws has probability $p^{R}$, so a
+declared target fixes the margin an input must deliver: at $R=10$, $+2.63$ nats for
+an even chance of $10/10$, $+4.55$ for $90\%$, and $+6.90$ for $99\%$. The distance
+between a model's margin under a given input and that threshold is how much
+specification is still missing --- in nats, for that model under that input. It is a
+floor attached to the model--input pair, not to the model: none of the $28$ models
+clears the requirement at baseline, $22$ clear it under the substrate, and among the
+fourteen we can measure internally, eight exceed $+2.63$. The engineering question
+becomes whether a given input specifies the task well enough for a chosen model to
+meet a stated requirement, rather than whether that model is ``capable'' --- which
+is not well posed until the input is named. We do not identify a minimal
+specification, and the measured gap says how far there is to go, not what to add.
 
 \item \textbf{A verified behavioural reference for internal causal analysis.}
 We contribute a methodology that anchors internal causal analysis to an
